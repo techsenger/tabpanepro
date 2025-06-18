@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.techsenger.maven-root</groupId>
+        <artifactId>maven-root</artifactId>
+        <version>1.5.0</version>
+    </parent>
+
+    <groupId>com.techsenger.tabpanepro</groupId>
+    <artifactId>tabpanepro</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>TabPanePro</name>
+    <description>An extension of the standard OpenJFX TabPane implementation with additional features</description>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License, version 2</name>
+            <url>https://www.gnu.org/licenses/old-licenses/gpl-2.0.html</url>
+        </license>
+    </licenses>
+
+    <url>https://github.com/techsenger/tabpanepro</url>
+
+    <scm>
+        <connection>scm:git:https://github.com/techsenger/tabpanepro.git</connection>
+        <developerConnection>scm:git:https://github.com/techsenger/tabpanepro.git</developerConnection>
+        <url>https://github.com/techsenger/tabpanepro</url>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/techsenger/tabpanepro/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>pcastornii</id>
+            <name>Pavel Castornii</name>
+        </developer>
+    </developers>
+
+    <properties>
+        <publishing.plugin.exclusions>tabpanepro-demo</publishing.plugin.exclusions>
+        <checkstyle.plugin.skip>true</checkstyle.plugin.skip>    <!-- todo: -->
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.techsenger.osp-bom</groupId>
+                <artifactId>osp-bom</artifactId>
+                <version>1.6.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.techsenger.tabpanepro</groupId>
+                <artifactId>tabpanepro-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <module>tabpanepro-core</module>
+        <module>tabpanepro-demo</module>
+    </modules>
+</project>
+
+
