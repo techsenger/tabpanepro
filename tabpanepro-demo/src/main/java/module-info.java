@@ -25,6 +25,8 @@ module com.techsenger.tabpanepro.demo {
     requires javafx.base;
     requires javafx.graphics;
     requires javafx.controls;
+    requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.materialdesign2;
 
     exports com.techsenger.tabpanepro.demo;
 }

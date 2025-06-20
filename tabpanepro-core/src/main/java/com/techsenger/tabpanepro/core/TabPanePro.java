@@ -21,6 +21,7 @@
 
 package com.techsenger.tabpanepro.core;
 
+import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -71,9 +72,10 @@ public class TabPanePro extends TabPane {
 
     public TabPanePro(DragAndDropContext context, Tab... tabs) {
         super(tabs);
-        // setSkin(new TabPaneProSkin(this));
+        setSkin(new TabPaneProSkin(this));
         this.context = context;
-        this.getStylesheets().add(TabPanePro.class.getResource("tab-pane-pro.css").toExternalForm());
+        getStyleClass().add("tab-pane-pro");
+        getStylesheets().add(TabPanePro.class.getResource("tab-pane-pro.css").toExternalForm());
         this.dropPrevTab.addListener((ov, oldV, newV) -> updateDropTab(oldV, newV, "drop-prev-tab"));
         this.dropNextTab.addListener((ov, oldV, newV) -> updateDropTab(oldV, newV, "drop-next-tab"));
         // the node to the headers region will be added only on the secod pulse after adding tab

@@ -13,10 +13,22 @@
     <name>TabPanePro - Demo</name>
     <description>The demonstration module that showcases the capabilities of TabPanePro</description>
 
+    <properties>
+        <javafx.version>25-ea+12</javafx.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.techsenger.tabpanepro</groupId>
             <artifactId>tabpanepro-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-materialdesign2-pack</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.mkpaz</groupId>
@@ -25,14 +37,17 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
     </dependencies>
 

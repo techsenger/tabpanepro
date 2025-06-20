@@ -23,3 +23,38 @@
     Author: Pavel Castornii
 */
 
+.split-pane {
+    -fx-border-color: -color-accent-7;
+    -fx-border-width: 1;
+}
+
+.tab-pane-pro > .tab-header-area {
+/*    -fx-padding: 10;*/
+}
+
+.tab-pane-pro > .tab-header-area > .header-first-area {
+    -fx-padding: 10;
+    -fx-background-color: red;
+}
+
+.tab-pane-pro > .tab-header-area > .header-first-area > .container {
+/*    -fx-background-color: red;*/
+/*    -fx-padding: 2 4 2 4;*/
+}
+
+.tab-pane-pro > .tab-header-area > .header-first-area > .container > .button {
+    -fx-padding: 2;
+}
+
+.tab-pane-pro > .tab-header-area > .header-first-area  .ikonli-font-icon {
+/*    -fx-icon-size: 20;*/
+/*    -fx-icon-color: -f;*/
+}
+
+.tab-pane-pro > .tab-header-area > .header-last-area {
+/*    -fx-background-color: -color-warning-4;*/
+}
+
+.tab-pane-pro:bottom > .tab-header-area > .header-first-area > .container > .button {
+    -fx-rotate: 180;
+}

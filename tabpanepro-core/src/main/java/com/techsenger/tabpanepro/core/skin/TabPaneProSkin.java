@@ -26,15 +26,15 @@
 /*
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
- * June 18, 2025.
+ * June 18, 2025; June 20, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
 
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.behavior.TabPaneBehavior;
-import com.techsenger.tabpanepro.core.collections.TabObservableList;
-import com.techsenger.tabpanepro.core.utils.LambdaMultiplePropertyChangeListenerHandler;
+import com.techsenger.tabpanepro.core.control.TabObservableList;
+import com.techsenger.tabpanepro.core.control.LambdaMultiplePropertyChangeListenerHandler;
 import com.techsenger.tabpanepro.core.utils.Utils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -442,7 +442,13 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
     }
 
+    public StackPane getHeaderFirstArea() {
+        return tabHeaderArea.headerFirstArea;
+    }
 
+    public StackPane getHeaderLastArea() {
+        return tabHeaderArea.headerLastArea;
+    }
 
     /* *************************************************************************
      *                                                                         *
@@ -839,10 +845,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private double scrollOffset;
         private boolean scrollOffsetDirty = true;
 
+        private final StackPane headerFirstArea = new StackPane();
+
+        private final StackPane headerLastArea = new StackPane();
+
         public TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
             setManaged(false);
-            final TabPane tabPane = getSkinnable();
+            final TabPanePro tabPane = getSkinnable();
 
             headerClip = new Rectangle();
 
@@ -933,7 +943,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             if (controlButtons.isVisible()) {
                 controlButtons.setVisible(true);
             }
-            getChildren().addAll(headerBackground, headersRegion, controlButtons);
+            getChildren().addAll(headerBackground, headersRegion, controlButtons, headerFirstArea);
 
             // support for mouse scroll of header area (for when the tabs exceed
             // the available space).
@@ -961,6 +971,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 }
 
             });
+
+            this.headerFirstArea.getStyleClass().add("header-first-area");
+            this.headerLastArea.getStyleClass().add("header-last-area");
         }
 
         private void updateHeaderClip() {
@@ -1152,15 +1165,15 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double padding = isHorizontal() ?
                 snappedLeftInset() + snappedRightInset() :
                 snappedTopInset() + snappedBottomInset();
-            return snapSizeX(headersRegion.prefWidth(height)) + controlButtons.prefWidth(height) +
-                    firstTabIndent() + SPACER + padding;
+            return snapSizeX(headerFirstArea.prefWidth(height) + headersRegion.prefWidth(height))
+                    + controlButtons.prefWidth(height) + firstTabIndent() + SPACER + padding;
         }
 
         @Override protected double computePrefHeight(double width) {
             double padding = isHorizontal() ?
                 snappedTopInset() + snappedBottomInset() :
                 snappedLeftInset() + snappedRightInset();
-            return snapSizeY(headersRegion.prefHeight(-1)) + padding;
+            return snapSizeY(Math.max(headerFirstArea.prefHeight(-1), headersRegion.prefHeight(-1))) + padding;
         }
 
         @Override public double getBaselineOffset() {
@@ -1183,6 +1196,16 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double headersPrefWidth = snapSizeX(headersRegion.prefWidth(-1));
             double headersPrefHeight = snapSizeY(headersRegion.prefHeight(-1));
 
+            var firstAreaWidth = Math.min(Math.max(headerFirstArea.prefWidth(-1), headerFirstArea.minWidth(-1)),
+                    headerFirstArea.maxWidth(-1));
+            firstAreaWidth = snapSizeX(firstAreaWidth);
+            var firstAreaHeight = Math.min(Math.max(headerFirstArea.prefHeight(-1), headerFirstArea.minHeight(-1)),
+                    headerFirstArea.maxHeight(-1));
+            firstAreaHeight = Math.max(snapSizeY(firstAreaHeight), h);
+            headerFirstArea.resize(firstAreaWidth, firstAreaHeight);
+
+            h = Math.min(h, headersPrefHeight);
+
             controlButtons.showTabsMenu(! tabsFit());
 
             updateHeaderClip();
@@ -1203,30 +1226,40 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 headerBackground.setVisible(true);
             }
 
-            double startX = 0;
-            double startY = 0;
+            double firstAreaX = 0;
+            double firstAreaY = 0;
+            double regionX = 0;
+            double regionY = 0;
             double controlStartX = 0;
             double controlStartY = 0;
             Side tabPosition = getSkinnable().getSide();
 
             if (tabPosition.equals(Side.TOP)) {
-                startX = leftInset;
-                startY = tabBackgroundHeight - headersPrefHeight - bottomInset;
+                firstAreaX = leftInset;
+                firstAreaY = topInset;
+                regionX = firstAreaX + firstAreaWidth;
+                regionY = tabBackgroundHeight - headersPrefHeight - bottomInset;
                 controlStartX = w - btnWidth + leftInset;
                 controlStartY = snapSizeY(getHeight()) - btnHeight - bottomInset;
             } else if (tabPosition.equals(Side.RIGHT)) {
-                startX = topInset;
-                startY = tabBackgroundHeight - headersPrefHeight - leftInset;
+                firstAreaX = topInset;
+                firstAreaY = tabBackgroundHeight - firstAreaHeight - leftInset;
+                regionX = firstAreaX + firstAreaWidth;
+                regionY = tabBackgroundHeight - headersPrefHeight - leftInset;
                 controlStartX = w - btnWidth + topInset;
                 controlStartY = snapSizeY(getHeight()) - btnHeight - leftInset;
             } else if (tabPosition.equals(Side.BOTTOM)) {
-                startX = snapSizeX(getWidth()) - headersPrefWidth - leftInset;
-                startY = tabBackgroundHeight - headersPrefHeight - topInset;
+                firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - leftInset;
+                firstAreaY = tabBackgroundHeight - firstAreaHeight - topInset;
+                regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - leftInset;
+                regionY = tabBackgroundHeight - headersPrefHeight - topInset;
                 controlStartX = rightInset;
                 controlStartY = snapSizeY(getHeight()) - btnHeight - topInset;
             } else if (tabPosition.equals(Side.LEFT)) {
-                startX = snapSizeX(getWidth()) - headersPrefWidth - topInset;
-                startY = tabBackgroundHeight - headersPrefHeight - rightInset;
+                firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - topInset;
+                firstAreaY = tabBackgroundHeight - firstAreaHeight - rightInset;
+                regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - topInset;
+                regionY = tabBackgroundHeight - headersPrefHeight - rightInset;
                 controlStartX = leftInset;
                 controlStartY = snapSizeY(getHeight()) - btnHeight - rightInset;
             }
@@ -1234,9 +1267,12 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 positionInArea(headerBackground, 0, 0,
                         snapSizeX(getWidth()), snapSizeY(getHeight()), /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             }
-            positionInArea(headersRegion, startX, startY, w, h, /*baseline ignored*/0, HPos.LEFT, VPos.CENTER);
+
+            positionInArea(headerFirstArea, firstAreaX, firstAreaY, firstAreaWidth, firstAreaHeight, 0, HPos.CENTER, VPos.CENTER);
+            positionInArea(headersRegion, regionX, regionY, w, h, /*baseline ignored*/0, HPos.LEFT, VPos.CENTER);
             positionInArea(controlButtons, controlStartX, controlStartY, btnWidth, btnHeight,
                         /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
+
         }
 
         void dispose() {
