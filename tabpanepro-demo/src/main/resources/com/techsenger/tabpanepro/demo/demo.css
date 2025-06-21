@@ -23,38 +23,90 @@
     Author: Pavel Castornii
 */
 
-.split-pane {
-    -fx-border-color: -color-accent-7;
-    -fx-border-width: 1;
-}
-
-.tab-pane-pro > .tab-header-area {
-/*    -fx-padding: 10;*/
-}
-
-.tab-pane-pro > .tab-header-area > .header-first-area {
-    -fx-padding: 10;
-    -fx-background-color: red;
-}
+/*
+    Header first area.
+*/
 
 .tab-pane-pro > .tab-header-area > .header-first-area > .container {
-/*    -fx-background-color: red;*/
-/*    -fx-padding: 2 4 2 4;*/
+    -fx-padding: 0 4 0 4;
 }
 
 .tab-pane-pro > .tab-header-area > .header-first-area > .container > .button {
     -fx-padding: 2;
 }
 
+.tab-pane-pro:bottom > .tab-header-area > .header-first-area > .container {
+    -fx-rotate: 180;
+}
+
+/*
+    Header last area.
+*/
+
+.tab-pane-pro > .tab-header-area > .header-last-area > .container {
+    -fx-padding: 0 4 0 4;
+    -fx-spacing: 4;
+}
+
+.tab-pane-pro > .tab-header-area > .header-last-area > .container > .button {
+    -fx-padding: 2;
+}
+
+.tab-pane-pro:bottom > .tab-header-area > .header-last-area > .container {
+    -fx-rotate: 180;
+}
+
+.tab-pane-pro:left > .tab-header-area > .header-last-area > .container {
+    -fx-scale-y: -1;
+    -fx-rotate: 180;
+}
+
+/*
+    For tests only.
+*/
+
+/*.tab-pane-pro:top > .tab-header-area {
+    -fx-padding: 0 50 0 25;
+}
+
+.tab-pane-pro:bottom > .tab-header-area {
+    -fx-padding: 0 25 0 50;
+}
+
+.tab-pane-pro:left > .tab-header-area {
+    -fx-padding: 25 0 50 0;
+}
+
+.tab-pane-pro:right > .tab-header-area {
+    -fx-padding: 50 0 25 0;
+}*/
+
+
+/*.tab-pane-pro > .tab-header-area > .header-first-area {
+    -fx-padding: 10;
+    -fx-background-color: red;
+}
+
+.tab-pane-pro > .tab-header-area > .header-first-area > .container {
+    -fx-padding: 10;
+    -fx-background-color: blue;
+}
+
 .tab-pane-pro > .tab-header-area > .header-first-area  .ikonli-font-icon {
-/*    -fx-icon-size: 20;*/
-/*    -fx-icon-color: -f;*/
+    -fx-icon-size: 20;
 }
 
 .tab-pane-pro > .tab-header-area > .header-last-area {
-/*    -fx-background-color: -color-warning-4;*/
+    -fx-padding: 10;
+    -fx-background-color: green;
+    -fx-opacity: 0.2;
 }
 
-.tab-pane-pro:bottom > .tab-header-area > .header-first-area > .container > .button {
-    -fx-rotate: 180;
+.tab-pane-pro > .tab-header-area > .header-last-area > .container {
+        -fx-padding: 10;
+    -fx-background-color: blue;
 }
+
+.tab-pane-pro > .tab-header-area > .header-last-area  .ikonli-font-icon {
+    -fx-icon-size: 20;
+}*/

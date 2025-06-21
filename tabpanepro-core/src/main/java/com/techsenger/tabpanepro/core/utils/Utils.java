@@ -41,6 +41,31 @@ public final class Utils {
         return mac;
     }
 
+    public static double computeBoundedSize(double min, double pref, double max) {
+        final double actualMax;
+        if (min > max) {
+            actualMax = min;
+        } else {
+            actualMax = max;
+        }
+
+        final double sizeWithMinGuarantee;
+        if (pref < min) {
+            sizeWithMinGuarantee = min;
+        } else {
+            sizeWithMinGuarantee = pref;
+        }
+
+        final double finalSize;
+        if (sizeWithMinGuarantee > actualMax) {
+            finalSize = actualMax;
+        } else {
+            finalSize = sizeWithMinGuarantee;
+        }
+
+        return finalSize;
+    }
+
     private Utils() {
         //empty
     }

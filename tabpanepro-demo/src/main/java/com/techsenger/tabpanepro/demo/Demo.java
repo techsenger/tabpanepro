@@ -21,7 +21,6 @@
 
 package com.techsenger.tabpanepro.demo;
 
-import atlantafx.base.controls.Spacer;
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.Styles;
 import com.techsenger.tabpanepro.core.DragAndDropContext;
@@ -41,16 +40,19 @@ import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignH;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignD;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignM;
 
 /**
  *
@@ -86,6 +88,8 @@ public class Demo extends Application {
 
     private final CheckBox proCheckBox = new CheckBox("Pro");
 
+    private final CheckBox atlantaFxCheckBox = new CheckBox("AtlantaFX");
+
     private final ComboBox<Integer> tabCountComboBox =
             new ComboBox<>(FXCollections.observableArrayList(1, 2, 3, 4, 5, 10, 15, 20, 25));
 
@@ -96,55 +100,100 @@ public class Demo extends Application {
 
     private final CheckBox headerLastAreaCheckBox = new CheckBox("Header Last Area");
 
-    private final GridPane controlGridPane = new GridPane();
+    private final GridPane mainGridPane = new GridPane();
 
-    private final StackPane controlPane = new StackPane(controlGridPane);
+    private final GridPane gridPane0 = new GridPane();
 
-    private final VBox root = new VBox(tabPaneBox, controlPane);
+    private final GridPane gridPane1 = new GridPane();
+
+    private final GridPane gridPane2 = new GridPane();
+
+    private final GridPane gridPane3 = new GridPane();
+
+    private final VBox root = new VBox(tabPaneBox, mainGridPane);
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet());
+        // forces equal width in HBox layout regardless of tab count
+        leftSplitPane.setPrefWidth(0);
         HBox.setHgrow(leftSplitPane, Priority.ALWAYS);
         leftSplitPane.setOrientation(Orientation.VERTICAL);
         HBox.setHgrow(rightSplitPane, Priority.ALWAYS);
+        rightSplitPane.setPrefWidth(0);
         tabPaneBox.setSpacing(INSET);
         VBox.setVgrow(tabPaneBox, Priority.ALWAYS);
 
+        for (var i = 0; i < 4; i++) {
+            ColumnConstraints con = new ColumnConstraints();
+            con.setPercentWidth(25);
+            mainGridPane.getColumnConstraints().add(con);
+        }
+        mainGridPane.setHgap(INSET);
+        mainGridPane.add(gridPane0, 0, 0);
+        mainGridPane.add(gridPane1, 1, 0);
+        mainGridPane.add(gridPane2, 2, 0);
+        mainGridPane.add(gridPane3, 3, 0);
+        mainGridPane.setHgap(INSET);
+
+        gridPane0.setVgap(INSET);
+        gridPane0.setHgap(INSET);
+        gridPane0.add(proCheckBox, 0, 0, 2, 1);
         proCheckBox.setSelected(true);
-        proCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        tabStylesComboBox.getSelectionModel().select(0);
-        tabStylesComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        tabCountComboBox.getSelectionModel().select(3);
-        tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
-
-        controlGridPane.setVgap(INSET);
-        controlGridPane.setHgap(INSET);
-        controlGridPane.add(proCheckBox, 0, 0, 2, 1);
-        controlGridPane.add(new Spacer(3 * INSET, Orientation.HORIZONTAL), 2, 0);
-        controlGridPane.add(new Label("Tab Style"), 3, 0);
-        controlGridPane.add(tabStylesComboBox, 4, 0);
-        controlGridPane.add(new Spacer(3 * INSET, Orientation.HORIZONTAL), 5, 0);
-        controlGridPane.add(new Label("Tab Count"), 6, 0);
-        controlGridPane.add(tabCountComboBox, 7, 0);
-
+        proCheckBox.selectedProperty().addListener((ov, oldV, newV) -> {
+            createTabPanes();
+            headerFirstAreaCheckBox.setDisable(!newV);
+            headerLastAreaCheckBox.setDisable(!newV);
+        });
         headerFirstAreaCheckBox.setSelected(true);
         headerFirstAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane0.add(headerFirstAreaCheckBox, 0, 1, 2, 1);
+
+        gridPane1.setVgap(INSET);
+        gridPane1.setHgap(INSET);
+        atlantaFxCheckBox.setSelected(true);
+        atlantaFxCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
+        gridPane1.add(atlantaFxCheckBox, 0, 0, 2, 1);
         headerLastAreaCheckBox.setSelected(true);
         headerLastAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane1.add(headerLastAreaCheckBox, 0, 1, 2, 1);
 
-        controlGridPane.add(headerFirstAreaCheckBox, 0, 1, 2, 1);
-        controlGridPane.add(headerLastAreaCheckBox, 3, 1, 2, 1);
+        gridPane2.setVgap(INSET);
+        gridPane2.setHgap(INSET);
+        gridPane2.add(new Label("Tab Style"), 0, 0);
+        gridPane2.add(tabStylesComboBox, 1, 0);
+        tabStylesComboBox.getSelectionModel().select(2);
+        tabStylesComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
 
-        createTabPanes();
+        gridPane3.setVgap(INSET);
+        gridPane3.setHgap(INSET);
+        gridPane3.add(new Label("Tab Count"), 0, 0);
+        gridPane3.add(tabCountComboBox, 1, 0);
+        tabCountComboBox.getSelectionModel().select(4);
+        tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
 
         root.setSpacing(2 * INSET);
         root.setPadding(new Insets(INSET));
-        Scene scene = new Scene(root, 1280, 600);
+        Scene scene = new Scene(root, 1280, 720);
+        updateUserAgentStylesheet();
+        createTabPanes();
         scene.getStylesheets().add(Demo.class.getResource("demo.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setTitle("TabPanePro Demo");
         primaryStage.show();
+    }
+
+    private void updateUserAgentStylesheet() {
+        var modenaCss = Demo.class.getResource("modena.css").toExternalForm();
+        var atlantaCss = Demo.class.getResource("atlantafx.css").toExternalForm();
+        if (atlantaFxCheckBox.isSelected()) {
+            Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet());
+            this.root.getScene().getStylesheets().remove(modenaCss);
+            this.root.getScene().getStylesheets().add(atlantaCss);
+        } else {
+            Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
+            this.root.getScene().getStylesheets().remove(atlantaCss);
+            this.root.getScene().getStylesheets().add(modenaCss);
+        }
     }
 
     private void createTabPanes() {
@@ -162,13 +211,27 @@ public class Demo extends Application {
         TabPane tabPane = null;
         if (proCheckBox.isSelected()) {
             tabPane = new TabPanePro(context);
+            var skin = (TabPaneProSkin) tabPane.getSkin();
             if (headerFirstAreaCheckBox.isSelected()) {
-                var button = new Button(null, new FontIcon(MaterialDesignH.HELP));
+                var button = new Button(null, new FontIcon(MaterialDesignD.DOTS_VERTICAL));
                 button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-                button.setShape(new Circle(20));
                 var container = new StackPane(button);
                 container.getStyleClass().add("container");
-                ((TabPaneProSkin) tabPane.getSkin()).getHeaderFirstArea().getChildren().add(container);
+                container.setMaxHeight(Region.USE_PREF_SIZE);
+                skin.getHeaderFirstArea().getChildren().add(container);
+            }
+            if (headerLastAreaCheckBox.isSelected()) {
+                var tabsMenuButton = new Button(null, new FontIcon(MaterialDesignM.MENU_DOWN));
+                tabsMenuButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+                tabsMenuButton.visibleProperty().bind(skin.tabsMenuRequiredProperty());
+                tabsMenuButton.setOnAction(e -> skin.showTabsMenu(tabsMenuButton));
+
+                var minimizeButton = new Button(null, new FontIcon(MaterialDesignM.MINUS));
+                minimizeButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+                var container = new HBox(tabsMenuButton, minimizeButton);
+                container.setMaxHeight(Region.USE_PREF_SIZE);
+                container.getStyleClass().add("container");
+                skin.getHeaderLastArea().getChildren().add(container);
             }
         } else {
             tabPane = new TabPane();
@@ -180,13 +243,8 @@ public class Demo extends Application {
             tabPane.getStyleClass().add(Styles.TABS_FLOATING);
         }
 
-        HBox.setHgrow(tabPane, Priority.ALWAYS);
         tabPane.setSide(side);
         tabPane.setMaxWidth(Double.MAX_VALUE);
-        //tabPane.getStyleClass().add(Styles.DENSE);
-        // forces equal width in HBox layout regardless of tab count
-        tabPane.setPrefWidth(0);
-        HBox.setHgrow(tabPane, Priority.ALWAYS);
         createTabs(tabPane);
         return tabPane;
     }
@@ -200,6 +258,10 @@ public class Demo extends Application {
 
     private void createTabs(TabPane tabPane) {
         tabPane.getTabs().clear();
+        var text1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+        var text2 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin id augue id nibh vestibulum "
+                + "imperdiet et quis sem. Quisque finibus, ante a tempor consectetur, diam purus tempor nunc, "
+                + "tempor auctor orci libero vitae quam.";
         for (var i = 0; i < this.tabCountComboBox.getValue(); i++) {
             String side = tabPane.getSide().name();
             var t = new Tab(side + " " + i);
@@ -208,11 +270,14 @@ public class Demo extends Application {
             content.setSpacing(INSET);
             //content.setStyle("-fx-background-color: -color-bg-subtle");
             content.setPadding(new Insets(INSET));
-            for (var z = 0; z < 2; z++) {
-                content.getChildren().add(new Label("Label " + i + " / " + z));
-                var textArea = new TextField("TextField " + i + " / " + z);
-                content.getChildren().add(textArea);
-            }
+            content.getChildren().add(new Label(side + " " + i));
+            var textField = new TextField(text1);
+            content.getChildren().add(textField);
+            var textArea = new TextArea(text2);
+            textArea.setWrapText(true);
+            textArea.setPrefHeight(0);
+            VBox.setVgrow(textArea, Priority.ALWAYS);
+            content.getChildren().add(textArea);
             t.setContent(content);
         }
     }
