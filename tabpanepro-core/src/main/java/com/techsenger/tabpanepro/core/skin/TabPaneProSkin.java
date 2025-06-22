@@ -26,7 +26,7 @@
 /*
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
- * June 18, 2025; June 20, 2025; June 21, 2025.
+ * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -243,6 +243,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
     public StackPane getHeaderLastArea() {
         return tabHeaderArea.headerLastArea;
+    }
+
+    public StackPane getHeaderStickyArea() {
+        return tabHeaderArea.headerStickyArea;
     }
 
     public void showTabsMenu(Node anchor) {
@@ -869,6 +873,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private final StackPane headerLastArea = new StackPane();
 
+        private final StackPane headerStickyArea = new StackPane();
+
         private final ReadOnlyBooleanWrapper tabsMenuRequired = new ReadOnlyBooleanWrapper(false);
 
         public TabHeaderArea() {
@@ -900,24 +906,19 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 }
 
                 @Override protected void layoutChildren() {
-                    double firstAreaWidth = snapSizeX(Utils.computeBoundedSize(
-                            headerFirstArea.minWidth(-1),
-                            headerFirstArea.prefWidth(-1),
-                            headerFirstArea.maxHeight(-1)));
-                    double lastAreaWidth = snapSizeX(Utils.computeBoundedSize(
-                            headerLastArea.minWidth(-1),
-                            headerLastArea.prefWidth(-1),
-                            headerLastArea.maxHeight(-1)));
+                    double firstAreaWidth = calculateAreaWidth(headerFirstArea, -1);
+                    double stickyAreaWidth = calculateAreaWidth(headerStickyArea, -1);
+                    double lastAreaWidth = calculateAreaWidth(headerLastArea, -1);
 
-                    if (tabsFit(firstAreaWidth, lastAreaWidth)) {
-                        setScrollOffset(0.0, firstAreaWidth, lastAreaWidth);
+                    if (tabsFit(firstAreaWidth, stickyAreaWidth, lastAreaWidth)) {
+                        setScrollOffset(0.0, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
                     } else {
                         if (scrollOffsetDirty) {
-                            ensureSelectedTabIsVisible(firstAreaWidth, lastAreaWidth);
+                            ensureSelectedTabIsVisible(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
                             scrollOffsetDirty = false;
                         }
                         // ensure there's no gap between last visible tab and trailing edge
-                        validateScrollOffset(firstAreaWidth, lastAreaWidth);
+                        validateScrollOffset(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
                     }
 
                     Side tabPosition = getSkinnable().getSide();
@@ -925,7 +926,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     double tabX = (tabPosition.equals(Side.LEFT) || tabPosition.equals(Side.BOTTOM)) ?
                         snapSizeX(getWidth()) - getScrollOffset() : getScrollOffset();
 
-                    updateHeaderClip(firstAreaWidth, lastAreaWidth);
+                    updateHeaderClip(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
                     for (Node node : getChildren()) {
                         TabHeaderSkin tabHeader = (TabHeaderSkin)node;
 
@@ -973,7 +974,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
 
             tabsMenuManager = new TabsMenuManager();
-            getChildren().addAll(headerBackground, headersRegion, headerFirstArea, headerLastArea);
+            getChildren().addAll(headerBackground, headersRegion, headerStickyArea, headerFirstArea, headerLastArea);
 
             // support for mouse scroll of header area (for when the tabs exceed
             // the available space).
@@ -986,6 +987,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 Side side = getSkinnable().getSide();
                 side = side == null ? Side.TOP : side;
                 var firstAreaWidth = snapSizeX(headerFirstArea.getWidth());
+                var stickyAreaWidth = snapSizeX(headerStickyArea.getWidth());
                 var lastAreaWidth = snapSizeX(headerLastArea.getWidth());
                 switch (side) {
                     default:
@@ -994,23 +996,25 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         // Consider vertical scroll events (dy > dx) from mouse wheel and trackpad,
                         // and horizontal scroll events from a trackpad (dx > dy)
                         dx = Math.abs(dy) > Math.abs(dx) ? dy : dx;
-                        setScrollOffset(scrollOffset + dx, firstAreaWidth, lastAreaWidth);
+                        setScrollOffset(scrollOffset + dx, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
                         break;
                     case LEFT:
                     case RIGHT:
-                        setScrollOffset(scrollOffset - dy, firstAreaWidth, lastAreaWidth);
+                        setScrollOffset(scrollOffset - dy, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
                         break;
                 }
 
             });
 
             this.headerFirstArea.getStyleClass().add("header-first-area");
-            this.headerFirstArea.setViewOrder(-100);
+            this.headerFirstArea.setViewOrder(-10);
             this.headerLastArea.getStyleClass().add("header-last-area");
-            this.headerLastArea.setViewOrder(-100);
+            this.headerLastArea.setViewOrder(-10);
+            this.headerStickyArea.getStyleClass().add("header-sticky-area");
+            this.headerStickyArea.setViewOrder(-9);
         }
 
-        private void updateHeaderClip(double firstAreaWidth, double lastAreaWidth) {
+        private void updateHeaderClip(double firstAreaWidth, double stickyAreaWidth, double lastAreaWidth) {
             Side tabPosition = getSkinnable().getSide();
 
             double x = 0;
@@ -1032,7 +1036,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 shadowRadius = shadow.getRadius();
             }
 
-            maxWidth = snapSizeX(getWidth()) - firstAreaWidth - lastAreaWidth - clipOffset;
+            maxWidth = snapSizeX(getWidth()) - firstAreaWidth - stickyAreaWidth - lastAreaWidth - clipOffset;
             if (tabPosition.equals(Side.LEFT) || tabPosition.equals(Side.BOTTOM)) {
                 if (headersPrefWidth < maxWidth) {
                     clipWidth = headersPrefWidth + shadowRadius;
@@ -1086,19 +1090,21 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             return null;
         }
 
-        private boolean tabsFit(double firstAreaWidth, double lastAreaWidth) {
+        private boolean tabsFit(double firstAreaWidth, double stickyAreaWidth, double lastAreaWidth) {
             double headerPrefWidth = snapSizeX(headersRegion.prefWidth(-1));
-            double visibleWidth = firstTabIndent() + firstAreaWidth + headerPrefWidth + lastAreaWidth + lastTabIndent();
+            double visibleWidth = firstTabIndent() + firstAreaWidth + headerPrefWidth + stickyAreaWidth
+                    + lastAreaWidth + lastTabIndent();
             var result = visibleWidth < getWidth();
             tabsMenuRequired.set(!result);
             return result;
         }
 
-        private void ensureSelectedTabIsVisible(double firstAreaWidth, double lastAreaWidth) {
+        private void ensureSelectedTabIsVisible(double firstAreaWidth, double stickyAreaWidth, double lastAreaWidth) {
             // work out the visible width of the tab header
             double tabPaneWidth = snapSizeX(isHorizontal() ? getSkinnable().getWidth() : getSkinnable().getHeight());
             //double controlTabWidth = snapSizeX(controlButtons.getWidth()); getWidth???
-            double visibleWidth = tabPaneWidth - firstTabIndent() - firstAreaWidth - lastAreaWidth - lastTabIndent();
+            double visibleWidth = tabPaneWidth - firstTabIndent() - firstAreaWidth - stickyAreaWidth
+                    - lastAreaWidth - lastTabIndent();
 
             // and get where the selected tab is in the header area
             double offset = 0.0;
@@ -1123,9 +1129,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             final double visibleAreaEndX = visibleWidth;
 
             if (selectedTabStartX < -scrollOffset) {
-                setScrollOffset(-selectedTabStartX, firstAreaWidth, lastAreaWidth);
+                setScrollOffset(-selectedTabStartX, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
             } else if (selectedTabEndX > (visibleAreaEndX - scrollOffset)) {
-                setScrollOffset(visibleAreaEndX - selectedTabEndX, firstAreaWidth, lastAreaWidth);
+                setScrollOffset(visibleAreaEndX - selectedTabEndX, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
             }
         }
 
@@ -1137,14 +1143,16 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             scrollOffsetDirty = true;
         }
 
-        private void validateScrollOffset(double firstAreaWidth, double lastAreaWidth) {
-            setScrollOffset(getScrollOffset(), firstAreaWidth, lastAreaWidth);
+        private void validateScrollOffset(double firstAreaWidth, double stickyAreaWidth, double lastAreaWidth) {
+            setScrollOffset(getScrollOffset(), firstAreaWidth, stickyAreaWidth, lastAreaWidth);
         }
 
-        private void setScrollOffset(double newScrollOffset, double firstAreaWidth, double lastAreaWidth) {
+        private void setScrollOffset(double newScrollOffset, double firstAreaWidth, double stickyAreaWidth,
+                double lastAreaWidth) {
             // work out the visible width of the tab header
             double tabPaneWidth = snapSizeX(isHorizontal() ? getSkinnable().getWidth() : getSkinnable().getHeight());
-            double visibleWidth = tabPaneWidth - firstTabIndent() - firstAreaWidth - lastAreaWidth - lastTabIndent();
+            double visibleWidth = tabPaneWidth - firstTabIndent() - firstAreaWidth - stickyAreaWidth
+                    - lastAreaWidth - lastTabIndent();
 
             // measure the width of all tabs
             double offset = 0.0;
@@ -1206,17 +1214,24 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double padding = isHorizontal() ?
                 snappedLeftInset() + snappedRightInset() :
                 snappedTopInset() + snappedBottomInset();
-            return snapSizeX(headerFirstArea.prefWidth(height) + headersRegion.prefWidth(height))
-                    + headerLastArea.prefWidth(height) + padding; // + firstTabIndent() ??
+            return calculateAreaWidth(headerFirstArea, height)
+                    + snapSizeX(headersRegion.prefWidth(height))
+                    + calculateAreaWidth(headerStickyArea, height)
+                    + calculateAreaWidth(headerLastArea, height)
+                    + padding; // + firstTabIndent() ??
         }
 
         @Override protected double computePrefHeight(double width) {
             double padding = isHorizontal() ?
                 snappedTopInset() + snappedBottomInset() :
                 snappedLeftInset() + snappedRightInset();
-            var max = Math.max(headerFirstArea.prefHeight(-1), headerLastArea.prefHeight(-1));
-            max = Math.max(max, headersRegion.prefHeight(-1));
-            return snapSizeY(max) + padding;
+            var firstAreaHeight = calculateAreaHeight(headerFirstArea, width);
+            var lastAreaHeight = calculateAreaHeight(headerLastArea, width);
+            var stickyAreaHeight = calculateAreaHeight(headerStickyArea, width);
+            var max = Math.max(firstAreaHeight, lastAreaHeight);
+            max = Math.max(max, stickyAreaHeight);
+            max = Math.max(max, snapSizeY(headersRegion.prefHeight(-1)));
+            return max + padding;
         }
 
         @Override public double getBaselineOffset() {
@@ -1239,33 +1254,24 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double headersPrefWidth = snapSizeX(headersRegion.prefWidth(-1));
             double headersPrefHeight = snapSizeY(headersRegion.prefHeight(-1));
 
-            var firstAreaWidth = Utils.computeBoundedSize(
-                    headerFirstArea.minWidth(-1),
-                    headerFirstArea.prefWidth(-1),
-                    headerFirstArea.maxWidth(-1));
-            firstAreaWidth = snapSizeX(firstAreaWidth);
-            var firstAreaHeight = Utils.computeBoundedSize(
-                    headerFirstArea.minHeight(-1),
-                    headerFirstArea.prefHeight(-1),
-                    headerFirstArea.maxHeight(-1));
-            firstAreaHeight = Math.max(snapSizeY(firstAreaHeight), h);
+            var firstAreaWidth = calculateAreaWidth(headerFirstArea, -1);
+            var firstAreaHeight = calculateAreaHeight(headerFirstArea, -1);
+            firstAreaHeight = Math.max(firstAreaHeight, h);
             headerFirstArea.resize(firstAreaWidth, firstAreaHeight);
 
-            var lastAreaWidth = Utils.computeBoundedSize(
-                    headerLastArea.minWidth(-1),
-                    headerLastArea.prefWidth(-1),
-                    headerLastArea.maxWidth(-1));
-            lastAreaWidth = snapSizeX(lastAreaWidth);
-            var lastAreaHeight = Utils.computeBoundedSize(
-                    headerLastArea.minHeight(-1),
-                    headerLastArea.prefHeight(-1),
-                    headerLastArea.maxHeight(-1));
-            lastAreaHeight = Math.max(snapSizeY(lastAreaHeight), h);
+            var stickyAreaWidth = calculateAreaWidth(headerStickyArea, -1);
+            var stickyAreaHeight = calculateAreaHeight(headerStickyArea, -1);
+            stickyAreaHeight = Math.max(stickyAreaHeight, h);
+            headerStickyArea.resize(stickyAreaWidth, stickyAreaHeight);
+
+            var lastAreaWidth = calculateAreaWidth(headerLastArea, -1);
+            var lastAreaHeight = calculateAreaHeight(headerLastArea, -1);
+            lastAreaHeight = Math.max(lastAreaHeight, h);
             headerLastArea.resize(lastAreaWidth, lastAreaHeight);
 
             h = Math.min(h, headersPrefHeight);
 
-            updateHeaderClip(firstAreaWidth, lastAreaWidth);
+            updateHeaderClip(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
             headersRegion.requestLayout();
 
             // POSITION TABS
@@ -1278,52 +1284,71 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 headerBackground.setVisible(true);
             }
 
+            double allAreaY = 0;
             double firstAreaX = 0;
-            double firstAreaY = 0;
             double regionX = 0;
             double regionY = 0;
+            double stickyX = 0;
             double lastAreaX = 0;
-            double lastAreaY = 0;
             Side tabPosition = getSkinnable().getSide();
+            var tabsFit = tabsFit(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
 
             if (tabPosition.equals(Side.TOP)) {
                 firstAreaX = leftInset;
-                firstAreaY = topInset;
+                allAreaY = topInset;
                 regionX = firstAreaX + firstAreaWidth;
                 regionY = tabBackgroundHeight - headersPrefHeight - bottomInset;
                 lastAreaX = w - lastAreaWidth + leftInset;
-                lastAreaY = snapSizeY(getHeight()) - lastAreaHeight - bottomInset;
+                if (tabsFit) {
+                    stickyX = regionX + headersPrefWidth;
+                } else {
+                    stickyX = lastAreaX - stickyAreaWidth;
+                }
             } else if (tabPosition.equals(Side.RIGHT)) {
                 firstAreaX = topInset;
-                firstAreaY = tabBackgroundHeight - firstAreaHeight - leftInset;
+                allAreaY = tabBackgroundHeight - firstAreaHeight - leftInset;
                 regionX = firstAreaX + firstAreaWidth;
                 regionY = tabBackgroundHeight - headersPrefHeight - leftInset;
                 lastAreaX = w - lastAreaWidth + topInset;
-                lastAreaY = snapSizeY(getHeight()) - lastAreaHeight - leftInset;
+                if (tabsFit) {
+                    stickyX = regionX + headersPrefWidth;
+                } else {
+                    stickyX = lastAreaX - stickyAreaWidth;
+                }
             } else if (tabPosition.equals(Side.BOTTOM)) {
                 firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - leftInset;
-                firstAreaY = tabBackgroundHeight - firstAreaHeight - topInset;
+                allAreaY = tabBackgroundHeight - firstAreaHeight - topInset;
                 regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - leftInset;
                 regionY = tabBackgroundHeight - headersPrefHeight - topInset;
                 lastAreaX = rightInset;
-                lastAreaY = snapSizeY(getHeight()) - lastAreaHeight - topInset;
+                if (tabsFit) {
+                    stickyX = regionX - stickyAreaWidth;
+                } else {
+                    stickyX = lastAreaX + lastAreaWidth;
+                }
             } else if (tabPosition.equals(Side.LEFT)) {
                 firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - topInset;
-                firstAreaY = tabBackgroundHeight - firstAreaHeight - rightInset;
+                allAreaY = tabBackgroundHeight - firstAreaHeight - rightInset;
                 regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - topInset;
                 regionY = tabBackgroundHeight - headersPrefHeight - rightInset;
                 lastAreaX = bottomInset;
-                lastAreaY = snapSizeY(getHeight()) - lastAreaHeight - rightInset;
+                if (tabsFit) {
+                    stickyX = regionX - stickyAreaWidth;
+                } else {
+                    stickyX = lastAreaX + lastAreaWidth;
+                }
             }
             if (headerBackground.isVisible()) {
                 positionInArea(headerBackground, 0, 0,
                         snapSizeX(getWidth()), snapSizeY(getHeight()), /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             }
 
-            positionInArea(headerFirstArea, firstAreaX, firstAreaY, firstAreaWidth, firstAreaHeight,
+            positionInArea(headerFirstArea, firstAreaX, allAreaY, firstAreaWidth, firstAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             positionInArea(headersRegion, regionX, regionY, w, h, /*baseline ignored*/0, HPos.LEFT, VPos.CENTER);
-            positionInArea(headerLastArea, lastAreaX, lastAreaY, lastAreaWidth, lastAreaHeight,
+            positionInArea(headerStickyArea, stickyX, allAreaY, stickyAreaWidth, stickyAreaHeight,
+                    /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
+            positionInArea(headerLastArea, lastAreaX, allAreaY, lastAreaWidth, lastAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
 
         }
@@ -1334,6 +1359,24 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 header.dispose();
             }
             tabsMenuManager.dispose();
+        }
+
+        private double calculateAreaWidth(StackPane area, double height) {
+            var areaWidth = Utils.computeBoundedSize(
+                    area.minWidth(height),
+                    area.prefWidth(height),
+                    area.maxWidth(height));
+            areaWidth = snapSizeX(areaWidth);
+            return areaWidth;
+        }
+
+        private double calculateAreaHeight(StackPane area, double width) {
+            var areaHeight = Utils.computeBoundedSize(
+                    area.minHeight(width),
+                    area.prefHeight(width),
+                    area.maxHeight(width));
+            areaHeight = snapSizeY(areaHeight);
+            return areaHeight;
         }
     } /* End TabHeaderArea */
 

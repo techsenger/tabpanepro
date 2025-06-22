@@ -37,6 +37,14 @@
 }
 
 /*
+    Header sticky area.
+*/
+
+.tab-pane > .tab-header-area > .header-sticky-area > .container > .button .ikonli-font-icon {
+    -fx-icon-color: -fx-text-base-color;
+}
+
+/*
     Header last area.
 */
 

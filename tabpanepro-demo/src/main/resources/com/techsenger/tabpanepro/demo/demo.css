@@ -40,6 +40,28 @@
 }
 
 /*
+    Header sticky area.
+*/
+
+.tab-pane-pro > .tab-header-area > .header-sticky-area > .container {
+    -fx-padding: 0 0 0 4;
+    -fx-spacing: 4;
+}
+
+.tab-pane-pro > .tab-header-area > .header-sticky-area > .container > .button {
+    -fx-padding: 2;
+}
+
+.tab-pane-pro:bottom > .tab-header-area > .header-sticky-area > .container {
+    -fx-rotate: 180;
+}
+
+.tab-pane-pro:left > .tab-header-area > .header-sticky-area > .container {
+    -fx-scale-y: -1;
+    -fx-rotate: 180;
+}
+
+/*
     Header last area.
 */
 
@@ -65,6 +87,10 @@
     For tests only.
 */
 
+/*.tab-pane-pro > .tab-header-area > .headers-region {
+    -fx-background-color: red;
+}*/
+
 /*.tab-pane-pro:top > .tab-header-area {
     -fx-padding: 0 50 0 25;
 }
@@ -81,32 +107,34 @@
     -fx-padding: 50 0 25 0;
 }*/
 
+/*.tab-pane-pro > .tab-header-area {
+    -fx-padding: 5 10 15 20;
+}
 
-/*.tab-pane-pro > .tab-header-area > .header-first-area {
-    -fx-padding: 10;
+.tab-pane-pro > .tab-header-area > .header-first-area {
+    -fx-padding: 5;
     -fx-background-color: red;
 }
 
 .tab-pane-pro > .tab-header-area > .header-first-area > .container {
-    -fx-padding: 10;
     -fx-background-color: blue;
 }
 
-.tab-pane-pro > .tab-header-area > .header-first-area  .ikonli-font-icon {
-    -fx-icon-size: 20;
+.tab-pane-pro > .tab-header-area > .header-sticky-area {
+    -fx-padding: 5;
+    -fx-background-color: orange;
+}
+
+.tab-pane-pro > .tab-header-area > .header-sticky-area > .container {
+    -fx-background-color: purple;
 }
 
 .tab-pane-pro > .tab-header-area > .header-last-area {
-    -fx-padding: 10;
+    -fx-padding: 5;
     -fx-background-color: green;
-    -fx-opacity: 0.2;
 }
 
 .tab-pane-pro > .tab-header-area > .header-last-area > .container {
-        -fx-padding: 10;
     -fx-background-color: blue;
-}
-
-.tab-pane-pro > .tab-header-area > .header-last-area  .ikonli-font-icon {
-    -fx-icon-size: 20;
 }*/
+

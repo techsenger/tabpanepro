@@ -37,6 +37,15 @@
 }
 
 /*
+    Header sticky area.
+*/
+
+.tab-pane.classic > .tab-header-area > .header-sticky-area > .container > .button:hover {
+    -fx-background-color: -color-tab-bg-selected;
+}
+
+
+/*
     Header last area.
 */
 

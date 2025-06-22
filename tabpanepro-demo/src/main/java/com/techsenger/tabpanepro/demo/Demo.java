@@ -31,6 +31,7 @@ import static javafx.application.Application.launch;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -53,6 +54,7 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignD;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignM;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignP;
 
 /**
  *
@@ -98,19 +100,13 @@ public class Demo extends Application {
 
     private final CheckBox headerFirstAreaCheckBox = new CheckBox("Header First Area");
 
+    private final CheckBox headerStickyAreaCheckBox = new CheckBox("Header Sticky Area");
+
     private final CheckBox headerLastAreaCheckBox = new CheckBox("Header Last Area");
 
-    private final GridPane mainGridPane = new GridPane();
+    private final GridPane gridPane = new GridPane();
 
-    private final GridPane gridPane0 = new GridPane();
-
-    private final GridPane gridPane1 = new GridPane();
-
-    private final GridPane gridPane2 = new GridPane();
-
-    private final GridPane gridPane3 = new GridPane();
-
-    private final VBox root = new VBox(tabPaneBox, mainGridPane);
+    private final VBox root = new VBox(tabPaneBox, gridPane);
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -126,50 +122,48 @@ public class Demo extends Application {
         for (var i = 0; i < 4; i++) {
             ColumnConstraints con = new ColumnConstraints();
             con.setPercentWidth(25);
-            mainGridPane.getColumnConstraints().add(con);
+            gridPane.getColumnConstraints().add(con);
         }
-        mainGridPane.setHgap(INSET);
-        mainGridPane.add(gridPane0, 0, 0);
-        mainGridPane.add(gridPane1, 1, 0);
-        mainGridPane.add(gridPane2, 2, 0);
-        mainGridPane.add(gridPane3, 3, 0);
-        mainGridPane.setHgap(INSET);
+        gridPane.setHgap(INSET);
+        gridPane.setVgap(INSET);
 
-        gridPane0.setVgap(INSET);
-        gridPane0.setHgap(INSET);
-        gridPane0.add(proCheckBox, 0, 0, 2, 1);
+        // row 0
+        gridPane.add(proCheckBox, 0, 0);
         proCheckBox.setSelected(true);
         proCheckBox.selectedProperty().addListener((ov, oldV, newV) -> {
             createTabPanes();
             headerFirstAreaCheckBox.setDisable(!newV);
+            headerStickyAreaCheckBox.setDisable(!newV);
             headerLastAreaCheckBox.setDisable(!newV);
         });
-        headerFirstAreaCheckBox.setSelected(true);
-        headerFirstAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        gridPane0.add(headerFirstAreaCheckBox, 0, 1, 2, 1);
-
-        gridPane1.setVgap(INSET);
-        gridPane1.setHgap(INSET);
         atlantaFxCheckBox.setSelected(true);
         atlantaFxCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
-        gridPane1.add(atlantaFxCheckBox, 0, 0, 2, 1);
-        headerLastAreaCheckBox.setSelected(true);
-        headerLastAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        gridPane1.add(headerLastAreaCheckBox, 0, 1, 2, 1);
-
-        gridPane2.setVgap(INSET);
-        gridPane2.setHgap(INSET);
-        gridPane2.add(new Label("Tab Style"), 0, 0);
-        gridPane2.add(tabStylesComboBox, 1, 0);
-        tabStylesComboBox.getSelectionModel().select(2);
+        gridPane.add(atlantaFxCheckBox, 1, 0);
+        var tabStylesHBox = new HBox(new Label("Tab Style"), tabStylesComboBox);
+        tabStylesHBox.setSpacing(INSET);
+        tabStylesHBox.setAlignment(Pos.CENTER_LEFT);
+        gridPane.add(tabStylesHBox, 2, 0);
+        tabStylesComboBox.getSelectionModel().select(0);
         tabStylesComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
-
-        gridPane3.setVgap(INSET);
-        gridPane3.setHgap(INSET);
-        gridPane3.add(new Label("Tab Count"), 0, 0);
-        gridPane3.add(tabCountComboBox, 1, 0);
+        tabStylesComboBox.getStyleClass().add(Styles.DENSE);
+        var tabCountHBox = new HBox(new Label("Tab Count"), tabCountComboBox);
+        tabCountHBox.setSpacing(INSET);
+        tabCountHBox.setAlignment(Pos.CENTER_LEFT);
+        tabCountComboBox.getStyleClass().add(Styles.DENSE);
         tabCountComboBox.getSelectionModel().select(4);
         tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
+        gridPane.add(tabCountHBox, 3, 0);
+
+        // row 1
+        headerFirstAreaCheckBox.setSelected(true);
+        headerFirstAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane.add(headerFirstAreaCheckBox, 0, 1);
+        headerStickyAreaCheckBox.setSelected(true);
+        headerStickyAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane.add(headerStickyAreaCheckBox, 1, 1);
+        headerLastAreaCheckBox.setSelected(true);
+        headerLastAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane.add(headerLastAreaCheckBox, 2, 1);
 
         root.setSpacing(2 * INSET);
         root.setPadding(new Insets(INSET));
@@ -219,6 +213,14 @@ public class Demo extends Application {
                 container.getStyleClass().add("container");
                 container.setMaxHeight(Region.USE_PREF_SIZE);
                 skin.getHeaderFirstArea().getChildren().add(container);
+            }
+            if (headerStickyAreaCheckBox.isSelected()) {
+                var button = new Button(null, new FontIcon(MaterialDesignP.PLUS));
+                button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+                var container = new StackPane(button);
+                container.getStyleClass().add("container");
+                container.setMaxHeight(Region.USE_PREF_SIZE);
+                skin.getHeaderStickyArea().getChildren().add(container);
             }
             if (headerLastAreaCheckBox.isSelected()) {
                 var tabsMenuButton = new Button(null, new FontIcon(MaterialDesignM.MENU_DOWN));
