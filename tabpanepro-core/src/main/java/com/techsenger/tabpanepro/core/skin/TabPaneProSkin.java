@@ -902,9 +902,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 }
 
                 @Override protected void layoutChildren() {
-                    double firstAreaWidth = calculateAreaWidth(headerFirstArea, -1);
-                    double stickyAreaWidth = calculateAreaWidth(headerStickyArea, -1);
-                    double lastAreaWidth = calculateAreaWidth(headerLastArea, -1);
+                    double firstAreaWidth = computeRegionWidth(headerFirstArea, -1);
+                    double stickyAreaWidth = computeRegionWidth(headerStickyArea, -1);
+                    double lastAreaWidth = computeRegionWidth(headerLastArea, -1);
 
                     if (tabsFit(firstAreaWidth, stickyAreaWidth, lastAreaWidth)) {
                         setScrollOffset(0.0, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
@@ -1210,10 +1210,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double padding = isHorizontal() ?
                 snappedLeftInset() + snappedRightInset() :
                 snappedTopInset() + snappedBottomInset();
-            return calculateAreaWidth(headerFirstArea, height)
+            return computeRegionWidth(headerFirstArea, height)
                     + snapSizeX(headersRegion.prefWidth(height))
-                    + calculateAreaWidth(headerStickyArea, height)
-                    + calculateAreaWidth(headerLastArea, height)
+                    + computeRegionWidth(headerStickyArea, height)
+                    + computeRegionWidth(headerLastArea, height)
                     + padding; // + firstTabIndent() ??
         }
 
@@ -1221,9 +1221,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double padding = isHorizontal() ?
                 snappedTopInset() + snappedBottomInset() :
                 snappedLeftInset() + snappedRightInset();
-            var firstAreaHeight = calculateAreaHeight(headerFirstArea, width);
-            var lastAreaHeight = calculateAreaHeight(headerLastArea, width);
-            var stickyAreaHeight = calculateAreaHeight(headerStickyArea, width);
+            var firstAreaHeight = computeRegionHeight(headerFirstArea, width);
+            var lastAreaHeight = computeRegionHeight(headerLastArea, width);
+            var stickyAreaHeight = computeRegionHeight(headerStickyArea, width);
             var max = Math.max(firstAreaHeight, lastAreaHeight);
             max = Math.max(max, stickyAreaHeight);
             max = Math.max(max, snapSizeY(headersRegion.prefHeight(-1)));
@@ -1250,18 +1250,18 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double headersPrefWidth = snapSizeX(headersRegion.prefWidth(-1));
             double headersPrefHeight = snapSizeY(headersRegion.prefHeight(-1));
 
-            var firstAreaWidth = calculateAreaWidth(headerFirstArea, -1);
-            var firstAreaHeight = calculateAreaHeight(headerFirstArea, -1);
+            var firstAreaWidth = computeRegionWidth(headerFirstArea, -1);
+            var firstAreaHeight = computeRegionHeight(headerFirstArea, -1);
             firstAreaHeight = Math.max(firstAreaHeight, h);
             headerFirstArea.resize(firstAreaWidth, firstAreaHeight);
 
-            var stickyAreaWidth = calculateAreaWidth(headerStickyArea, -1);
-            var stickyAreaHeight = calculateAreaHeight(headerStickyArea, -1);
+            var stickyAreaWidth = computeRegionWidth(headerStickyArea, -1);
+            var stickyAreaHeight = computeRegionHeight(headerStickyArea, -1);
             stickyAreaHeight = Math.max(stickyAreaHeight, h);
             headerStickyArea.resize(stickyAreaWidth, stickyAreaHeight);
 
-            var lastAreaWidth = calculateAreaWidth(headerLastArea, -1);
-            var lastAreaHeight = calculateAreaHeight(headerLastArea, -1);
+            var lastAreaWidth = computeRegionWidth(headerLastArea, -1);
+            var lastAreaHeight = computeRegionHeight(headerLastArea, -1);
             lastAreaHeight = Math.max(lastAreaHeight, h);
             headerLastArea.resize(lastAreaWidth, lastAreaHeight);
 
@@ -1373,20 +1373,20 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             tabsMenuManager.dispose();
         }
 
-        private double calculateAreaWidth(StackPane area, double height) {
+        private double computeRegionWidth(Region region, double height) {
             var areaWidth = Utils.computeBoundedSize(
-                    area.minWidth(height),
-                    area.prefWidth(height),
-                    area.maxWidth(height));
+                    region.minWidth(height),
+                    region.prefWidth(height),
+                    region.maxWidth(height));
             areaWidth = snapSizeX(areaWidth);
             return areaWidth;
         }
 
-        private double calculateAreaHeight(StackPane area, double width) {
+        private double computeRegionHeight(Region region, double width) {
             var areaHeight = Utils.computeBoundedSize(
-                    area.minHeight(width),
-                    area.prefHeight(width),
-                    area.maxHeight(width));
+                    region.minHeight(width),
+                    region.prefHeight(width),
+                    region.maxHeight(width));
             areaHeight = snapSizeY(areaHeight);
             return areaHeight;
         }
