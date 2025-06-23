@@ -23,7 +23,9 @@ package com.techsenger.tabpanepro.core;
 
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Rectangle2D;
@@ -62,6 +64,8 @@ public class TabPanePro extends TabPane {
 
     private final ObjectProperty<StackPane> dropNextTab = new SimpleObjectProperty<>();
 
+    private final BooleanProperty headerVisibleWhenEmpty = new SimpleBooleanProperty(true);
+
     private StackPane headersRegion;
 
     private StackPane headerArea;
@@ -96,6 +100,33 @@ public class TabPanePro extends TabPane {
                 });
             }
         });
+    }
+
+    /**
+     * Returns the property that controls whether the header is visible when no tabs are present.
+     *
+     * @return the property controlling header visibility when empty
+     */
+    public BooleanProperty headerVisibleWhenEmptyProperty() {
+        return headerVisibleWhenEmpty;
+    }
+
+    /**
+     * Returns whether the header is visible when there are no tabs.
+     *
+     * @return true if the header is visible when empty, false otherwise
+     */
+    public boolean isHeaderVisibleWhenEmpty() {
+        return headerVisibleWhenEmpty.get();
+    }
+
+    /**
+     * Sets whether the header should be visible when there are no tabs.
+     *
+     * @param visible true to show the header when empty, false to hide it
+     */
+    public void setHeaderVisibleWhenEmpty(boolean visible) {
+        headerVisibleWhenEmpty.set(visible);
     }
 
     private void initTabs() {

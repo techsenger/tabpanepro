@@ -68,6 +68,13 @@ public class Demo extends Application {
 
     private static final int INSET = 10;
 
+    private static final String SHORT_TEXT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+
+    private static final String LONG_TEXT =
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin id augue id nibh vestibulum "
+                + "imperdiet et quis sem. Quisque finibus, ante a tempor consectetur, diam purus tempor nunc, "
+                + "tempor auctor orci libero vitae quam.";
+
     private enum TabStyle {
         BASE, FLOATING, CLASSIC
     }
@@ -104,6 +111,8 @@ public class Demo extends Application {
 
     private final CheckBox headerLastAreaCheckBox = new CheckBox("Header Last Area");
 
+    private final CheckBox headerHiddenWhenEmptyCheckBox = new CheckBox("Header Visible When Empty");
+
     private final GridPane gridPane = new GridPane();
 
     private final VBox root = new VBox(tabPaneBox, gridPane);
@@ -135,6 +144,7 @@ public class Demo extends Application {
             headerFirstAreaCheckBox.setDisable(!newV);
             headerStickyAreaCheckBox.setDisable(!newV);
             headerLastAreaCheckBox.setDisable(!newV);
+            headerHiddenWhenEmptyCheckBox.setDisable(!newV);
         });
         atlantaFxCheckBox.setSelected(true);
         atlantaFxCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
@@ -164,6 +174,9 @@ public class Demo extends Application {
         headerLastAreaCheckBox.setSelected(true);
         headerLastAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
         gridPane.add(headerLastAreaCheckBox, 2, 1);
+        gridPane.add(headerHiddenWhenEmptyCheckBox,3, 1);
+        headerHiddenWhenEmptyCheckBox.setSelected(true);
+        headerHiddenWhenEmptyCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateHeaderVisibleWhenEmpty());
 
         root.setSpacing(2 * INSET);
         root.setPadding(new Insets(INSET));
@@ -190,6 +203,14 @@ public class Demo extends Application {
         }
     }
 
+    private void updateHeaderVisibleWhenEmpty() {
+        var value = this.headerHiddenWhenEmptyCheckBox.isSelected();
+        ((TabPanePro) this.topPane).setHeaderVisibleWhenEmpty(value);
+        ((TabPanePro) this.rightPane).setHeaderVisibleWhenEmpty(value);
+        ((TabPanePro) this.bottomPane).setHeaderVisibleWhenEmpty(value);
+        ((TabPanePro) this.leftPane).setHeaderVisibleWhenEmpty(value);
+    }
+
     private void createTabPanes() {
         this.leftSplitPane.getItems().clear();
         this.rightSplitPane.getItems().clear();
@@ -202,9 +223,11 @@ public class Demo extends Application {
     }
 
     private TabPane createTabPane(Side side) {
-        TabPane tabPane = null;
+        final TabPane tabPane;
         if (proCheckBox.isSelected()) {
-            tabPane = new TabPanePro(context);
+            TabPanePro tabPanePro = new TabPanePro(context);
+            tabPane = tabPanePro;
+            tabPanePro.setHeaderVisibleWhenEmpty(this.headerHiddenWhenEmptyCheckBox.isSelected());
             var skin = (TabPaneProSkin) tabPane.getSkin();
             if (headerFirstAreaCheckBox.isSelected()) {
                 var button = new Button(null, new FontIcon(MaterialDesignD.DOTS_VERTICAL));
@@ -217,6 +240,9 @@ public class Demo extends Application {
             if (headerStickyAreaCheckBox.isSelected()) {
                 var button = new Button(null, new FontIcon(MaterialDesignP.PLUS));
                 button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+                button.setOnAction(e -> {
+                    addTabTo(tabPane);
+                });
                 var container = new StackPane(button);
                 container.getStyleClass().add("container");
                 container.setMaxHeight(Region.USE_PREF_SIZE);
@@ -260,27 +286,28 @@ public class Demo extends Application {
 
     private void createTabs(TabPane tabPane) {
         tabPane.getTabs().clear();
-        var text1 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-        var text2 = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin id augue id nibh vestibulum "
-                + "imperdiet et quis sem. Quisque finibus, ante a tempor consectetur, diam purus tempor nunc, "
-                + "tempor auctor orci libero vitae quam.";
         for (var i = 0; i < this.tabCountComboBox.getValue(); i++) {
-            String side = tabPane.getSide().name();
-            var t = new Tab(side + " " + i);
-            tabPane.getTabs().add(t);
-            var content = new VBox();
-            content.setSpacing(INSET);
-            //content.setStyle("-fx-background-color: -color-bg-subtle");
-            content.setPadding(new Insets(INSET));
-            content.getChildren().add(new Label(side + " " + i));
-            var textField = new TextField(text1);
-            content.getChildren().add(textField);
-            var textArea = new TextArea(text2);
-            textArea.setWrapText(true);
-            textArea.setPrefHeight(0);
-            VBox.setVgrow(textArea, Priority.ALWAYS);
-            content.getChildren().add(textArea);
-            t.setContent(content);
+            addTabTo(tabPane);
         }
+    }
+
+    private void addTabTo(TabPane tabPane) {
+        String side = tabPane.getSide().name();
+        var index = tabPane.getTabs().size();
+        var tab = new Tab(side + " " + index);
+        var content = new VBox();
+        content.setSpacing(INSET);
+        //content.setStyle("-fx-background-color: -color-bg-subtle");
+        content.setPadding(new Insets(INSET));
+        content.getChildren().add(new Label(side + " " + index));
+        var textField = new TextField(SHORT_TEXT);
+        content.getChildren().add(textField);
+        var textArea = new TextArea(LONG_TEXT);
+        textArea.setWrapText(true);
+        textArea.setPrefHeight(0);
+        VBox.setVgrow(textArea, Priority.ALWAYS);
+        content.getChildren().add(textArea);
+        tab.setContent(content);
+        tabPane.getTabs().add(tab);
     }
 }

@@ -26,7 +26,7 @@
 /*
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
- * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025.
+ * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -198,9 +198,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         tabHeaderArea = new TabHeaderArea();
         tabHeaderArea.setClip(tabHeaderAreaClipRect);
         getChildren().add(tabHeaderArea);
-        if (getSkinnable().getTabs().size() == 0) {
-            tabHeaderArea.setVisible(false);
-        }
+        tabHeaderArea.updateNoTabsState();
 
         initializeTabListener();
         updateSelectionModel();
@@ -229,6 +227,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         selectedTab = getSkinnable().getSelectionModel().getSelectedItem();
 
         initializeSwipeHandlers();
+        registerChangeListener(control.headerVisibleWhenEmptyProperty(), e -> tabHeaderArea.updateNoTabsState());
     }
 
     /* *************************************************************************
@@ -553,9 +552,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
                     tabHeaderArea.removeTab(tab);
                     tabHeaderArea.requestLayout();
-                    if (getSkinnable().getTabs().isEmpty()) {
-                        tabHeaderArea.setVisible(false);
-                    }
                 };
 
                 if (Platform.isFxApplicationThread() && (closeTabAnimation.get() == TabAnimation.GROW)) {
@@ -599,9 +595,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         for (final Tab tab : addedList) {
             stopCurrentAnimation(tab); // Note that this must happen before addTab() call below
             // A new tab was added - animate it out
-            if (!tabHeaderArea.isVisible()) {
-                tabHeaderArea.setVisible(true);
-            }
             int index = from + i++;
             tabHeaderArea.addTab(tab, index);
             addTabContent(tab);
@@ -629,9 +622,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
     WeakListChangeListener<Tab> weakTabsListener;
     private void initializeTabListener() {
         tabsListener = c -> {
+            tabHeaderArea.updateNoTabsState(); // before processing tab adding/removing!
+
             List<Tab> tabsToRemove = new ArrayList<>();
             List<Tab> tabsToAdd = new ArrayList<>();
-
             while (c.next()) {
                 if (c.wasPermutated()) {
                     if (dragState != DragState.REORDER) {
@@ -876,6 +870,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private final StackPane headerStickyArea = new StackPane();
 
         private final ReadOnlyBooleanWrapper tabsMenuRequired = new ReadOnlyBooleanWrapper(false);
+
+        private boolean dummyTabAdded = false;
 
         public TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
@@ -1299,10 +1295,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 regionX = firstAreaX + firstAreaWidth;
                 regionY = tabBackgroundHeight - headersPrefHeight - bottomInset;
                 lastAreaX = w - lastAreaWidth + leftInset;
-                if (tabsFit) {
-                    stickyX = regionX + headersPrefWidth;
+                if (isDummyTabAdded()) {
+                    stickyX = regionX;
                 } else {
-                    stickyX = lastAreaX - stickyAreaWidth;
+                    if (tabsFit) {
+                        stickyX = regionX + headersPrefWidth;
+                    } else {
+                        stickyX = lastAreaX - stickyAreaWidth;
+                    }
                 }
             } else if (tabPosition.equals(Side.RIGHT)) {
                 firstAreaX = topInset;
@@ -1310,10 +1310,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 regionX = firstAreaX + firstAreaWidth;
                 regionY = tabBackgroundHeight - headersPrefHeight - leftInset;
                 lastAreaX = w - lastAreaWidth + topInset;
-                if (tabsFit) {
-                    stickyX = regionX + headersPrefWidth;
+                if (isDummyTabAdded()) {
+                    stickyX = regionX;
                 } else {
-                    stickyX = lastAreaX - stickyAreaWidth;
+                    if (tabsFit) {
+                        stickyX = regionX + headersPrefWidth;
+                    } else {
+                        stickyX = lastAreaX - stickyAreaWidth;
+                    }
                 }
             } else if (tabPosition.equals(Side.BOTTOM)) {
                 firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - leftInset;
@@ -1321,10 +1325,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - leftInset;
                 regionY = tabBackgroundHeight - headersPrefHeight - topInset;
                 lastAreaX = rightInset;
-                if (tabsFit) {
-                    stickyX = regionX - stickyAreaWidth;
+                if (isDummyTabAdded()) {
+                    stickyX = regionX;
                 } else {
-                    stickyX = lastAreaX + lastAreaWidth;
+                    if (tabsFit) {
+                        stickyX = regionX - stickyAreaWidth;
+                    } else {
+                        stickyX = lastAreaX + lastAreaWidth;
+                    }
                 }
             } else if (tabPosition.equals(Side.LEFT)) {
                 firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - topInset;
@@ -1332,10 +1340,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - topInset;
                 regionY = tabBackgroundHeight - headersPrefHeight - rightInset;
                 lastAreaX = bottomInset;
-                if (tabsFit) {
-                    stickyX = regionX - stickyAreaWidth;
+                if (isDummyTabAdded()) {
+                    stickyX = regionX;
                 } else {
-                    stickyX = lastAreaX + lastAreaWidth;
+                    if (tabsFit) {
+                        stickyX = regionX - stickyAreaWidth;
+                    } else {
+                        stickyX = lastAreaX + lastAreaWidth;
+                    }
                 }
             }
             if (headerBackground.isVisible()) {
@@ -1378,6 +1390,53 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             areaHeight = snapSizeY(areaHeight);
             return areaHeight;
         }
+
+        private boolean isDummyTabAdded() {
+            return dummyTabAdded;
+        }
+
+        /**
+        * When there are no tabs, it is necessary to know the height of the headersRegion in order to calculate the
+        * correct height of the header area. This is achieved using a dummy tab header.
+        */
+        private void updateNoTabsState() {
+            if (getSkinnable().getTabs().isEmpty()) {
+                if (getSkinnable().isHeaderVisibleWhenEmpty()) {
+                    tabHeaderArea.setVisible(true);
+                    if (!dummyTabAdded) {
+                        addDummyTab();
+                    }
+                } else {
+                    tabHeaderArea.setVisible(false);
+                    if (dummyTabAdded) {
+                        removeDummyTab();
+                    }
+                }
+            } else {
+                if (!tabHeaderArea.isVisible()) {
+                    tabHeaderArea.setVisible(true);
+                }
+                if (dummyTabAdded) {
+                    removeDummyTab();
+                }
+            }
+        }
+
+        private void addDummyTab() {
+            var dummyTab = new Tab();
+            var dummyTabSkin = new TabHeaderSkin(dummyTab);
+            headersRegion.getChildren().add(dummyTabSkin);
+            headersRegion.setVisible(false);
+            dummyTabAdded = true;
+        }
+
+        private void removeDummyTab() {
+            headersRegion.getChildren().clear();
+            headersRegion.setVisible(true);
+            dummyTabAdded = false;
+        }
+
+
     } /* End TabHeaderArea */
 
 
@@ -1599,9 +1658,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             listener.registerChangeListener(tab.disabledProperty(), e -> {
                 updateTabDisabledState();
             });
-            listener.registerChangeListener(tab.getTabPane().disabledProperty(), e -> {
-                updateTabDisabledState();
-            });
+            if (tab.getTabPane() != null) {
+                listener.registerChangeListener(tab.getTabPane().disabledProperty(), e -> {
+                    updateTabDisabledState();
+                });
+            }
             listener.registerChangeListener(tab.styleProperty(), e -> setStyle(tab.getStyle()));
 
             tab.getStyleClass().addListener(weakStyleClassListener);
