@@ -26,6 +26,8 @@ import atlantafx.base.theme.Styles;
 import com.techsenger.tabpanepro.core.DragAndDropContext;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.collections.FXCollections;
@@ -79,15 +81,13 @@ public class Demo extends Application {
         BASE, FLOATING, CLASSIC
     }
 
+    private enum CssTest {
+        NO_TEST, AREA_POSITION, HEADER_PADDING, AREA_MIN_HEIGHT, AREA_MIN_HEIGHT_AND_HEADER_PADDING
+    }
+
     private final DragAndDropContext context = new DragAndDropContext();
 
-    private TabPane topPane;
-
-    private TabPane bottomPane;
-
-    private TabPane rightPane;
-
-    private TabPane leftPane;
+    private final List<? extends TabPane> tabPanes = new ArrayList<>();
 
     private final SplitPane leftSplitPane = new SplitPane();
 
@@ -99,7 +99,7 @@ public class Demo extends Application {
 
     private final CheckBox atlantaFxCheckBox = new CheckBox("AtlantaFX");
 
-    private final ComboBox<Integer> tabCountComboBox =
+    private final ComboBox<Integer> tabCountsComboBox =
             new ComboBox<>(FXCollections.observableArrayList(1, 2, 3, 4, 5, 10, 15, 20, 25));
 
     private final ComboBox<TabStyle> tabStylesComboBox
@@ -111,7 +111,14 @@ public class Demo extends Application {
 
     private final CheckBox headerLastAreaCheckBox = new CheckBox("Header Last Area");
 
-    private final CheckBox headerHiddenWhenEmptyCheckBox = new CheckBox("Header Visible When Empty");
+    private final CheckBox headerVisibleWhenEmptyCheckBox = new CheckBox("Header Visible When Empty");
+
+    private final CheckBox tabScrollBarCheckBox = new CheckBox("Tab Scroll Bar");
+
+    private final Label cssTestLabel = new Label("CSS Test");
+
+    private final ComboBox<CssTest> cssTestsComboBox
+            = new ComboBox<>(FXCollections.observableArrayList(CssTest.values()));
 
     private final GridPane gridPane = new GridPane();
 
@@ -144,7 +151,10 @@ public class Demo extends Application {
             headerFirstAreaCheckBox.setDisable(!newV);
             headerStickyAreaCheckBox.setDisable(!newV);
             headerLastAreaCheckBox.setDisable(!newV);
-            headerHiddenWhenEmptyCheckBox.setDisable(!newV);
+            headerVisibleWhenEmptyCheckBox.setDisable(!newV);
+            cssTestLabel.setDisable(!newV);
+            cssTestsComboBox.setDisable(!newV);
+            tabScrollBarCheckBox.setDisable(!newV);
         });
         atlantaFxCheckBox.setSelected(true);
         atlantaFxCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
@@ -156,12 +166,12 @@ public class Demo extends Application {
         tabStylesComboBox.getSelectionModel().select(0);
         tabStylesComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
         tabStylesComboBox.getStyleClass().add(Styles.DENSE);
-        var tabCountHBox = new HBox(new Label("Tab Count"), tabCountComboBox);
+        var tabCountHBox = new HBox(new Label("Tab Count"), tabCountsComboBox);
         tabCountHBox.setSpacing(INSET);
         tabCountHBox.setAlignment(Pos.CENTER_LEFT);
-        tabCountComboBox.getStyleClass().add(Styles.DENSE);
-        tabCountComboBox.getSelectionModel().select(4);
-        tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
+        tabCountsComboBox.getStyleClass().add(Styles.DENSE);
+        tabCountsComboBox.getSelectionModel().select(4);
+        tabCountsComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
         gridPane.add(tabCountHBox, 3, 0);
 
         // row 1
@@ -174,9 +184,25 @@ public class Demo extends Application {
         headerLastAreaCheckBox.setSelected(true);
         headerLastAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
         gridPane.add(headerLastAreaCheckBox, 2, 1);
-        gridPane.add(headerHiddenWhenEmptyCheckBox,3, 1);
-        headerHiddenWhenEmptyCheckBox.setSelected(true);
-        headerHiddenWhenEmptyCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateHeaderVisibleWhenEmpty());
+        gridPane.add(headerVisibleWhenEmptyCheckBox,3, 1);
+        headerVisibleWhenEmptyCheckBox.setSelected(true);
+        headerVisibleWhenEmptyCheckBox.selectedProperty().addListener((ov, oldV, newV) ->
+                updateHeaderVisibleWhenEmpty(newV));
+
+        //row 2
+        gridPane.add(tabScrollBarCheckBox, 0, 2);
+        tabScrollBarCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateScrollBarEnabled(newV));
+
+        cssTestLabel.setMinWidth(Region.USE_PREF_SIZE);
+        var testsHBox = new HBox(cssTestLabel, cssTestsComboBox);
+        testsHBox.setSpacing(INSET);
+        testsHBox.setAlignment(Pos.CENTER_LEFT);
+        cssTestsComboBox.getSelectionModel().select(0);
+        cssTestsComboBox.valueProperty().addListener((ov, oldV, newV) -> updateCssTest(oldV, newV));
+        cssTestsComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(cssTestsComboBox, Priority.ALWAYS);
+        GridPane.setHgrow(testsHBox, Priority.ALWAYS);
+        gridPane.add(testsHBox, 2, 2, 2, 1);
 
         root.setSpacing(2 * INSET);
         root.setPadding(new Insets(INSET));
@@ -203,23 +229,43 @@ public class Demo extends Application {
         }
     }
 
-    private void updateHeaderVisibleWhenEmpty() {
-        var value = this.headerHiddenWhenEmptyCheckBox.isSelected();
-        ((TabPanePro) this.topPane).setHeaderVisibleWhenEmpty(value);
-        ((TabPanePro) this.rightPane).setHeaderVisibleWhenEmpty(value);
-        ((TabPanePro) this.bottomPane).setHeaderVisibleWhenEmpty(value);
-        ((TabPanePro) this.leftPane).setHeaderVisibleWhenEmpty(value);
+    private void updateHeaderVisibleWhenEmpty(boolean value) {
+        tabPanes.stream().map(e -> (TabPanePro) e).forEach(e -> e.setHeaderVisibleWhenEmpty(value));
+    }
+
+    private void updateScrollBarEnabled(boolean value) {
+        tabPanes.stream().map(e -> (TabPanePro) e).forEach(e -> e.setTabScrollBarEnabled(value));
+    }
+
+    private void updateCssTest(CssTest oldValue, CssTest newValue) {
+        if (oldValue != CssTest.NO_TEST) {
+            tabPanes.stream().forEach(e -> {
+                e.getStyleClass().removeAll("test", resolveTestStyleClass(oldValue));
+            });
+        }
+        if (newValue != CssTest.NO_TEST) {
+            tabPanes.stream().forEach(e -> {
+                e.getStyleClass().addAll("test", resolveTestStyleClass(newValue));
+            });
+        }
+        tabPanes.stream().forEach(e -> e.requestLayout());
+    }
+
+    private String resolveTestStyleClass(CssTest test) {
+        return test.name().toLowerCase().replace("_", "-") + "-test";
     }
 
     private void createTabPanes() {
         this.leftSplitPane.getItems().clear();
         this.rightSplitPane.getItems().clear();
-        this.topPane = createTabPane(Side.TOP);
-        this.bottomPane = createTabPane(Side.BOTTOM);
+        var topPane = createTabPane(Side.TOP);
+        var bottomPane = createTabPane(Side.BOTTOM);
         this.leftSplitPane.getItems().addAll(topPane, bottomPane);
-        this.rightPane = createTabPane(Side.RIGHT);
-        this.leftPane = createTabPane(Side.LEFT);
+        var rightPane = createTabPane(Side.RIGHT);
+        var leftPane = createTabPane(Side.LEFT);
         this.rightSplitPane.getItems().addAll(leftPane, rightPane);
+        this.tabPanes.clear();
+        this.tabPanes.addAll((List) List.of(topPane, rightPane, bottomPane, leftPane));
     }
 
     private TabPane createTabPane(Side side) {
@@ -227,7 +273,6 @@ public class Demo extends Application {
         if (proCheckBox.isSelected()) {
             TabPanePro tabPanePro = new TabPanePro(context);
             tabPane = tabPanePro;
-            tabPanePro.setHeaderVisibleWhenEmpty(this.headerHiddenWhenEmptyCheckBox.isSelected());
             var skin = (TabPaneProSkin) tabPane.getSkin();
             if (headerFirstAreaCheckBox.isSelected()) {
                 var button = new Button(null, new FontIcon(MaterialDesignD.DOTS_VERTICAL));
@@ -242,6 +287,7 @@ public class Demo extends Application {
                 button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
                 button.setOnAction(e -> {
                     addTabTo(tabPane);
+                    tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
                 });
                 var container = new StackPane(button);
                 container.getStyleClass().add("container");
@@ -261,6 +307,8 @@ public class Demo extends Application {
                 container.getStyleClass().add("container");
                 skin.getHeaderLastArea().getChildren().add(container);
             }
+            tabPanePro.setHeaderVisibleWhenEmpty(this.headerVisibleWhenEmptyCheckBox.isSelected());
+            tabPanePro.setTabScrollBarEnabled(tabScrollBarCheckBox.isSelected());
         } else {
             tabPane = new TabPane();
         }
@@ -278,15 +326,12 @@ public class Demo extends Application {
     }
 
     private void createTabs() {
-        createTabs(topPane);
-        createTabs(rightPane);
-        createTabs(bottomPane);
-        createTabs(leftPane);
+        tabPanes.forEach(e -> createTabs(e));
     }
 
     private void createTabs(TabPane tabPane) {
         tabPane.getTabs().clear();
-        for (var i = 0; i < this.tabCountComboBox.getValue(); i++) {
+        for (var i = 0; i < this.tabCountsComboBox.getValue(); i++) {
             addTabTo(tabPane);
         }
     }

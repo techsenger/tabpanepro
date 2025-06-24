@@ -66,6 +66,8 @@ public class TabPanePro extends TabPane {
 
     private final BooleanProperty headerVisibleWhenEmpty = new SimpleBooleanProperty(true);
 
+    private final BooleanProperty tabScrollBarEnabled = new SimpleBooleanProperty(false);
+
     private StackPane headersRegion;
 
     private StackPane headerArea;
@@ -127,6 +129,36 @@ public class TabPanePro extends TabPane {
      */
     public void setHeaderVisibleWhenEmpty(boolean visible) {
         headerVisibleWhenEmpty.set(visible);
+    }
+
+    /**
+     * Returns the property that controls whether a scroll bar is enabled
+     * next to the tab headers when the tabs overflow.
+     *
+     * @return the tabScrollBarEnabled property
+     */
+    public BooleanProperty tabScrollBarEnabledProperty() {
+        return tabScrollBarEnabled;
+    }
+
+    /**
+     * Returns whether a scroll bar is enabled next to the tab headers
+     * when the tabs overflow.
+     *
+     * @return {@code true} if the scroll bar is enabled, {@code false} otherwise
+     */
+    public boolean isTabScrollBarEnabled() {
+        return tabScrollBarEnabled.get();
+    }
+
+    /**
+     * Sets whether a scroll bar is enabled next to the tab headers
+     * when the tabs overflow.
+     *
+     * @param enabled {@code true} to enable the scroll bar, {@code false} to disable it
+     */
+    public void setTabScrollBarEnabled(boolean enabled) {
+        tabScrollBarEnabled.set(enabled);
     }
 
     private void initTabs() {

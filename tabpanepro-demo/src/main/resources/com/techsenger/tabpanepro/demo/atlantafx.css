@@ -28,6 +28,14 @@
     -fx-border-width: 1;
 }
 
+.scroll-bar:horizontal {
+  -fx-pref-height: 4px;
+}
+
+.scroll-bar:vertical {
+  -fx-pref-width: 4px;
+}
+
 /*
     Header first area.
 */

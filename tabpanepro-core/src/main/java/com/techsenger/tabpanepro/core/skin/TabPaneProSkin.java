@@ -26,7 +26,7 @@
 /*
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
- * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025.
+ * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -88,6 +89,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SkinBase;
 import javafx.scene.control.Tab;
@@ -199,12 +201,16 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         tabHeaderArea.setClip(tabHeaderAreaClipRect);
         getChildren().add(tabHeaderArea);
         tabHeaderArea.updateNoTabsState();
+        tabHeaderArea.updateScrollBarPresence();
 
         initializeTabListener();
         updateSelectionModel();
 
         registerChangeListener(control.selectionModelProperty(), e -> updateSelectionModel());
-        registerChangeListener(control.sideProperty(), e -> updateTabPosition());
+        registerChangeListener(control.sideProperty(), e -> {
+            updateTabPosition();
+            tabHeaderArea.updateElementsRotation();
+        });
         registerChangeListener(control.widthProperty(), e -> {
             tabHeaderArea.invalidateScrollOffset();
             clipRect.setWidth(getSkinnable().getWidth());
@@ -228,6 +234,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         initializeSwipeHandlers();
         registerChangeListener(control.headerVisibleWhenEmptyProperty(), e -> tabHeaderArea.updateNoTabsState());
+        registerChangeListener(control.tabScrollBarEnabledProperty(), e -> tabHeaderArea.updateScrollBarPresence());
+
     }
 
     /* *************************************************************************
@@ -873,6 +881,27 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private boolean dummyTabAdded = false;
 
+        /**
+        * The ScrollBar is added to the header when the user enables it, and removed when the user disables it.
+        * Its visibility depends on three factors:
+        * 1) the mouse is hovering over the header,
+        * 2) the user is currently scrolling via the thumb,
+        * 3) whether all tabs fit within the available space.
+        */
+        private final ScrollBar scrollBar = new ScrollBar();
+
+        private Node scrollBarThumb;
+
+        private boolean scrollingViaThumb;
+
+        private boolean mouseIsOverHeaderClip;
+
+        private boolean scrollBarListenerEnabled = true;
+
+        private FadeTransition showTransition;
+
+        private FadeTransition hideTransition;
+
         public TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
             setManaged(false);
@@ -982,9 +1011,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
                 Side side = getSkinnable().getSide();
                 side = side == null ? Side.TOP : side;
-                var firstAreaWidth = snapSizeX(headerFirstArea.getWidth());
-                var stickyAreaWidth = snapSizeX(headerStickyArea.getWidth());
-                var lastAreaWidth = snapSizeX(headerLastArea.getWidth());
                 switch (side) {
                     default:
                     case TOP:
@@ -992,22 +1018,92 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         // Consider vertical scroll events (dy > dx) from mouse wheel and trackpad,
                         // and horizontal scroll events from a trackpad (dx > dy)
                         dx = Math.abs(dy) > Math.abs(dx) ? dy : dx;
-                        setScrollOffset(scrollOffset + dx, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
+                        scrollTabsBy(dx);
                         break;
                     case LEFT:
                     case RIGHT:
-                        setScrollOffset(scrollOffset - dy, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
+                        scrollTabsBy(dy * -1);
                         break;
                 }
-
             });
 
-            this.headerFirstArea.getStyleClass().add("header-first-area");
+            this.headerFirstArea.getStyleClass().add("first-area");
             this.headerFirstArea.setViewOrder(-10);
-            this.headerLastArea.getStyleClass().add("header-last-area");
+            this.headerLastArea.getStyleClass().add("last-area");
             this.headerLastArea.setViewOrder(-10);
-            this.headerStickyArea.getStyleClass().add("header-sticky-area");
+            this.headerStickyArea.getStyleClass().add("sticky-area");
             this.headerStickyArea.setViewOrder(-9);
+            this.scrollBar.setUnitIncrement(10);
+            this.scrollBar.setBlockIncrement(25);
+            this.scrollBar.setViewOrder(-8);
+            this.scrollBar.setVisible(false);
+            this.scrollBar.setMin(0);
+            this.scrollBar.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (scrollBarListenerEnabled) {
+                    var delta = newVal.doubleValue() - oldVal.doubleValue();
+                    scrollTabsBy(delta * -1);
+                }
+            });
+            updateElementsRotation();
+
+            addEventHandler(MouseEvent.MOUSE_MOVED, e -> {
+                if (this.scrollBar.getParent() != null) {
+                    updateMousePosition(isMouseOverHeaderClip(e));
+                }
+            });
+            addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
+                if (this.scrollBar.getParent() != null) {
+                    updateMousePosition(false);
+                }
+            });
+
+        }
+
+        private boolean isMouseOverHeaderClip(MouseEvent e) {
+            var mouseIsOver = false;
+            var side = getSkinnable().getSide();
+            if (side == TOP || side == RIGHT) {
+                if (e.getX() >= headerFirstArea.getLayoutX() + headerFirstArea.getWidth()
+                        && e.getX() <= headerStickyArea.getLayoutX()) {
+                    mouseIsOver = true;
+                }
+            } else if (side == BOTTOM) {
+                if (e.getX() >= headerStickyArea.getLayoutX() + headerStickyArea.getWidth()
+                        && e.getX() <= headerFirstArea.getLayoutX()) {
+                    mouseIsOver = true;
+                }
+            } else if (side == LEFT) {
+                if (e.getX() <= headerFirstArea.getLayoutX()
+                        && e.getX() >= headerStickyArea.getLayoutX() + headerStickyArea.getWidth()) {
+                    mouseIsOver = true;
+                }
+            }
+            return mouseIsOver;
+        }
+
+        private void updateMousePosition(boolean mouseIsOver) {
+            if (this.mouseIsOverHeaderClip) {
+                if (!mouseIsOver) {
+                    this.mouseIsOverHeaderClip = mouseIsOver;
+                    if (!scrollingViaThumb) {
+                        requestLayout();
+                    }
+                }
+            } else {
+                if (mouseIsOver) {
+                    this.mouseIsOverHeaderClip = mouseIsOver;
+                    requestLayout();
+                }
+            }
+        }
+
+        private void scrollTabsBy(double delta) {
+            var firstAreaWidth = snapSizeX(headerFirstArea.getWidth());
+            var stickyAreaWidth = snapSizeX(headerStickyArea.getWidth());
+            var lastAreaWidth = snapSizeX(headerLastArea.getWidth());
+            // it is important to snap the delta
+            delta = getSkinnable().getSide().isHorizontal() ? snapSizeX(delta) : snapSizeY(delta);
+            setScrollOffset(scrollOffset + delta, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
         }
 
         private void updateHeaderClip(double firstAreaWidth, double stickyAreaWidth, double lastAreaWidth) {
@@ -1242,9 +1338,13 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             final double rightInset = snappedRightInset();
             final double topInset = snappedTopInset();
             final double bottomInset = snappedBottomInset();
-            double w = snapSizeX(getWidth()) - (isHorizontal() ?
+
+            double headerWidth = snapSizeX(getWidth());
+            double headerHeight = snapSizeY(getHeight());
+
+            double w = headerWidth - (isHorizontal() ?
                     leftInset + rightInset : topInset + bottomInset);
-            double h = snapSizeY(getHeight()) - (isHorizontal() ?
+            double h = headerHeight - (isHorizontal() ?
                     topInset + bottomInset : leftInset + rightInset);
             double tabBackgroundHeight = snapSizeY(prefHeight(-1));
             double headersPrefWidth = snapSizeX(headersRegion.prefWidth(-1));
@@ -1265,6 +1365,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             lastAreaHeight = Math.max(lastAreaHeight, h);
             headerLastArea.resize(lastAreaWidth, lastAreaHeight);
 
+            double scrollBarWidth = 0.0;
+            double scrollBarHeight = 0.0;
+            if (scrollBar.getParent() != null) {
+                scrollBarWidth = w - firstAreaWidth - stickyAreaWidth - lastAreaWidth;
+                scrollBarHeight = computeRegionHeight(scrollBar, -1);
+                scrollBar.resize(scrollBarWidth, scrollBarHeight);
+            }
+
             h = Math.min(h, headersPrefHeight);
 
             updateHeaderClip(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
@@ -1276,7 +1384,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             if (isFloatingStyleClass()) {
                 headerBackground.setVisible(false);
             } else {
-                headerBackground.resize(snapSizeX(getWidth()), snapSizeY(getHeight()));
+                headerBackground.resize(headerWidth, headerHeight);
                 headerBackground.setVisible(true);
             }
 
@@ -1288,6 +1396,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double lastAreaX = 0;
             Side tabPosition = getSkinnable().getSide();
             var tabsFit = tabsFit(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
+            double scrollBarX = 0;
+            double scrollBarY = 0;
 
             if (tabPosition.equals(Side.TOP)) {
                 firstAreaX = leftInset;
@@ -1304,6 +1414,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         stickyX = lastAreaX - stickyAreaWidth;
                     }
                 }
+                scrollBarX = regionX;
+                scrollBarY = topInset + firstAreaHeight - scrollBarHeight;
             } else if (tabPosition.equals(Side.RIGHT)) {
                 firstAreaX = topInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - leftInset;
@@ -1319,10 +1431,12 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         stickyX = lastAreaX - stickyAreaWidth;
                     }
                 }
+                scrollBarX = regionX;
+                scrollBarY = headerHeight - leftInset - scrollBarHeight;
             } else if (tabPosition.equals(Side.BOTTOM)) {
-                firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - leftInset;
+                firstAreaX = headerWidth - firstAreaWidth - leftInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - topInset;
-                regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - leftInset;
+                regionX = headerWidth - headersPrefWidth - firstAreaWidth - leftInset;
                 regionY = tabBackgroundHeight - headersPrefHeight - topInset;
                 lastAreaX = rightInset;
                 if (isDummyTabAdded()) {
@@ -1334,10 +1448,13 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         stickyX = lastAreaX + lastAreaWidth;
                     }
                 }
+                scrollBarX = lastAreaX + lastAreaWidth + stickyAreaWidth;
+//                scrollBarX = stickyX + stickyAreaWidth;
+                scrollBarY = tabBackgroundHeight - scrollBarHeight - topInset;
             } else if (tabPosition.equals(Side.LEFT)) {
-                firstAreaX = snapSizeX(getWidth()) - firstAreaWidth - topInset;
+                firstAreaX = headerWidth - firstAreaWidth - topInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - rightInset;
-                regionX = snapSizeX(getWidth()) - headersPrefWidth - firstAreaWidth - topInset;
+                regionX = headerWidth - headersPrefWidth - firstAreaWidth - topInset;
                 regionY = tabBackgroundHeight - headersPrefHeight - rightInset;
                 lastAreaX = bottomInset;
                 if (isDummyTabAdded()) {
@@ -1349,10 +1466,12 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         stickyX = lastAreaX + lastAreaWidth;
                     }
                 }
+                scrollBarX = firstAreaX - scrollBarWidth;
+                scrollBarY = headerHeight - scrollBarHeight - rightInset;
             }
             if (headerBackground.isVisible()) {
                 positionInArea(headerBackground, 0, 0,
-                        snapSizeX(getWidth()), snapSizeY(getHeight()), /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
+                        headerWidth, headerHeight, /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             }
 
             positionInArea(headerFirstArea, firstAreaX, allAreaY, firstAreaWidth, firstAreaHeight,
@@ -1362,7 +1481,26 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             positionInArea(headerLastArea, lastAreaX, allAreaY, lastAreaWidth, lastAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
-
+            if (scrollBar.getParent() != null) {
+                updateScrollBarMetrics(scrollBarWidth, headersPrefWidth, scrollOffset * -1);
+                // position in any case - visible or not
+                positionInArea(scrollBar, scrollBarX, scrollBarY, scrollBarWidth,
+                        scrollBarHeight,  /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
+                initScrollBarThumb();
+                if (scrollBar.isVisible()) {
+                    if (tabsFit) {
+                        // in this case, animation is not used because the width of the ScrollBar exceeds the
+                        // bounds of the visible tabs, resulting in an undesirable visual effect.
+                        hideScrollBar(false);
+                    } else if (!mouseIsOverHeaderClip && !scrollingViaThumb) {
+                        hideScrollBar(true);
+                    }
+                } else {
+                    if (!tabsFit && mouseIsOverHeaderClip) {
+                        showScrollBar();
+                    }
+                }
+            }
         }
 
         void dispose() {
@@ -1371,6 +1509,73 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 header.dispose();
             }
             tabsMenuManager.dispose();
+        }
+
+        private void updateScrollBarPresence() {
+            if (getSkinnable().isTabScrollBarEnabled()) {
+                if (this.scrollBar.getParent() == null) {
+                    getChildren().add(this.scrollBar);
+                }
+            } else {
+                if (this.scrollBar.getParent() != null) {
+                    getChildren().remove(this.scrollBar);
+                }
+            }
+        }
+
+        private void showScrollBar() {
+            if (scrollBar.getParent() != null && !this.scrollBar.isVisible() && showTransition == null) {
+                showTransition = new FadeTransition(Duration.millis(ANIMATION_SPEED * 2), scrollBar);
+                this.scrollBar.setVisible(true);
+                this.scrollBar.setOpacity(0);
+                showTransition.setToValue(1);
+                showTransition.setOnFinished(e -> showTransition = null);
+                showTransition.play();
+            }
+        }
+
+        private void hideScrollBar(boolean animationEnabled) {
+            if (!this.scrollBar.isVisible()) {
+                return;
+            }
+            if (animationEnabled) {
+                if (hideTransition == null) {
+                    hideTransition = new FadeTransition(Duration.millis(ANIMATION_SPEED * 2), scrollBar);
+                    hideTransition.setToValue(0);
+                    hideTransition.setOnFinished((e) -> {
+                        this.scrollBar.setVisible(false);
+                        hideTransition = null;
+                    });
+                    hideTransition.play();
+                }
+            } else {
+                this.scrollBar.setVisible(false);
+            }
+        }
+
+        private void updateScrollBarMetrics(double scrollBarWidth, double regionWidth, double offset) {
+            this.scrollBarListenerEnabled = false;
+            double max = Math.max(0, regionWidth - scrollBarWidth);
+            scrollBar.setMax(max);
+            double visibleAmount = (scrollBarWidth / regionWidth) * max;
+            scrollBar.setVisibleAmount(visibleAmount);
+            scrollBar.setValue(Math.min(offset, max));
+            this.scrollBarListenerEnabled = true;
+        }
+
+        private void initScrollBarThumb() {
+            if (scrollBarThumb == null && scrollBar.getScene() != null) {
+                scrollBarThumb = scrollBar.lookup(".thumb");
+                if (scrollBarThumb != null) {
+                    scrollBarThumb.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> scrollingViaThumb = true);
+                    scrollBarThumb.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
+                        scrollingViaThumb = false;
+                        if (!mouseIsOverHeaderClip) {
+                            requestLayout();
+                        }
+                    });
+                }
+            }
         }
 
         private double computeRegionWidth(Region region, double height) {
@@ -1436,6 +1641,25 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             dummyTabAdded = false;
         }
 
+        private void updateElementsRotation() {
+            var side = getSkinnable().getSide();
+            switch (side) {
+                case TOP:
+                    scrollBar.setRotate(0);
+                    break;
+                case RIGHT:
+                    scrollBar.setRotate(0);
+                    break;
+                case BOTTOM:
+                    scrollBar.setRotate(180);
+                    break;
+                case LEFT:
+                    scrollBar.setRotate(180);
+                    break;
+                default:
+                    throw new AssertionError();
+            }
+        }
 
     } /* End TabHeaderArea */
 

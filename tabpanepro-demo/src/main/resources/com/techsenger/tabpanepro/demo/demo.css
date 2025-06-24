@@ -27,15 +27,15 @@
     Header first area.
 */
 
-.tab-pane-pro > .tab-header-area > .header-first-area > .container {
+.tab-pane-pro > .tab-header-area > .first-area > .container {
     -fx-padding: 0 4 0 4;
 }
 
-.tab-pane-pro > .tab-header-area > .header-first-area > .container > .button {
+.tab-pane-pro > .tab-header-area > .first-area > .container > .button {
     -fx-padding: 2;
 }
 
-.tab-pane-pro:bottom > .tab-header-area > .header-first-area > .container {
+.tab-pane-pro:bottom > .tab-header-area > .first-area > .container {
     -fx-rotate: 180;
 }
 
@@ -43,20 +43,20 @@
     Header sticky area.
 */
 
-.tab-pane-pro > .tab-header-area > .header-sticky-area > .container {
+.tab-pane-pro > .tab-header-area > .sticky-area > .container {
     -fx-padding: 0 0 0 4;
     -fx-spacing: 4;
 }
 
-.tab-pane-pro > .tab-header-area > .header-sticky-area > .container > .button {
+.tab-pane-pro > .tab-header-area > .sticky-area > .container > .button {
     -fx-padding: 2;
 }
 
-.tab-pane-pro:bottom > .tab-header-area > .header-sticky-area > .container {
+.tab-pane-pro:bottom > .tab-header-area > .sticky-area > .container {
     -fx-rotate: 180;
 }
 
-.tab-pane-pro:left > .tab-header-area > .header-sticky-area > .container {
+.tab-pane-pro:left > .tab-header-area > .sticky-area > .container {
     -fx-scale-y: -1;
     -fx-rotate: 180;
 }
@@ -65,76 +65,62 @@
     Header last area.
 */
 
-.tab-pane-pro > .tab-header-area > .header-last-area > .container {
+.tab-pane-pro > .tab-header-area > .last-area > .container {
     -fx-padding: 0 4 0 4;
     -fx-spacing: 4;
 }
 
-.tab-pane-pro > .tab-header-area > .header-last-area > .container > .button {
+.tab-pane-pro > .tab-header-area > .last-area > .container > .button {
     -fx-padding: 2;
 }
 
-.tab-pane-pro:bottom > .tab-header-area > .header-last-area > .container {
+.tab-pane-pro:bottom > .tab-header-area > .last-area > .container {
     -fx-rotate: 180;
 }
 
-.tab-pane-pro:left > .tab-header-area > .header-last-area > .container {
+.tab-pane-pro:left > .tab-header-area > .last-area > .container {
     -fx-scale-y: -1;
     -fx-rotate: 180;
 }
 
 /*
-    For tests only.
+    Tests
 */
 
-/*.tab-pane-pro > .tab-header-area > .headers-region {
-    -fx-background-color: red;
-}*/
-
-/*.tab-pane-pro:top > .tab-header-area {
-    -fx-padding: 0 50 0 25;
-}
-
-.tab-pane-pro:bottom > .tab-header-area {
-    -fx-padding: 0 25 0 50;
-}
-
-.tab-pane-pro:left > .tab-header-area {
-    -fx-padding: 25 0 50 0;
-}
-
-.tab-pane-pro:right > .tab-header-area {
-    -fx-padding: 50 0 25 0;
-}*/
-
-/*.tab-pane-pro > .tab-header-area {
-    -fx-padding: 5 10 15 20;
-}
-
-.tab-pane-pro > .tab-header-area > .header-first-area {
-    -fx-padding: 5;
+.tab-pane-pro.test > .tab-header-area > .first-area {
     -fx-background-color: red;
 }
 
-.tab-pane-pro > .tab-header-area > .header-first-area > .container {
+.tab-pane-pro.test > .tab-header-area > .first-area > .container {
     -fx-background-color: blue;
 }
 
-.tab-pane-pro > .tab-header-area > .header-sticky-area {
-    -fx-padding: 5;
+.tab-pane-pro.test > .tab-header-area > .sticky-area {
     -fx-background-color: orange;
 }
 
-.tab-pane-pro > .tab-header-area > .header-sticky-area > .container {
+.tab-pane-pro.test > .tab-header-area > .sticky-area > .container {
     -fx-background-color: purple;
 }
 
-.tab-pane-pro > .tab-header-area > .header-last-area {
-    -fx-padding: 5;
+.tab-pane-pro.test > .tab-header-area > .last-area {
     -fx-background-color: green;
 }
 
-.tab-pane-pro > .tab-header-area > .header-last-area > .container {
+.tab-pane-pro.test > .tab-header-area > .last-area > .container {
     -fx-background-color: blue;
-}*/
+}
+
+.tab-pane-pro.area-min-height-test > .tab-header-area > .first-area,
+.tab-pane-pro.area-min-height-and-header-padding-test > .tab-header-area > .first-area {
+    -fx-min-height: 60px;
+}
+
+.tab-pane-pro.header-padding-test > .tab-header-area,
+.tab-pane-pro.area-min-height-and-header-padding-test > .tab-header-area {
+    -fx-padding: 5 10 15 20;
+}
+
+
+
 
