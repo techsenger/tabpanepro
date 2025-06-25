@@ -32,7 +32,7 @@
     Header first area.
 */
 
-.tab-pane > .tab-header-area > .header-first-area > .container > .button .ikonli-font-icon {
+.tab-pane > .tab-header-area > .first-area > .container > .button .ikonli-font-icon {
     -fx-icon-color: -fx-text-base-color;
 }
 
@@ -40,7 +40,7 @@
     Header sticky area.
 */
 
-.tab-pane > .tab-header-area > .header-sticky-area > .container > .button .ikonli-font-icon {
+.tab-pane > .tab-header-area > .sticky-area > .container > .button .ikonli-font-icon {
     -fx-icon-color: -fx-text-base-color;
 }
 
@@ -48,6 +48,6 @@
     Header last area.
 */
 
-.tab-pane > .tab-header-area > .header-last-area > .container > .button .ikonli-font-icon {
+.tab-pane > .tab-header-area > .last-area > .container > .button .ikonli-font-icon {
     -fx-icon-color: -fx-text-base-color;
 }

@@ -40,7 +40,7 @@
     Header first area.
 */
 
-.tab-pane.classic > .tab-header-area > .header-first-area > .container > .button:hover {
+.tab-pane.classic > .tab-header-area > .first-area > .container > .button:hover {
     -fx-background-color: -color-tab-bg-selected;
 }
 
@@ -48,7 +48,7 @@
     Header sticky area.
 */
 
-.tab-pane.classic > .tab-header-area > .header-sticky-area > .container > .button:hover {
+.tab-pane.classic > .tab-header-area > .sticky-area > .container > .button:hover {
     -fx-background-color: -color-tab-bg-selected;
 }
 
@@ -57,7 +57,7 @@
     Header last area.
 */
 
-.tab-pane.classic > .tab-header-area > .header-last-area > .container > .button:hover {
+.tab-pane.classic > .tab-header-area > .last-area > .container > .button:hover {
     -fx-background-color: -color-tab-bg-selected;
 }
 
