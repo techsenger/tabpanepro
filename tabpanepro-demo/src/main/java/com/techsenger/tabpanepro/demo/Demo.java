@@ -81,6 +81,10 @@ public class Demo extends Application {
         BASE, FLOATING, CLASSIC
     }
 
+    private enum TabScrollBarStyle {
+        ABOVE_TABS, ABOVE_TABS_AND_STICKY, BELOW_TABS, BELOW_TABS_AND_STICKY
+    }
+
     private enum CssTest {
         NO_TEST, AREA_POSITION, HEADER_PADDING, AREA_MIN_HEIGHT, AREA_MIN_HEIGHT_AND_HEADER_PADDING
     }
@@ -97,12 +101,12 @@ public class Demo extends Application {
 
     private final CheckBox proCheckBox = new CheckBox("Pro");
 
-    private final CheckBox atlantaFxCheckBox = new CheckBox("AtlantaFX");
+    private final CheckBox cupertinoDarkCheckBox = new CheckBox("Cupertino Dark");
 
-    private final ComboBox<Integer> tabCountsComboBox =
+    private final ComboBox<Integer> tabCountComboBox =
             new ComboBox<>(FXCollections.observableArrayList(1, 2, 3, 4, 5, 10, 15, 20, 25));
 
-    private final ComboBox<TabStyle> tabStylesComboBox
+    private final ComboBox<TabStyle> tabStyleComboBox
             = new ComboBox<>(FXCollections.observableArrayList(TabStyle.values()));
 
     private final CheckBox headerFirstAreaCheckBox = new CheckBox("Header First Area");
@@ -113,11 +117,16 @@ public class Demo extends Application {
 
     private final CheckBox headerVisibleWhenEmptyCheckBox = new CheckBox("Header Visible When Empty");
 
-    private final CheckBox tabScrollBarCheckBox = new CheckBox("Tab Scroll Bar");
+    private final CheckBox tabScrollBarCheckBox = new CheckBox("Tab ScrollBar");
+
+    private final Label tabScrollBarStyleLabel = new Label("Tab ScrollBar Style");
+
+    private final ComboBox<TabScrollBarStyle> tabScrollBarStyleComboBox
+            = new ComboBox<>(FXCollections.observableArrayList(TabScrollBarStyle.values()));
 
     private final Label cssTestLabel = new Label("CSS Test");
 
-    private final ComboBox<CssTest> cssTestsComboBox
+    private final ComboBox<CssTest> cssTestComboBox
             = new ComboBox<>(FXCollections.observableArrayList(CssTest.values()));
 
     private final GridPane gridPane = new GridPane();
@@ -153,25 +162,27 @@ public class Demo extends Application {
             headerLastAreaCheckBox.setDisable(!newV);
             headerVisibleWhenEmptyCheckBox.setDisable(!newV);
             cssTestLabel.setDisable(!newV);
-            cssTestsComboBox.setDisable(!newV);
+            cssTestComboBox.setDisable(!newV);
             tabScrollBarCheckBox.setDisable(!newV);
+            tabScrollBarStyleLabel.setDisable(!newV);
+            tabScrollBarStyleComboBox.setDisable(!newV);
         });
-        atlantaFxCheckBox.setSelected(true);
-        atlantaFxCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
-        gridPane.add(atlantaFxCheckBox, 1, 0);
-        var tabStylesHBox = new HBox(new Label("Tab Style"), tabStylesComboBox);
+        cupertinoDarkCheckBox.setSelected(true);
+        cupertinoDarkCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
+        gridPane.add(cupertinoDarkCheckBox, 1, 0);
+        var tabStylesHBox = new HBox(new Label("Tab Style"), tabStyleComboBox);
         tabStylesHBox.setSpacing(INSET);
         tabStylesHBox.setAlignment(Pos.CENTER_LEFT);
         gridPane.add(tabStylesHBox, 2, 0);
-        tabStylesComboBox.getSelectionModel().select(0);
-        tabStylesComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        tabStylesComboBox.getStyleClass().add(Styles.DENSE);
-        var tabCountHBox = new HBox(new Label("Tab Count"), tabCountsComboBox);
+        tabStyleComboBox.getSelectionModel().select(0);
+        tabStyleComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        tabStyleComboBox.getStyleClass().add(Styles.DENSE);
+        var tabCountHBox = new HBox(new Label("Tab Count"), tabCountComboBox);
         tabCountHBox.setSpacing(INSET);
         tabCountHBox.setAlignment(Pos.CENTER_LEFT);
-        tabCountsComboBox.getStyleClass().add(Styles.DENSE);
-        tabCountsComboBox.getSelectionModel().select(4);
-        tabCountsComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
+        tabCountComboBox.getStyleClass().add(Styles.DENSE);
+        tabCountComboBox.getSelectionModel().select(4);
+        tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
         gridPane.add(tabCountHBox, 3, 0);
 
         // row 1
@@ -192,15 +203,23 @@ public class Demo extends Application {
         //row 2
         gridPane.add(tabScrollBarCheckBox, 0, 2);
         tabScrollBarCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateScrollBarEnabled(newV));
+        tabScrollBarStyleLabel.setMinWidth(Region.USE_PREF_SIZE);
+        tabScrollBarStyleComboBox.getSelectionModel().select(2);
+        tabScrollBarStyleComboBox.valueProperty()
+                .addListener((ov, oldV, newV) -> updateTabScrollBarStyle(oldV, newV));
+        var scrollBarStyleHBox = new HBox(tabScrollBarStyleLabel, tabScrollBarStyleComboBox);
+        scrollBarStyleHBox.setSpacing(INSET);
+        scrollBarStyleHBox.setAlignment(Pos.CENTER_LEFT);
+        gridPane.add(scrollBarStyleHBox, 1, 2);
 
         cssTestLabel.setMinWidth(Region.USE_PREF_SIZE);
-        var testsHBox = new HBox(cssTestLabel, cssTestsComboBox);
+        var testsHBox = new HBox(cssTestLabel, cssTestComboBox);
         testsHBox.setSpacing(INSET);
         testsHBox.setAlignment(Pos.CENTER_LEFT);
-        cssTestsComboBox.getSelectionModel().select(0);
-        cssTestsComboBox.valueProperty().addListener((ov, oldV, newV) -> updateCssTest(oldV, newV));
-        cssTestsComboBox.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(cssTestsComboBox, Priority.ALWAYS);
+        cssTestComboBox.getSelectionModel().select(0);
+        cssTestComboBox.valueProperty().addListener((ov, oldV, newV) -> updateCssTest(oldV, newV));
+        cssTestComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(cssTestComboBox, Priority.ALWAYS);
         GridPane.setHgrow(testsHBox, Priority.ALWAYS);
         gridPane.add(testsHBox, 2, 2, 2, 1);
 
@@ -217,14 +236,14 @@ public class Demo extends Application {
 
     private void updateUserAgentStylesheet() {
         var modenaCss = Demo.class.getResource("modena.css").toExternalForm();
-        var atlantaCss = Demo.class.getResource("atlantafx.css").toExternalForm();
-        if (atlantaFxCheckBox.isSelected()) {
+        var cupertinoDarkCss = Demo.class.getResource("cupertino-dark.css").toExternalForm();
+        if (cupertinoDarkCheckBox.isSelected()) {
             Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet());
             this.root.getScene().getStylesheets().remove(modenaCss);
-            this.root.getScene().getStylesheets().add(atlantaCss);
+            this.root.getScene().getStylesheets().add(cupertinoDarkCss);
         } else {
             Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
-            this.root.getScene().getStylesheets().remove(atlantaCss);
+            this.root.getScene().getStylesheets().remove(cupertinoDarkCss);
             this.root.getScene().getStylesheets().add(modenaCss);
         }
     }
@@ -235,6 +254,21 @@ public class Demo extends Application {
 
     private void updateScrollBarEnabled(boolean value) {
         tabPanes.stream().map(e -> (TabPanePro) e).forEach(e -> e.setTabScrollBarEnabled(value));
+    }
+
+    private void updateTabScrollBarStyle(TabScrollBarStyle oldStyle, TabScrollBarStyle newStyle) {
+        if (oldStyle != null) {
+            var styleClass = resolveTabScrollBarStyleClass(oldStyle);
+            tabPanes.stream().forEach(e -> e.getStyleClass().remove(styleClass));
+        }
+        if (newStyle != null) {
+            var styleClass = resolveTabScrollBarStyleClass(newStyle);
+            tabPanes.stream().forEach(e -> e.getStyleClass().add(styleClass));
+        }
+    }
+
+    private String resolveTabScrollBarStyleClass(TabScrollBarStyle style) {
+        return "tsb-" + style.name().toLowerCase().replace("_", "-");
     }
 
     private void updateCssTest(CssTest oldValue, CssTest newValue) {
@@ -266,6 +300,8 @@ public class Demo extends Application {
         this.rightSplitPane.getItems().addAll(leftPane, rightPane);
         this.tabPanes.clear();
         this.tabPanes.addAll((List) List.of(topPane, rightPane, bottomPane, leftPane));
+        updateCssTest(CssTest.NO_TEST, cssTestComboBox.getValue());
+        updateTabScrollBarStyle(null, tabScrollBarStyleComboBox.getValue());
     }
 
     private TabPane createTabPane(Side side) {
@@ -313,9 +349,9 @@ public class Demo extends Application {
             tabPane = new TabPane();
         }
 
-        if (tabStylesComboBox.getValue() == TabStyle.CLASSIC) {
+        if (tabStyleComboBox.getValue() == TabStyle.CLASSIC) {
             tabPane.getStyleClass().add(Styles.TABS_CLASSIC);
-        } else if (tabStylesComboBox.getValue() == TabStyle.FLOATING) {
+        } else if (tabStyleComboBox.getValue() == TabStyle.FLOATING) {
             tabPane.getStyleClass().add(Styles.TABS_FLOATING);
         }
 
@@ -331,7 +367,7 @@ public class Demo extends Application {
 
     private void createTabs(TabPane tabPane) {
         tabPane.getTabs().clear();
-        for (var i = 0; i < this.tabCountsComboBox.getValue(); i++) {
+        for (var i = 0; i < this.tabCountComboBox.getValue(); i++) {
             addTabTo(tabPane);
         }
     }

@@ -26,7 +26,8 @@
 /*
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
- * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025.
+ * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
+ * June 25, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -89,7 +90,6 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
-import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SkinBase;
 import javafx.scene.control.Tab;
@@ -116,7 +116,6 @@ import javafx.util.Pair;
  * Default skin implementation for the {@link TabPanePro} control.
  *
  * @see TabPanePro
- * @since 9
  */
 public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
@@ -174,7 +173,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      **************************************************************************/
 
     /**
-     * Creates a new TabPaneSkin instance, installing the necessary child
+     * Creates a new TabPaneProSkin instance, installing the necessary child
      * nodes into the Control {@link Control#getChildren() children} list, as
      * well as the necessary input mappings for handling key, mouse, etc events.
      *
@@ -888,7 +887,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         * 2) the user is currently scrolling via the thumb,
         * 3) whether all tabs fit within the available space.
         */
-        private final ScrollBar scrollBar = new ScrollBar();
+        private final TabScrollBar scrollBar = new TabScrollBar();
 
         private Node scrollBarThumb;
 
@@ -1415,7 +1414,19 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     }
                 }
                 scrollBarX = regionX;
-                scrollBarY = topInset + firstAreaHeight - scrollBarHeight;
+                if (this.scrollBar.getHeaderPosition() == TabScrollBar.HeaderPosition.ABOVE_TABS) {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = 0;
+                    } else {
+                        scrollBarY = topInset;
+                    }
+                } else {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = headerHeight - scrollBarHeight;
+                    } else {
+                        scrollBarY = topInset + firstAreaHeight - scrollBarHeight;
+                    }
+                }
             } else if (tabPosition.equals(Side.RIGHT)) {
                 firstAreaX = topInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - leftInset;
@@ -1432,7 +1443,19 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     }
                 }
                 scrollBarX = regionX;
-                scrollBarY = headerHeight - leftInset - scrollBarHeight;
+                if (this.scrollBar.getHeaderPosition() == TabScrollBar.HeaderPosition.ABOVE_TABS) {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = 0;
+                    } else {
+                        scrollBarY = rightInset;
+                    }
+                } else {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = headerHeight - scrollBarHeight;
+                    } else {
+                        scrollBarY = headerHeight - leftInset - scrollBarHeight;
+                    }
+                }
             } else if (tabPosition.equals(Side.BOTTOM)) {
                 firstAreaX = headerWidth - firstAreaWidth - leftInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - topInset;
@@ -1449,8 +1472,19 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     }
                 }
                 scrollBarX = lastAreaX + lastAreaWidth + stickyAreaWidth;
-//                scrollBarX = stickyX + stickyAreaWidth;
-                scrollBarY = tabBackgroundHeight - scrollBarHeight - topInset;
+                if (this.scrollBar.getHeaderPosition() == TabScrollBar.HeaderPosition.ABOVE_TABS) {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = tabBackgroundHeight - scrollBarHeight;
+                    } else {
+                        scrollBarY = tabBackgroundHeight - scrollBarHeight - topInset;
+                    }
+                } else {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = 0;
+                    } else {
+                        scrollBarY = topInset;
+                    }
+                }
             } else if (tabPosition.equals(Side.LEFT)) {
                 firstAreaX = headerWidth - firstAreaWidth - topInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - rightInset;
@@ -1467,7 +1501,19 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     }
                 }
                 scrollBarX = firstAreaX - scrollBarWidth;
-                scrollBarY = headerHeight - scrollBarHeight - rightInset;
+                if (this.scrollBar.getHeaderPosition() == TabScrollBar.HeaderPosition.ABOVE_TABS) {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = 0;
+                    } else {
+                        scrollBarY = leftInset;
+                    }
+                } else {
+                    if (this.scrollBar.isStickToEdge()) {
+                        scrollBarY = headerHeight - scrollBarHeight;
+                    } else {
+                        scrollBarY = headerHeight - scrollBarHeight - rightInset;
+                    }
+                }
             }
             if (headerBackground.isVisible()) {
                 positionInArea(headerBackground, 0, 0,

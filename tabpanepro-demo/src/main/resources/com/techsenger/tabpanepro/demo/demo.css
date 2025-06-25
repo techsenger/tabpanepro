@@ -84,6 +84,31 @@
 }
 
 /*
+    Tab Scroll Bar
+
+*/
+
+.tab-pane-pro.tsb-above-tabs > .tab-header-area > .tab-scroll-bar {
+    -tpp-header-position: above_tabs;
+    -tpp-stick-to-edge: false;
+}
+
+.tab-pane-pro.tsb-above-tabs-and-sticky > .tab-header-area > .tab-scroll-bar {
+    -tpp-header-position: above_tabs;
+    -tpp-stick-to-edge: true;
+}
+
+.tab-pane-pro.tsb-below-tabs > .tab-header-area > .tab-scroll-bar {
+    -tpp-header-position: below_tabs;
+    -tpp-stick-to-edge: false;
+}
+
+.tab-pane-pro.tsb-below-tabs-and-sticky > .tab-header-area > .tab-scroll-bar {
+    -tpp-header-position: below_tabs;
+    -tpp-stick-to-edge: true;
+}
+
+/*
     Tests
 */
 
