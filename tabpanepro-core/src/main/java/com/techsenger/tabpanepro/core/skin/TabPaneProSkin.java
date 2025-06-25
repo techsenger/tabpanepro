@@ -245,15 +245,15 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      *                                                                         *
      **************************************************************************/
 
-    public StackPane getHeaderFirstArea() {
+    public StackPane getTabHeaderFirstArea() {
         return tabHeaderArea.headerFirstArea;
     }
 
-    public StackPane getHeaderLastArea() {
+    public StackPane getTabHeaderLastArea() {
         return tabHeaderArea.headerLastArea;
     }
 
-    public StackPane getHeaderStickyArea() {
+    public StackPane getTabHeaderStickyArea() {
         return tabHeaderArea.headerStickyArea;
     }
 

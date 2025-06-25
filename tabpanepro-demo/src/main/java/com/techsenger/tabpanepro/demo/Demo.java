@@ -314,14 +314,14 @@ public class Demo extends Application {
             tabPane = tabPanePro;
             var skin = (TabPaneProSkin) tabPane.getSkin();
             if (headerFirstAreaCheckBox.isSelected()) {
-                skin.getHeaderFirstArea().getChildren().add(createFirstAreaContainer());
+                skin.getTabHeaderFirstArea().getChildren().add(createFirstAreaContainer());
             }
             if (headerStickyAreaCheckBox.isSelected()) {
 
-                skin.getHeaderStickyArea().getChildren().add(createStickyAreaContainer(tabPane));
+                skin.getTabHeaderStickyArea().getChildren().add(createStickyAreaContainer(tabPane));
             }
             if (headerLastAreaCheckBox.isSelected()) {
-                skin.getHeaderLastArea().getChildren().add(createLastAreaContainer(skin));
+                skin.getTabHeaderLastArea().getChildren().add(createLastAreaContainer(skin));
             }
             tabPanePro.setHeaderVisibleWhenEmpty(this.headerVisibleWhenEmptyCheckBox.isSelected());
             tabPanePro.setTabScrollBarEnabled(tabScrollBarCheckBox.isSelected());
