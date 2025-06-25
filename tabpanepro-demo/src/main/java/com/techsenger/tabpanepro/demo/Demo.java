@@ -28,13 +28,17 @@ import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -53,7 +57,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignD;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignM;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignP;
@@ -182,7 +188,7 @@ public class Demo extends Application {
         tabCountHBox.setAlignment(Pos.CENTER_LEFT);
         tabCountComboBox.getStyleClass().add(Styles.DENSE);
         tabCountComboBox.getSelectionModel().select(4);
-        tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabs());
+        tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> tabPanes.forEach(e -> createTabs(e)));
         gridPane.add(tabCountHBox, 3, 0);
 
         // row 1
@@ -311,37 +317,14 @@ public class Demo extends Application {
             tabPane = tabPanePro;
             var skin = (TabPaneProSkin) tabPane.getSkin();
             if (headerFirstAreaCheckBox.isSelected()) {
-                var button = new Button(null, new FontIcon(MaterialDesignD.DOTS_VERTICAL));
-                button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-                var container = new StackPane(button);
-                container.getStyleClass().add("container");
-                container.setMaxHeight(Region.USE_PREF_SIZE);
-                skin.getHeaderFirstArea().getChildren().add(container);
+                skin.getHeaderFirstArea().getChildren().add(createFirstAreaContainer());
             }
             if (headerStickyAreaCheckBox.isSelected()) {
-                var button = new Button(null, new FontIcon(MaterialDesignP.PLUS));
-                button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-                button.setOnAction(e -> {
-                    addTabTo(tabPane);
-                    tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
-                });
-                var container = new StackPane(button);
-                container.getStyleClass().add("container");
-                container.setMaxHeight(Region.USE_PREF_SIZE);
-                skin.getHeaderStickyArea().getChildren().add(container);
+
+                skin.getHeaderStickyArea().getChildren().add(createStickyAreaContainer(tabPane));
             }
             if (headerLastAreaCheckBox.isSelected()) {
-                var tabsMenuButton = new Button(null, new FontIcon(MaterialDesignM.MENU_DOWN));
-                tabsMenuButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-                tabsMenuButton.visibleProperty().bind(skin.tabsMenuRequiredProperty());
-                tabsMenuButton.setOnAction(e -> skin.showTabsMenu(tabsMenuButton));
-
-                var minimizeButton = new Button(null, new FontIcon(MaterialDesignM.MINUS));
-                minimizeButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-                var container = new HBox(tabsMenuButton, minimizeButton);
-                container.setMaxHeight(Region.USE_PREF_SIZE);
-                container.getStyleClass().add("container");
-                skin.getHeaderLastArea().getChildren().add(container);
+                skin.getHeaderLastArea().getChildren().add(createLastAreaContainer(skin));
             }
             tabPanePro.setHeaderVisibleWhenEmpty(this.headerVisibleWhenEmptyCheckBox.isSelected());
             tabPanePro.setTabScrollBarEnabled(tabScrollBarCheckBox.isSelected());
@@ -361,8 +344,70 @@ public class Demo extends Application {
         return tabPane;
     }
 
-    private void createTabs() {
-        tabPanes.forEach(e -> createTabs(e));
+    private Node createFirstAreaContainer() {
+        var button = new Button(null, new FontIcon(MaterialDesignD.DOTS_VERTICAL));
+        button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+        var container = new StackPane(button);
+        container.getStyleClass().add("container");
+        container.setMaxHeight(Region.USE_PREF_SIZE);
+        return container;
+    }
+
+    private Node createStickyAreaContainer(TabPane tabPane) {
+        var button = new Button(null, new FontIcon(MaterialDesignP.PLUS));
+        button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+        button.setOnAction(e -> {
+            addTabTo(tabPane);
+            tabPane.getSelectionModel().select(tabPane.getTabs().size() - 1);
+        });
+        var container = new StackPane(button);
+        container.getStyleClass().add("container");
+        container.setMaxHeight(Region.USE_PREF_SIZE);
+        return container;
+    }
+
+    private Node createLastAreaContainer(TabPaneProSkin skin) {
+        var tabsMenuButton = new Button(null, new FontIcon(MaterialDesignM.MENU_DOWN));
+        tabsMenuButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+        tabsMenuButton.visibleProperty().bind(skin.headersRegionOverflowedProperty());
+        tabsMenuButton.setOnAction(e -> skin.showTabsMenu(tabsMenuButton));
+
+        var leftTimeline = new Timeline(new KeyFrame(Duration.millis(25), e -> skin.scrollTabHeadersBy(10)));
+        leftTimeline.setCycleCount(Timeline.INDEFINITE);
+        var scrollLeftButton = new Button(null, new FontIcon(MaterialDesignC.CHEVRON_LEFT));
+        var leftEdge = Bindings.createBooleanBinding(
+                () -> skin.getHeadersRegionOffset() >= 0 - 0.000001,
+                skin.headersRegionOffsetProperty());
+        scrollLeftButton.disableProperty().bind(leftEdge.or(skin.headersRegionOverflowedProperty().not()));
+        scrollLeftButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+        scrollLeftButton.setOnMousePressed(e -> leftTimeline.play());
+        scrollLeftButton.setOnMouseReleased(e -> leftTimeline.stop());
+
+        var rightTimeline = new Timeline(new KeyFrame(Duration.millis(25), e -> skin.scrollTabHeadersBy(-10)));
+        rightTimeline.setCycleCount(Timeline.INDEFINITE);
+        var scrollRightButton = new Button(null, new FontIcon(MaterialDesignC.CHEVRON_RIGHT));
+        var rightEdge = Bindings.createBooleanBinding(
+                () -> {
+                    // If snapToPixel is true, then all values (including the offset) are snapped
+                    return skin.getHeadersRegionWidth() - 0.000001 <=  skin.getHeadersClipWidth()
+                        + Math.abs(skin.getHeadersRegionOffset());
+                },
+                skin.headersRegionOffsetProperty(),
+                skin.headersRegionWidthProperty(),
+                skin.headersClipWidthProperty());
+        scrollRightButton.disableProperty().bind(rightEdge.or(skin.headersRegionOverflowedProperty().not()));
+
+        scrollRightButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+        scrollRightButton.setOnMousePressed(e -> rightTimeline.play());
+        scrollRightButton.setOnMouseReleased(e -> rightTimeline.stop());
+
+        var minimizeButton = new Button(null, new FontIcon(MaterialDesignM.MINUS));
+        minimizeButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+
+        var container = new HBox(tabsMenuButton, scrollLeftButton, scrollRightButton, minimizeButton);
+        container.setMaxHeight(Region.USE_PREF_SIZE);
+        container.getStyleClass().add("container");
+        return container;
     }
 
     private void createTabs(TabPane tabPane) {
@@ -378,7 +423,6 @@ public class Demo extends Application {
         var tab = new Tab(side + " " + index);
         var content = new VBox();
         content.setSpacing(INSET);
-        //content.setStyle("-fx-background-color: -color-bg-subtle");
         content.setPadding(new Insets(INSET));
         content.getChildren().add(new Label(side + " " + index));
         var textField = new TextField(SHORT_TEXT);

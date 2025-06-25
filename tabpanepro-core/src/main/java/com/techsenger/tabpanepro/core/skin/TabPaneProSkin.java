@@ -57,6 +57,8 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
@@ -259,12 +261,40 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         this.tabHeaderArea.tabsMenuManager.showPopupMenu(anchor);
     }
 
-    public ReadOnlyBooleanProperty tabsMenuRequiredProperty() {
-        return this.tabHeaderArea.tabsMenuRequired.getReadOnlyProperty();
+    public ReadOnlyBooleanProperty headersRegionOverflowedProperty() {
+        return this.tabHeaderArea.headersRegionOverflowed.getReadOnlyProperty();
     }
 
-    public boolean isTabsMenuRequired() {
-        return this.tabHeaderArea.tabsMenuRequired.get();
+    public boolean isHeadersRegionOverflowed() {
+        return this.tabHeaderArea.headersRegionOverflowed.get();
+    }
+
+    public ReadOnlyDoubleProperty headersRegionWidthProperty() {
+        return this.tabHeaderArea.headersRegion.widthProperty();
+    }
+
+    public double getHeadersRegionWidth() {
+        return this.tabHeaderArea.headersRegion.widthProperty().get();
+    }
+
+    public ReadOnlyDoubleProperty headersRegionOffsetProperty() {
+        return this.tabHeaderArea.scrollOffset;
+    }
+
+    public double getHeadersRegionOffset() {
+        return this.tabHeaderArea.scrollOffset.get();
+    }
+
+    public ReadOnlyDoubleProperty headersClipWidthProperty() {
+        return this.tabHeaderArea.headerClip.widthProperty();
+    }
+
+    public double getHeadersClipWidth() {
+        return this.tabHeaderArea.headerClip.widthProperty().get();
+    }
+
+    public void scrollTabHeadersBy(double delta) {
+        this.tabHeaderArea.scrollTabsBy(delta);
     }
 
     /* *************************************************************************
@@ -867,7 +897,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private boolean measureClosingTabs = false;
 
-        private double scrollOffset;
+        private final ReadOnlyDoubleWrapper scrollOffset = new ReadOnlyDoubleWrapper();
+
         private boolean scrollOffsetDirty = true;
 
         private final StackPane headerFirstArea = new StackPane();
@@ -876,7 +907,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private final StackPane headerStickyArea = new StackPane();
 
-        private final ReadOnlyBooleanWrapper tabsMenuRequired = new ReadOnlyBooleanWrapper(false);
+        private final ReadOnlyBooleanWrapper headersRegionOverflowed = new ReadOnlyBooleanWrapper(false);
 
         private boolean dummyTabAdded = false;
 
@@ -1102,7 +1133,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             var lastAreaWidth = snapSizeX(headerLastArea.getWidth());
             // it is important to snap the delta
             delta = getSkinnable().getSide().isHorizontal() ? snapSizeX(delta) : snapSizeY(delta);
-            setScrollOffset(scrollOffset + delta, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
+            setScrollOffset(scrollOffset.get() + delta, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
         }
 
         private void updateHeaderClip(double firstAreaWidth, double stickyAreaWidth, double lastAreaWidth) {
@@ -1186,7 +1217,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double visibleWidth = firstTabIndent() + firstAreaWidth + headerPrefWidth + stickyAreaWidth
                     + lastAreaWidth + lastTabIndent();
             var result = visibleWidth < getWidth();
-            tabsMenuRequired.set(!result);
+            headersRegionOverflowed.set(!result);
             return result;
         }
 
@@ -1227,7 +1258,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         public double getScrollOffset() {
-            return scrollOffset;
+            return scrollOffset.get();
         }
 
         public void invalidateScrollOffset() {
@@ -1269,8 +1300,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 actualNewScrollOffset = newScrollOffset;
             }
 
-            if (Math.abs(actualNewScrollOffset - scrollOffset) > 0.001) {
-                scrollOffset = actualNewScrollOffset;
+            if (Math.abs(actualNewScrollOffset - scrollOffset.get()) > 0.001) {
+                scrollOffset.set(actualNewScrollOffset);
                 headersRegion.requestLayout();
             }
         }
@@ -1528,7 +1559,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             positionInArea(headerLastArea, lastAreaX, allAreaY, lastAreaWidth, lastAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             if (scrollBar.getParent() != null) {
-                updateScrollBarMetrics(scrollBarWidth, headersPrefWidth, scrollOffset * -1);
                 // position in any case - visible or not
                 positionInArea(scrollBar, scrollBarX, scrollBarY, scrollBarWidth,
                         scrollBarHeight,  /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
@@ -1541,6 +1571,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     } else if (!mouseIsOverHeaderClip && !scrollingViaThumb) {
                         hideScrollBar(true);
                     }
+                    updateScrollBarMetrics(scrollBarWidth, headersPrefWidth, scrollOffset.get() * -1);
                 } else {
                     if (!tabsFit && mouseIsOverHeaderClip) {
                         showScrollBar();
