@@ -23,7 +23,6 @@ package com.techsenger.tabpanepro.demo;
 
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.Styles;
-import com.techsenger.tabpanepro.core.DragAndDropContext;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import java.util.ArrayList;
@@ -94,8 +93,6 @@ public class Demo extends Application {
     private enum CssTest {
         NO_TEST, AREA_POSITION, HEADER_PADDING, AREA_MIN_HEIGHT, AREA_MIN_HEIGHT_AND_HEADER_PADDING
     }
-
-    private final DragAndDropContext context = new DragAndDropContext();
 
     private final List<? extends TabPane> tabPanes = new ArrayList<>();
 
@@ -313,7 +310,7 @@ public class Demo extends Application {
     private TabPane createTabPane(Side side) {
         final TabPane tabPane;
         if (proCheckBox.isSelected()) {
-            TabPanePro tabPanePro = new TabPanePro(context);
+            TabPanePro tabPanePro = new TabPanePro();
             tabPane = tabPanePro;
             var skin = (TabPaneProSkin) tabPane.getSkin();
             if (headerFirstAreaCheckBox.isSelected()) {
