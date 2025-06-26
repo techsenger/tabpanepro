@@ -19,25 +19,15 @@
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.techsenger.tabpanepro.core;
-
-import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+package com.techsenger.tabpanepro.core.skin;
 
 /**
  *
  * @author Pavel Castornii
  */
-public class TabPanePro extends TabPane {
+public enum TabHeaderAreaPolicy {
 
-    public TabPanePro() {
-        this(null);
-    }
+    ALWAYS_VISIBLE,
 
-    public TabPanePro(Tab... tabs) {
-        super(tabs);
-        setSkin(new TabPaneProSkin(this));
-        getStyleClass().add("tab-pane-pro");
-    }
+    VISIBLE_WHEN_TABS_PRESENT
 }

@@ -27,7 +27,7 @@
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
- * June 25, 2025.
+ * June 25, 2025; June 26, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -53,13 +53,16 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -201,8 +204,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         tabHeaderArea = new TabHeaderArea();
         tabHeaderArea.setClip(tabHeaderAreaClipRect);
         getChildren().add(tabHeaderArea);
-        tabHeaderArea.updateNoTabsState();
-        tabHeaderArea.updateScrollBarPresence();
 
         initializeTabListener();
         updateSelectionModel();
@@ -234,9 +235,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         selectedTab = getSkinnable().getSelectionModel().getSelectedItem();
 
         initializeSwipeHandlers();
-        registerChangeListener(control.headerVisibleWhenEmptyProperty(), e -> tabHeaderArea.updateNoTabsState());
-        registerChangeListener(control.tabScrollBarEnabledProperty(), e -> tabHeaderArea.updateScrollBarPresence());
-
     }
 
     /* *************************************************************************
@@ -255,6 +253,48 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
     public StackPane getTabHeaderStickyArea() {
         return tabHeaderArea.headerStickyArea;
+    }
+
+    public ObjectProperty<TabHeaderAreaPolicy> tabHeaderAreaPolicyProperty() {
+        return tabHeaderArea.policy;
+    }
+
+    public TabHeaderAreaPolicy getTabHeaderAreaPolicy() {
+        return tabHeaderArea.policy.get();
+    }
+
+    public void setTabHeaderAreaPolicy(TabHeaderAreaPolicy policy) {
+        this.tabHeaderArea.policy.set(policy);
+    }
+
+    /**
+     * Returns the property that controls whether a scroll bar is enabled
+     * next to the tab headers when the tabs overflow.
+     *
+     * @return the tabScrollBarEnabled property
+     */
+    public BooleanProperty tabScrollBarEnabledProperty() {
+        return this.tabHeaderArea.scrollBarEnabled;
+    }
+
+    /**
+     * Returns whether a scroll bar is enabled next to the tab headers
+     * when the tabs overflow.
+     *
+     * @return {@code true} if the scroll bar is enabled, {@code false} otherwise
+     */
+    public boolean isTabScrollBarEnabled() {
+        return this.tabHeaderArea.scrollBarEnabled.get();
+    }
+
+    /**
+     * Sets whether a scroll bar is enabled next to the tab headers
+     * when the tabs overflow.
+     *
+     * @param enabled {@code true} to enable the scroll bar, {@code false} to disable it
+     */
+    public void setTabScrollBarEnabled(boolean enabled) {
+        this.tabHeaderArea.scrollBarEnabled.set(enabled);
     }
 
     public void showTabsMenu(Node anchor) {
@@ -920,6 +960,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         */
         private final TabScrollBar scrollBar = new TabScrollBar();
 
+        private final BooleanProperty scrollBarEnabled = new SimpleBooleanProperty(false);
+
         private Node scrollBarThumb;
 
         private boolean scrollingViaThumb;
@@ -931,6 +973,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private FadeTransition showTransition;
 
         private FadeTransition hideTransition;
+
+        private final ObjectProperty<TabHeaderAreaPolicy> policy =
+                new SimpleObjectProperty<>(TabHeaderAreaPolicy.VISIBLE_WHEN_TABS_PRESENT);
 
         public TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
@@ -1087,6 +1132,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 }
             });
 
+            updateNoTabsState();
+            policy.addListener((ov, oldV, newV) -> updateNoTabsState());
+            updateScrollBarPresence();
+            scrollBarEnabled.addListener((ov, oldV, newV) -> updateScrollBarPresence());
         }
 
         private boolean isMouseOverHeaderClip(MouseEvent e) {
@@ -1571,9 +1620,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     } else if (!mouseIsOverHeaderClip && !scrollingViaThumb) {
                         hideScrollBar(true);
                     }
-                    updateScrollBarMetrics(scrollBarWidth, headersPrefWidth, scrollOffset.get() * -1);
+                    updateScrollBarMetrics(scrollBarWidth, headersPrefWidth);
                 } else {
                     if (!tabsFit && mouseIsOverHeaderClip) {
+                        updateScrollBarMetrics(scrollBarWidth, headersPrefWidth);
                         showScrollBar();
                     }
                 }
@@ -1589,7 +1639,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void updateScrollBarPresence() {
-            if (getSkinnable().isTabScrollBarEnabled()) {
+            if (scrollBarEnabled.get()) {
                 if (this.scrollBar.getParent() == null) {
                     getChildren().add(this.scrollBar);
                 }
@@ -1630,13 +1680,13 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
         }
 
-        private void updateScrollBarMetrics(double scrollBarWidth, double regionWidth, double offset) {
+        private void updateScrollBarMetrics(double scrollBarWidth, double regionWidth) {
             this.scrollBarListenerEnabled = false;
             double max = Math.max(0, regionWidth - scrollBarWidth);
             scrollBar.setMax(max);
             double visibleAmount = (scrollBarWidth / regionWidth) * max;
             scrollBar.setVisibleAmount(visibleAmount);
-            scrollBar.setValue(Math.min(offset, max));
+            scrollBar.setValue(Math.min(scrollOffset.get() * -1, max));
             this.scrollBarListenerEnabled = true;
         }
 
@@ -1683,20 +1733,20 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         */
         private void updateNoTabsState() {
             if (getSkinnable().getTabs().isEmpty()) {
-                if (getSkinnable().isHeaderVisibleWhenEmpty()) {
-                    tabHeaderArea.setVisible(true);
+                if (policy.get() == TabHeaderAreaPolicy.ALWAYS_VISIBLE) {
+                    setVisible(true);
                     if (!dummyTabAdded) {
                         addDummyTab();
                     }
                 } else {
-                    tabHeaderArea.setVisible(false);
+                    setVisible(false);
                     if (dummyTabAdded) {
                         removeDummyTab();
                     }
                 }
             } else {
-                if (!tabHeaderArea.isVisible()) {
-                    tabHeaderArea.setVisible(true);
+                if (!isVisible()) {
+                    setVisible(true);
                 }
                 if (dummyTabAdded) {
                     removeDummyTab();

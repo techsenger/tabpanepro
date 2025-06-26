@@ -24,6 +24,7 @@ package com.techsenger.tabpanepro.demo;
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.Styles;
 import com.techsenger.tabpanepro.core.TabPanePro;
+import com.techsenger.tabpanepro.core.skin.TabHeaderAreaPolicy;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,17 +113,20 @@ public class Demo extends Application {
     private final ComboBox<TabStyle> tabStyleComboBox
             = new ComboBox<>(FXCollections.observableArrayList(TabStyle.values()));
 
-    private final CheckBox headerFirstAreaCheckBox = new CheckBox("Header First Area");
+    private final CheckBox firstAreaCheckBox = new CheckBox("First Area");
 
-    private final CheckBox headerStickyAreaCheckBox = new CheckBox("Header Sticky Area");
+    private final CheckBox stickyAreaCheckBox = new CheckBox("Sticky Area");
 
-    private final CheckBox headerLastAreaCheckBox = new CheckBox("Header Last Area");
+    private final CheckBox lastAreaCheckBox = new CheckBox("Last Area");
 
-    private final CheckBox headerVisibleWhenEmptyCheckBox = new CheckBox("Header Visible When Empty");
+    private final Label tabHeaderAreaPolicyLabel = new Label("Tab Header Area Policy");
 
-    private final CheckBox tabScrollBarCheckBox = new CheckBox("Tab ScrollBar");
+    private final ComboBox<TabHeaderAreaPolicy> tabHeaderAreaPolicyComboBox
+            = new ComboBox<>(FXCollections.observableArrayList(TabHeaderAreaPolicy.values()));
 
-    private final Label tabScrollBarStyleLabel = new Label("Tab ScrollBar Style");
+    private final CheckBox scrollBarCheckBox = new CheckBox("ScrollBar");
+
+    private final Label scrollBarStyleLabel = new Label("ScrollBar Style");
 
     private final ComboBox<TabScrollBarStyle> tabScrollBarStyleComboBox
             = new ComboBox<>(FXCollections.observableArrayList(TabScrollBarStyle.values()));
@@ -160,65 +164,67 @@ public class Demo extends Application {
         proCheckBox.setSelected(true);
         proCheckBox.selectedProperty().addListener((ov, oldV, newV) -> {
             createTabPanes();
-            headerFirstAreaCheckBox.setDisable(!newV);
-            headerStickyAreaCheckBox.setDisable(!newV);
-            headerLastAreaCheckBox.setDisable(!newV);
-            headerVisibleWhenEmptyCheckBox.setDisable(!newV);
+            firstAreaCheckBox.setDisable(!newV);
+            stickyAreaCheckBox.setDisable(!newV);
+            lastAreaCheckBox.setDisable(!newV);
+            tabHeaderAreaPolicyLabel.setDisable(!newV);
+            tabHeaderAreaPolicyComboBox.setDisable(!newV);
             cssTestLabel.setDisable(!newV);
             cssTestComboBox.setDisable(!newV);
-            tabScrollBarCheckBox.setDisable(!newV);
-            tabScrollBarStyleLabel.setDisable(!newV);
+            scrollBarCheckBox.setDisable(!newV);
+            scrollBarStyleLabel.setDisable(!newV);
             tabScrollBarStyleComboBox.setDisable(!newV);
         });
         cupertinoDarkCheckBox.setSelected(true);
         cupertinoDarkCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
         gridPane.add(cupertinoDarkCheckBox, 1, 0);
-        var tabStylesHBox = new HBox(new Label("Tab Style"), tabStyleComboBox);
-        tabStylesHBox.setSpacing(INSET);
-        tabStylesHBox.setAlignment(Pos.CENTER_LEFT);
+        var tabStylesHBox = createCellHBox(new Label("Tab Style"), tabStyleComboBox);
         gridPane.add(tabStylesHBox, 2, 0);
         tabStyleComboBox.getSelectionModel().select(0);
         tabStyleComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
         tabStyleComboBox.getStyleClass().add(Styles.DENSE);
-        var tabCountHBox = new HBox(new Label("Tab Count"), tabCountComboBox);
-        tabCountHBox.setSpacing(INSET);
-        tabCountHBox.setAlignment(Pos.CENTER_LEFT);
+        tabStyleComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(tabStyleComboBox, Priority.ALWAYS);
+        var tabCountHBox = createCellHBox(new Label("Tab Count"), tabCountComboBox);
         tabCountComboBox.getStyleClass().add(Styles.DENSE);
         tabCountComboBox.getSelectionModel().select(4);
         tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> tabPanes.forEach(e -> createTabs(e)));
+        tabCountComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(tabCountComboBox, Priority.ALWAYS);
         gridPane.add(tabCountHBox, 3, 0);
 
         // row 1
-        headerFirstAreaCheckBox.setSelected(true);
-        headerFirstAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        gridPane.add(headerFirstAreaCheckBox, 0, 1);
-        headerStickyAreaCheckBox.setSelected(true);
-        headerStickyAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        gridPane.add(headerStickyAreaCheckBox, 1, 1);
-        headerLastAreaCheckBox.setSelected(true);
-        headerLastAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        gridPane.add(headerLastAreaCheckBox, 2, 1);
-        gridPane.add(headerVisibleWhenEmptyCheckBox,3, 1);
-        headerVisibleWhenEmptyCheckBox.setSelected(true);
-        headerVisibleWhenEmptyCheckBox.selectedProperty().addListener((ov, oldV, newV) ->
-                updateHeaderVisibleWhenEmpty(newV));
+        firstAreaCheckBox.setSelected(true);
+        firstAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane.add(firstAreaCheckBox, 0, 1);
+        stickyAreaCheckBox.setSelected(true);
+        stickyAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane.add(stickyAreaCheckBox, 1, 1);
+        lastAreaCheckBox.setSelected(true);
+        lastAreaCheckBox.selectedProperty().addListener((ov, oldV, newV) -> createTabPanes());
+        gridPane.add(lastAreaCheckBox, 2, 1);
+        tabHeaderAreaPolicyLabel.setMinWidth(Region.USE_PREF_SIZE);
+        var policyHBox = createCellHBox(tabHeaderAreaPolicyLabel, tabHeaderAreaPolicyComboBox);
+        gridPane.add(policyHBox,3, 1);
+        tabHeaderAreaPolicyComboBox.getSelectionModel().select(1);
+        tabHeaderAreaPolicyComboBox.valueProperty().addListener((ov, oldV, newV) -> updatePolicy(newV));
+        tabHeaderAreaPolicyComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(tabHeaderAreaPolicyComboBox, Priority.ALWAYS);
 
         //row 2
-        gridPane.add(tabScrollBarCheckBox, 0, 2);
-        tabScrollBarCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateScrollBarEnabled(newV));
-        tabScrollBarStyleLabel.setMinWidth(Region.USE_PREF_SIZE);
+        gridPane.add(scrollBarCheckBox, 0, 2);
+        scrollBarCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateScrollBarEnabled(newV));
+        scrollBarStyleLabel.setMinWidth(Region.USE_PREF_SIZE);
         tabScrollBarStyleComboBox.getSelectionModel().select(2);
         tabScrollBarStyleComboBox.valueProperty()
                 .addListener((ov, oldV, newV) -> updateTabScrollBarStyle(oldV, newV));
-        var scrollBarStyleHBox = new HBox(tabScrollBarStyleLabel, tabScrollBarStyleComboBox);
-        scrollBarStyleHBox.setSpacing(INSET);
-        scrollBarStyleHBox.setAlignment(Pos.CENTER_LEFT);
+        tabScrollBarStyleComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(tabScrollBarStyleComboBox, Priority.ALWAYS);
+        var scrollBarStyleHBox = createCellHBox(scrollBarStyleLabel, tabScrollBarStyleComboBox);
         gridPane.add(scrollBarStyleHBox, 1, 2);
 
         cssTestLabel.setMinWidth(Region.USE_PREF_SIZE);
-        var testsHBox = new HBox(cssTestLabel, cssTestComboBox);
-        testsHBox.setSpacing(INSET);
-        testsHBox.setAlignment(Pos.CENTER_LEFT);
+        var testsHBox = createCellHBox(cssTestLabel, cssTestComboBox);
         cssTestComboBox.getSelectionModel().select(0);
         cssTestComboBox.valueProperty().addListener((ov, oldV, newV) -> updateCssTest(oldV, newV));
         cssTestComboBox.setMaxWidth(Double.MAX_VALUE);
@@ -237,6 +243,13 @@ public class Demo extends Application {
         primaryStage.show();
     }
 
+    private HBox createCellHBox(Node ...nodes) {
+        var box = new HBox(nodes);
+        box.setSpacing(INSET);
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
+    }
+
     private void updateUserAgentStylesheet() {
         var modenaCss = Demo.class.getResource("modena.css").toExternalForm();
         var cupertinoDarkCss = Demo.class.getResource("cupertino-dark.css").toExternalForm();
@@ -251,12 +264,12 @@ public class Demo extends Application {
         }
     }
 
-    private void updateHeaderVisibleWhenEmpty(boolean value) {
-        tabPanes.stream().map(e -> (TabPanePro) e).forEach(e -> e.setHeaderVisibleWhenEmpty(value));
+    private void updatePolicy(TabHeaderAreaPolicy policy) {
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(e -> e.setTabHeaderAreaPolicy(policy));
     }
 
     private void updateScrollBarEnabled(boolean value) {
-        tabPanes.stream().map(e -> (TabPanePro) e).forEach(e -> e.setTabScrollBarEnabled(value));
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(e -> e.setTabScrollBarEnabled(value));
     }
 
     private void updateTabScrollBarStyle(TabScrollBarStyle oldStyle, TabScrollBarStyle newStyle) {
@@ -313,18 +326,18 @@ public class Demo extends Application {
             TabPanePro tabPanePro = new TabPanePro();
             tabPane = tabPanePro;
             var skin = (TabPaneProSkin) tabPane.getSkin();
-            if (headerFirstAreaCheckBox.isSelected()) {
+            if (firstAreaCheckBox.isSelected()) {
                 skin.getTabHeaderFirstArea().getChildren().add(createFirstAreaContainer());
             }
-            if (headerStickyAreaCheckBox.isSelected()) {
+            if (stickyAreaCheckBox.isSelected()) {
 
                 skin.getTabHeaderStickyArea().getChildren().add(createStickyAreaContainer(tabPane));
             }
-            if (headerLastAreaCheckBox.isSelected()) {
+            if (lastAreaCheckBox.isSelected()) {
                 skin.getTabHeaderLastArea().getChildren().add(createLastAreaContainer(skin));
             }
-            tabPanePro.setHeaderVisibleWhenEmpty(this.headerVisibleWhenEmptyCheckBox.isSelected());
-            tabPanePro.setTabScrollBarEnabled(tabScrollBarCheckBox.isSelected());
+            skin.setTabHeaderAreaPolicy(this.tabHeaderAreaPolicyComboBox.getValue());
+            skin.setTabScrollBarEnabled(scrollBarCheckBox.isSelected());
         } else {
             tabPane = new TabPane();
         }
