@@ -243,26 +243,66 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      *                                                                         *
      **************************************************************************/
 
+    /**
+     * Returns the first area, located before all tab headers in the tab header area.
+     * <p>
+     * This area is typically used to place custom UI elements, such as a menu button.
+     *
+     * @return the {@code StackPane} positioned before the tab headers
+     */
     public StackPane getTabHeaderFirstArea() {
         return tabHeaderArea.headerFirstArea;
     }
 
+    /**
+     * Returns the last area, located after the sticky area and all tab headers in the tab header area.
+     * <p>
+     * This area is typically used to place scroll buttons, a minimize button, or other auxiliary controls.
+     *
+     * @return the {@code StackPane} positioned after the tab headers and sticky area
+     */
     public StackPane getTabHeaderLastArea() {
         return tabHeaderArea.headerLastArea;
     }
 
+    /**
+     * Returns the sticky area, located between the tab headers and the last header area.
+     * <p>
+     * This area is typically used to place a "New Tab" button or other controls that should remain visible
+     * regardless of tab scrolling.
+     *
+     * @return the {@code StackPane} positioned between the tab headers and the last header area
+     */
     public StackPane getTabHeaderStickyArea() {
         return tabHeaderArea.headerStickyArea;
     }
 
+    /**
+     * Returns the property that controls the visibility policy of the tab header area.
+     * <p>
+     * By default, the tab header area becomes invisible when there are no tabs. This behavior can be changed using
+     * the {@link TabHeaderAreaPolicy} enum.
+     *
+     * @return the {@code ObjectProperty} holding the current {@code TabHeaderAreaPolicy}
+     */
     public ObjectProperty<TabHeaderAreaPolicy> tabHeaderAreaPolicyProperty() {
         return tabHeaderArea.policy;
     }
 
+    /**
+     * Returns the current {@link TabHeaderAreaPolicy} that determines the visibility of the tab header area.
+     *
+     * @return the current tab header area policy
+     */
     public TabHeaderAreaPolicy getTabHeaderAreaPolicy() {
         return tabHeaderArea.policy.get();
     }
 
+    /**
+     * Sets the {@link TabHeaderAreaPolicy} that controls the visibility of the tab header area.
+     *
+     * @param policy the new tab header area policy to apply
+     */
     public void setTabHeaderAreaPolicy(TabHeaderAreaPolicy policy) {
         this.tabHeaderArea.policy.set(policy);
     }
@@ -297,42 +337,111 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         this.tabHeaderArea.scrollBarEnabled.set(enabled);
     }
 
+    /**
+     * Shows the standard tabs menu at the specified anchor node.
+     * <p>
+     * This menu is typically used for quick navigation between tabs and is usually triggered by a button placed in
+     * the tab header area.
+     *
+     * @param anchor the node relative to which the popup menu will be shown, typically a button that opens the menu
+     */
     public void showTabsMenu(Node anchor) {
         this.tabHeaderArea.tabsMenuManager.showPopupMenu(anchor);
     }
 
+    /**
+     * Returns a read-only property indicating whether all tab headers fit within the headers region.
+     * <p>
+     * This property can be used to determine whether a tabs menu button should be shown, for example, when the
+     * available space is insufficient to display all tabs.
+     *
+     * @return the read-only boolean property indicating tab header overflow
+     */
     public ReadOnlyBooleanProperty headersRegionOverflowedProperty() {
         return this.tabHeaderArea.headersRegionOverflowed.getReadOnlyProperty();
     }
 
+    /**
+     * Returns whether the headers region is currently overflowed, meaning not all tab headers fit within the
+     * visible area.
+     * <p>
+     * This is typically used to decide whether a tabs menu button should be displayed.
+     *
+     * @return {@code true} if not all tab headers are visible; {@code false} otherwise
+     */
     public boolean isHeadersRegionOverflowed() {
         return this.tabHeaderArea.headersRegionOverflowed.get();
     }
 
+    /**
+     * Returns a read-only property representing the width of the headers region.
+     *
+     * @return the read-only double property of the headers region width
+     */
     public ReadOnlyDoubleProperty headersRegionWidthProperty() {
         return this.tabHeaderArea.headersRegion.widthProperty();
     }
 
+    /**
+     * Returns the current width of the headers region.
+     *
+     * @return the width of the headers region in pixels
+     */
     public double getHeadersRegionWidth() {
         return this.tabHeaderArea.headersRegion.widthProperty().get();
     }
 
+    /**
+     * Returns a read-only property representing the offset of the headers region.
+     * <p>
+     * This offset indicates how much the entire headers region is shifted (scrolled), which effectively controls
+     * the visible portion of the tab headers.
+     *
+     * @return the read-only double property of the headers region offset
+     */
     public ReadOnlyDoubleProperty headersRegionOffsetProperty() {
         return this.tabHeaderArea.scrollOffset;
     }
 
+    /**
+     * Returns the current offset of the headers region.
+     * <p>
+     * This value reflects how much the headers region has been scrolled (shifted), which effectively controls
+     * the visible portion of the tab headers.
+     *
+     * @return the horizontal offset in pixels of the headers region
+     */
     public double getHeadersRegionOffset() {
         return this.tabHeaderArea.scrollOffset.get();
     }
 
+    /**
+     * Returns a read-only property representing the width of the clip region for the tab headers.
+     * <p>
+     * This clip region acts as a viewport, defining the visible area through which the tab headers are displayed.
+     *
+     * @return the read-only double property of the headers clip width
+     */
     public ReadOnlyDoubleProperty headersClipWidthProperty() {
         return this.tabHeaderArea.headerClip.widthProperty();
     }
 
+    /**
+     * Returns the current width of the clip region for the tab headers.
+     * <p>
+     * The clip defines the viewport area that determines which part of the tab headers is visible.
+     *
+     * @return the width of the headers clip region in pixels
+     */
     public double getHeadersClipWidth() {
         return this.tabHeaderArea.headerClip.widthProperty().get();
     }
 
+    /**
+     * Scrolls the tab headers by the specified number of pixels.
+     *
+     * @param delta the amount in pixels to scroll the tab headers;
+     */
     public void scrollTabHeadersBy(double delta) {
         this.tabHeaderArea.scrollTabsBy(delta);
     }
