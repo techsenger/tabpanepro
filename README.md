@@ -22,9 +22,10 @@
 
 ## Overview <a name="overview"></a>
 
-Techsenger TabPanePro is a lightweight library that extends the functionality of the standard TabPane in JavaFX.
-For the development of the library, we used the standard TabPaneSkin, carefully extracted from the OpenJFX project
-with a minimal set of required classes and adapted to work independently of OpenJFX internals.
+Techsenger TabPanePro is a lightweight library that extends the standard `TabPane` in JavaFX with a set of
+practical enhancements addressing common needs in real-world applications. For the development of the library,
+we used the standard TabPaneSkin, carefully extracted from the OpenJFX project with a minimal set of required
+classes and adapted to work independently of OpenJFX internals.
 
 ## Demo <a name="demo"></a>
 
@@ -38,8 +39,8 @@ Key features include:
 * A sticky area, located between the tabs and the trailing area, typically used for a New Tab button.
 * Ability to show the tab header area even when there are no tabs.
 * Support for both the standard and custom tab menus.
-* Support for scrolling tabs using a `ScrollBar`, whose position can be customized via CSS (4 options for each side).
-* An API that allows programmatic tab scrolling and provides all necessary information about the current scroll state.
+* Supports tab scrolling via a ScrollBar, with four CSS-configurable positions per side.
+* API for programmatic tab scrolling with scroll state tracking.
 * A demo application showcasing all library features.
 * Comprehensive documentation.
 
