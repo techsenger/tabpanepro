@@ -34,7 +34,7 @@ with a minimal set of required classes and adapted to work independently of Open
 
 Key features include:
 
-* Two additional areas — placed before and after all tabs — that can be used for any custom purpose.
+* Two additional areas placed before and after all tabs, available for any custom purpose.
 * A sticky area, located between the tabs and the trailing area, typically used for a New Tab button.
 * Ability to show the tab header area even when there are no tabs.
 * Support for both the standard and custom tab menus.
