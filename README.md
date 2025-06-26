@@ -29,9 +29,9 @@ classes and adapted it to work independently of OpenJFX internals.
 
 ## Demo <a name="demo"></a>
 
-![Screenshot from 2025-06-26 11-53-03](https://github.com/user-attachments/assets/a61b95e7-598d-470b-86ec-e4d07ecd8743)
+![t1](https://github.com/user-attachments/assets/17a6ee70-c724-4bf7-b882-2b8a0a064bd7)
 
-![Screenshot from 2025-06-26 11-54-04](https://github.com/user-attachments/assets/e786dcce-5399-4bdb-9aa3-1bb746e32957)
+![t2](https://github.com/user-attachments/assets/b41596f7-ddd0-4a94-a932-27faa9e5d2ef)
 
 ## Features <a name="features"></a>
 
