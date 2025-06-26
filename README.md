@@ -11,8 +11,8 @@
 * [Dependencies](#dependencies)
 * [Usage](#usage)
     * [Areas](#usage-areas)
-    * [Tabs ScrollBar](#usage-tabs-scroll-bar)
     * [Tabs Menu](#usage-tabs-menu)
+    * [Tabs ScrollBar](#usage-tabs-scroll-bar)
     * [Tab Scrolling](#usage-tab-scrolling)
 * [Code building](#code-building)
 * [Running Demo](#running-demo)
@@ -37,8 +37,8 @@ Key features include:
 * Two additional areas — placed before and after all tabs — that can be used for any custom purpose.
 * A sticky area, located between the tabs and the trailing area, typically used for a New Tab button.
 * Ability to show the tab header area even when there are no tabs.
-* Support for scrolling tabs using a `ScrollBar`, whose position can be customized via CSS (4 options for each side).
 * Support for both the standard and custom tab menus.
+* Support for scrolling tabs using a `ScrollBar`, whose position can be customized via CSS (4 options for each side).
 * An API that allows programmatic tab scrolling and provides all necessary information about the current scroll state.
 * A demo application showcasing all library features.
 * Comprehensive documentation.
@@ -62,24 +62,31 @@ This project will be available on Maven Central in a few weeks:
 The library provides three optional areas that can be used if needed. You can access these areas through the skin:
 
 ```
-TabPanePro tabPanePro = new TabPanePro();
+TabPanePro tabPane = new TabPanePro();
 var skin = (TabPaneProSkin) tabPane.getSkin();
 var firstArea = skin.getTabHeaderFirstArea(); // CSS: .first-area
 var stickyArea = skin.getTabHeaderStickyArea(); // CSS: .sticky-area
 var lastArea = skin.getTabHeaderLastArea(); // CSS: .last-area
 ```
-Note that these areas will rotate when the TabPane side is set to RIGHT, BOTTOM, or LEFT. However, the library does
-not apply any automatic transformation or layout logic to adapt their content. This is intentional, as there are
-multiple possible layout strategies, and enforcing a single approach could cause limitations or conflicts.
+Note that these areas will rotate when the side of the pane is set to `RIGHT`, `BOTTOM`, or `LEFT`. However, the
+library does not apply any automatic transformation or layout logic to adapt their content. This is intentional, as
+there are multiple possible layout strategies, and enforcing a single approach could cause limitations or conflicts.
 See `demo.css` for styling examples across different sides.
 
 The standard `TabPane` hides its tab header area when there are no tabs. However, this behavior is not suitable if you
-need to display the areas, which may contain various controls. To address this, use the `tabHeaderAreaPolicy`
-property provided by skin:
+need to display the areas, which may contain various controls. To address this, use
+`TabPaneProSkin#tabHeaderAreaPolicyProperty()`:
 
 ```
 skin.setTabHeaderAreaPolicy(TabHeaderAreaPolicy.ALWAYS_VISIBLE);
 ```
+
+### Tabs Menu <a name="usage-tabs-menu"></a>
+
+The Tabs Menu allows quick selection of a specific tab. This menu is typically used when not all tabs are visible to
+the user. The library supports both custom menus and the standard menu. To show the standard menu, use the method
+`TabPaneProSkin#showTabsMenu(Node)`. To determine whether this menu should be shown, use
+`TabPaneProSkin#headersRegionOverflowedProperty()`.
 
 ### Tabs ScrollBar <a name="usage-tabs-scroll-bar"></a>
 
@@ -103,13 +110,6 @@ Example:
     -tpp-stick-to-edge: false;
 }
 ```
-
-### Tabs Menu <a name="usage-tabs-menu"></a>
-
-The Tabs Menu allows quick selection of a specific tab. This menu is typically used when not all tabs are visible to
-the user.The library supports both custom menus and the standard menu. To show the standard menu, use the method
-`TabPaneProSkin#showTabsMenu(Node)`. To determine whether this menu should be shown, use the property
-`TabPaneProSkin#headersRegionOverflowedProperty()`.
 
 ### Tab Scrolling <a name="usage-tab-scrolling"></a>
 
