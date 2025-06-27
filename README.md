@@ -25,7 +25,7 @@
 Techsenger TabPanePro is a lightweight library that extends the standard `TabPane` in JavaFX with a set of
 practical enhancements addressing common needs in real-world applications. To develop the library, we used 
 the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a minimal set of required 
-classes and adapted it to work independently of OpenJFX internals.
+classes.
 
 ## Demo <a name="demo"></a>
 
