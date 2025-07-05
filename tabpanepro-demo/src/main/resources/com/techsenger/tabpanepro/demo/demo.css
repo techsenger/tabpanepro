@@ -85,7 +85,6 @@
 
 /*
     Tab Scroll Bar
-
 */
 
 .tab-pane-pro.tsb-above-tabs > .tab-header-area > .tab-scroll-bar {
@@ -106,6 +105,20 @@
 .tab-pane-pro.tsb-below-tabs-and-sticky > .tab-header-area > .tab-scroll-bar {
     -tpp-header-position: below_tabs;
     -tpp-stick-to-edge: true;
+}
+
+/*
+    Drag and Drop
+*/
+
+.tab-pane-pro > .tab-header-area > .drop-position {
+    -fx-background-color: -color-accent-emphasis;
+    -fx-min-width: 4px;
+}
+
+.tab-drag-content {
+    -fx-border-width: 1px;
+    -fx-border-color: -color-accent-emphasis;
 }
 
 /*

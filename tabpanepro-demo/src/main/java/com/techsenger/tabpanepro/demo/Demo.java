@@ -23,6 +23,7 @@ package com.techsenger.tabpanepro.demo;
 
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.Styles;
+import com.techsenger.tabpanepro.core.DragAndDropContext;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabHeaderAreaPolicy;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
@@ -38,8 +39,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -49,6 +52,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -56,6 +61,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -97,6 +103,8 @@ public class Demo extends Application {
 
     private final List<? extends TabPane> tabPanes = new ArrayList<>();
 
+    private final DragAndDropContext dragAndDropContext = new DragAndDropContext();
+
     private final SplitPane leftSplitPane = new SplitPane();
 
     private final SplitPane rightSplitPane = new SplitPane();
@@ -130,6 +138,8 @@ public class Demo extends Application {
 
     private final ComboBox<TabScrollBarStyle> tabScrollBarStyleComboBox
             = new ComboBox<>(FXCollections.observableArrayList(TabScrollBarStyle.values()));
+
+    private final CheckBox dragAndDropCheckBox = new CheckBox("Drag and Drop");
 
     private final Label cssTestLabel = new Label("CSS Test");
 
@@ -174,6 +184,7 @@ public class Demo extends Application {
             scrollBarCheckBox.setDisable(!newV);
             scrollBarStyleLabel.setDisable(!newV);
             tabScrollBarStyleComboBox.setDisable(!newV);
+            dragAndDropCheckBox.setDisable(!newV);
         });
         cupertinoDarkCheckBox.setSelected(true);
         cupertinoDarkCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
@@ -222,7 +233,8 @@ public class Demo extends Application {
         HBox.setHgrow(tabScrollBarStyleComboBox, Priority.ALWAYS);
         var scrollBarStyleHBox = createCellHBox(scrollBarStyleLabel, tabScrollBarStyleComboBox);
         gridPane.add(scrollBarStyleHBox, 1, 2);
-
+        gridPane.add(dragAndDropCheckBox, 2, 2);
+        dragAndDropCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateDragAndDrop(newV));
         cssTestLabel.setMinWidth(Region.USE_PREF_SIZE);
         var testsHBox = createCellHBox(cssTestLabel, cssTestComboBox);
         cssTestComboBox.getSelectionModel().select(0);
@@ -230,7 +242,7 @@ public class Demo extends Application {
         cssTestComboBox.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(cssTestComboBox, Priority.ALWAYS);
         GridPane.setHgrow(testsHBox, Priority.ALWAYS);
-        gridPane.add(testsHBox, 2, 2, 2, 1);
+        gridPane.add(testsHBox, 3, 2);
 
         root.setSpacing(2 * INSET);
         root.setPadding(new Insets(INSET));
@@ -287,6 +299,13 @@ public class Demo extends Application {
         return "tsb-" + style.name().toLowerCase().replace("_", "-");
     }
 
+    private void updateDragAndDrop(boolean enabled) {
+        tabPanes.stream().map(t -> (TabPanePro) t).forEach(t -> {
+            t.setTabDragEnabled(enabled);
+            t.setTabDropEnabled(enabled);
+        });
+    }
+
     private void updateCssTest(CssTest oldValue, CssTest newValue) {
         if (oldValue != CssTest.NO_TEST) {
             tabPanes.stream().forEach(e -> {
@@ -324,13 +343,18 @@ public class Demo extends Application {
         final TabPane tabPane;
         if (proCheckBox.isSelected()) {
             TabPanePro tabPanePro = new TabPanePro();
+            tabPanePro.setDragAndDropContext(dragAndDropContext);
+            tabPanePro.setTabDragEnabled(dragAndDropCheckBox.isSelected());
+            tabPanePro.setTabDropEnabled(dragAndDropCheckBox.isSelected());
             tabPane = tabPanePro;
             var skin = (TabPaneProSkin) tabPane.getSkin();
+            skin.setTabDragContentFactory(this::createDragContent);
+            skin.setTabDragScrollStep(10);
+            skin.setTabDragCursor(Cursor.CLOSED_HAND);
             if (firstAreaCheckBox.isSelected()) {
                 skin.getTabHeaderFirstArea().getChildren().add(createFirstAreaContainer());
             }
             if (stickyAreaCheckBox.isSelected()) {
-
                 skin.getTabHeaderStickyArea().getChildren().add(createStickyAreaContainer(tabPane));
             }
             if (lastAreaCheckBox.isSelected()) {
@@ -444,5 +468,18 @@ public class Demo extends Application {
         content.getChildren().add(textArea);
         tab.setContent(content);
         tabPane.getTabs().add(tab);
+    }
+
+    private Node createDragContent(Node tabHeader, Tab tab) {
+        var tabParams = new SnapshotParameters();
+        WritableImage tabImage = tabHeader.snapshot(tabParams, null);
+        ImageView dragView = new ImageView(tabImage);
+        if (tab.getTabPane().getSide() == Side.BOTTOM) {
+            Rotate rotate = new Rotate(180, tabImage.getWidth() / 2, tabImage.getHeight() / 2);
+            dragView.getTransforms().add(rotate);
+        }
+        var container = new VBox(dragView);
+        container.getStyleClass().add("tab-drag-content");
+        return container;
     }
 }

@@ -27,7 +27,7 @@
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
- * June 25, 2025; June 26, 2025.
+ * June 25, 2025; June 26, 2025; July 05, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.function.BiFunction;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
@@ -89,6 +90,7 @@ import javafx.geometry.VPos;
 import javafx.scene.AccessibleAction;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.AccessibleRole;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
@@ -107,6 +109,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.input.SwipeEvent;
@@ -114,6 +117,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
+import javafx.stage.Popup;
 import javafx.util.Duration;
 import javafx.util.Pair;
 
@@ -275,6 +279,22 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      */
     public StackPane getTabHeaderStickyArea() {
         return tabHeaderArea.headerStickyArea;
+    }
+
+    /**
+     * Returns the {@link StackPane} that visually marks the exact insertion position for a tab during drag-and-drop
+     * operations. The element is managed automatically (hidden when no drag is active).
+     *
+     * <p>Customize it by either:
+     * <ul>
+     *   <li>Styling with CSS (default style class: {@code tab-drop-position})</li>
+     *   <li>Adding custom nodes (e.g., an arrow icon via {@link #getChildren()})</li>
+     * </ul>
+     *
+     * @return the non-null container marking the drop position
+     */
+    public StackPane getTabDropPosition() {
+        return tabHeaderArea.dropPosition;
     }
 
     /**
@@ -444,6 +464,96 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      */
     public void scrollTabHeadersBy(double delta) {
         this.tabHeaderArea.scrollTabsBy(delta);
+    }
+
+    /**
+     * Returns the {@link ObjectProperty} that holds the factory function for creating tab drag content.
+     * The factory takes a {@link Node} (tab header) and a {@link Tab}, then produces an {@link Node}.
+     *
+     * @return The {@link ObjectProperty} containing the content factory.
+     */
+    public ObjectProperty<BiFunction<Node, Tab, Node>> tabDragContentFactoryProperty() {
+        return this.tabHeaderArea.tabDragContentFactory;
+    }
+
+    /**
+     * Gets the current factory function used to generate tab drag content.
+     * If no custom factory is set, this returns {@code null}.
+     *
+     * @return The current {@link BiFunction} producing an {@link Node}, or {@code null} if unset.
+     */
+    public BiFunction<Node, Tab, Node> getTabDragContentFactory() {
+        return tabDragContentFactoryProperty().get();
+    }
+
+    /**
+     * Sets a new factory function to generate custom tab drag content.
+     * The factory should take a {@link Node} (tab header) and a {@link Tab}, then return an {@link Node}.
+     *
+     * @param factory The {@link BiFunction} to use for content generation, or {@code null} to clear it.
+     */
+    public void setTabDragContentFactory(BiFunction<Node, Tab, Node> factory) {
+        tabDragContentFactoryProperty().set(factory);
+    }
+
+    /**
+     * Returns the DoubleProperty object for the tab drag scroll step.
+     * This value determines the scroll step (in pixels) for tab headers during drag-and-drop operations.
+     *
+     * @return the DoubleProperty representing the tab drag scroll step
+     */
+    public DoubleProperty tabDragScrollStepProperty() {
+        return tabHeaderArea.tabDragScrollStep;
+    }
+
+    /**
+     * Gets the current value of the tab drag scroll step property.
+     * This value determines the scroll step (in pixels) for tab headers during drag-and-drop operations.
+     *
+     * @return the current scroll step value
+     */
+    public double getTabDragScrollStep() {
+        return tabDragScrollStepProperty().get();
+    }
+
+    /**
+     * Sets the value of the tab drag scroll step property.
+     * This value determines the scroll step (in pixels) for tab headers during drag-and-drop operations.
+     *
+     * @param value the new scroll step value to be set
+     */
+    public void setTabDragScrollStep(double value) {
+        tabDragScrollStepProperty().set(value);
+    }
+
+    /**
+     * Gets the current cursor that will be displayed during tab drag-and-drop operations.
+     *
+     * @return The current drag cursor property. If not set, returns {@code null}
+     *         indicating system default cursor will be used.
+     */
+    public final ObjectProperty<Cursor> tabDragCursorProperty() {
+        return tabHeaderArea.tabDragCursor;
+    }
+
+    /**
+     * Sets the cursor to be displayed during tab drag-and-drop operations.
+     *
+     * @param cursor The cursor to display during dragging.
+     *               Use {@code null} to reset to system default behavior.
+     */
+    public final void setTabDragCursor(Cursor cursor) {
+        tabDragCursorProperty().set(cursor);
+    }
+
+    /**
+     * Gets the currently configured drag cursor.
+     *
+     * @return The current drag cursor, or {@code null} if no custom cursor
+     *         is set (system default will be used).
+     */
+    public final Cursor getTabDragCursor() {
+        return tabDragCursorProperty().get();
     }
 
     /* *************************************************************************
@@ -1046,7 +1156,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private boolean measureClosingTabs = false;
 
-        private final ReadOnlyDoubleWrapper scrollOffset = new ReadOnlyDoubleWrapper();
+        private final ReadOnlyDoubleWrapper scrollOffset = new ReadOnlyDoubleWrapper(this, "scrollOffset");
 
         private boolean scrollOffsetDirty = true;
 
@@ -1056,7 +1166,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private final StackPane headerStickyArea = new StackPane();
 
-        private final ReadOnlyBooleanWrapper headersRegionOverflowed = new ReadOnlyBooleanWrapper(false);
+        private final ReadOnlyBooleanWrapper headersRegionOverflowed =
+                new ReadOnlyBooleanWrapper(this, "headersRegionOverflowed", false);
 
         private boolean dummyTabAdded = false;
 
@@ -1069,7 +1180,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         */
         private final TabScrollBar scrollBar = new TabScrollBar();
 
-        private final BooleanProperty scrollBarEnabled = new SimpleBooleanProperty(false);
+        private final BooleanProperty scrollBarEnabled = new SimpleBooleanProperty(this, "scrollBarEnabled", false);
 
         private Node scrollBarThumb;
 
@@ -1084,7 +1195,25 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private FadeTransition hideTransition;
 
         private final ObjectProperty<TabHeaderAreaPolicy> policy =
-                new SimpleObjectProperty<>(TabHeaderAreaPolicy.VISIBLE_WHEN_TABS_PRESENT);
+                new SimpleObjectProperty<>(this, "policy", TabHeaderAreaPolicy.VISIBLE_WHEN_TABS_PRESENT);
+
+        private final ObjectProperty<BiFunction<Node, Tab, Node>> tabDragContentFactory =
+                new SimpleObjectProperty<>(this, "tabDragContentFactory");
+
+        private boolean acceptsTab;
+
+        private final StackPane dropPosition = new StackPane();
+
+        private int dropIndex = -1;
+
+        private final DoubleProperty tabDragScrollStep = new SimpleDoubleProperty(this, "tabDragScrollStep");
+
+        private double currentDragScrollStep;
+
+        private final Timeline dragScroll =
+                new Timeline(new KeyFrame(Duration.millis(25), e -> scrollTabHeadersBy(currentDragScrollStep)));
+
+        private final ObjectProperty<Cursor> tabDragCursor = new SimpleObjectProperty(this, "tabDragCursor");
 
         public TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
@@ -1165,7 +1294,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         }
                     }
                 }
-
             };
             headersRegion.getStyleClass().setAll("headers-region");
             headersRegion.setClip(headerClip);
@@ -1215,6 +1343,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             this.headerFirstArea.setViewOrder(-10);
             this.headerLastArea.getStyleClass().add("last-area");
             this.headerLastArea.setViewOrder(-10);
+
+            dropPosition.getStyleClass().add("drop-position");
+            dropPosition.setViewOrder(-11);
+            dropPosition.setMouseTransparent(true);
+
             this.headerStickyArea.getStyleClass().add("sticky-area");
             this.headerStickyArea.setViewOrder(-9);
             this.scrollBar.setUnitIncrement(10);
@@ -1245,6 +1378,12 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             policy.addListener((ov, oldV, newV) -> updateNoTabsState());
             updateScrollBarPresence();
             scrollBarEnabled.addListener((ov, oldV, newV) -> updateScrollBarPresence());
+
+            setOnMouseDragOver(e -> handleMouseDragOver(e));
+            setOnMouseDragEntered(e -> handleMouseDragEntered(e));
+            setOnMouseDragExited(e -> handleMouseDragExited(e));
+
+            dragScroll.setCycleCount(Timeline.INDEFINITE);
         }
 
         private boolean isMouseOverHeaderClip(MouseEvent e) {
@@ -1339,7 +1478,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void addTab(Tab tab, int addToIndex) {
-            TabHeaderSkin tabHeaderSkin = new TabHeaderSkin(tab);
+            TabHeaderSkin tabHeaderSkin = new TabHeaderSkin(tab, false);
             headersRegion.getChildren().add(addToIndex, tabHeaderSkin);
             invalidateScrollOffset();
         }
@@ -1538,6 +1677,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double headersPrefWidth = snapSizeX(headersRegion.prefWidth(-1));
             double headersPrefHeight = snapSizeY(headersRegion.prefHeight(-1));
 
+            h = Math.min(h, headersPrefHeight);
+
             var firstAreaWidth = computeRegionWidth(headerFirstArea, -1);
             var firstAreaHeight = computeRegionHeight(headerFirstArea, -1);
             firstAreaHeight = Math.max(firstAreaHeight, h);
@@ -1547,6 +1688,18 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             var stickyAreaHeight = computeRegionHeight(headerStickyArea, -1);
             stickyAreaHeight = Math.max(stickyAreaHeight, h);
             headerStickyArea.resize(stickyAreaWidth, stickyAreaHeight);
+
+            double dropPositionWidth = 0;
+            double dropPositionWidthHalf = 0;
+            double dropPositionHeight = h;
+            double dropPositionX = 0;
+            double dropPositionY = 0;
+
+            if (dropPosition.getParent() != null) {
+                dropPositionWidth = computeRegionWidth(dropPosition, -1);
+                dropPositionWidthHalf = snapSizeX(dropPositionWidth / 2);
+                dropPosition.resize(dropPositionWidth, dropPositionHeight);
+            }
 
             var lastAreaWidth = computeRegionWidth(headerLastArea, -1);
             var lastAreaHeight = computeRegionHeight(headerLastArea, -1);
@@ -1560,8 +1713,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 scrollBarHeight = computeRegionHeight(scrollBar, -1);
                 scrollBar.resize(scrollBarWidth, scrollBarHeight);
             }
-
-            h = Math.min(h, headersPrefHeight);
 
             updateHeaderClip(firstAreaWidth, stickyAreaWidth, lastAreaWidth);
             headersRegion.requestLayout();
@@ -1616,6 +1767,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = topInset + firstAreaHeight - scrollBarHeight;
                     }
                 }
+                dropPositionX = calculateDropPositionX(regionX, dropPositionWidthHalf);
+                dropPositionY = regionY;
             } else if (tabPosition.equals(Side.RIGHT)) {
                 firstAreaX = topInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - leftInset;
@@ -1645,6 +1798,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = headerHeight - leftInset - scrollBarHeight;
                     }
                 }
+                dropPositionX = calculateDropPositionX(regionX, dropPositionWidthHalf);
+                dropPositionY = regionY;
             } else if (tabPosition.equals(Side.BOTTOM)) {
                 firstAreaX = headerWidth - firstAreaWidth - leftInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - topInset;
@@ -1674,6 +1829,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = topInset;
                     }
                 }
+                dropPositionX = calculateDropPositionX(firstAreaX, dropPositionWidthHalf);
+                dropPositionY = regionY;
             } else if (tabPosition.equals(Side.LEFT)) {
                 firstAreaX = headerWidth - firstAreaWidth - topInset;
                 allAreaY = tabBackgroundHeight - firstAreaHeight - rightInset;
@@ -1703,6 +1860,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = headerHeight - scrollBarHeight - rightInset;
                     }
                 }
+                dropPositionX = calculateDropPositionX(firstAreaX, dropPositionWidthHalf);
+                dropPositionY = regionY;
             }
             if (headerBackground.isVisible()) {
                 positionInArea(headerBackground, 0, 0,
@@ -1711,6 +1870,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
             positionInArea(headerFirstArea, firstAreaX, allAreaY, firstAreaWidth, firstAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
+            if (dropPosition.getParent() != null) {
+                positionInArea(dropPosition, dropPositionX, dropPositionY, dropPositionWidth, dropPositionHeight,
+                    /*baseline ignored*/0, HPos.LEFT, VPos.CENTER);
+            }
             positionInArea(headersRegion, regionX, regionY, w, h, /*baseline ignored*/0, HPos.LEFT, VPos.CENTER);
             positionInArea(headerStickyArea, stickyX, allAreaY, stickyAreaWidth, stickyAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
@@ -1737,6 +1900,27 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     }
                 }
             }
+        }
+
+        private double calculateDropPositionX(double zeroPosition, double dropPositionWidthHalf) {
+            if (dropPosition.getParent() == null) {
+                return 0;
+            }
+            double dropPositionX = 0;
+            var side = getSkinnable().getSide();
+            if (dropIndex == 0) {
+                dropPositionX = zeroPosition - dropPositionWidthHalf;
+            } else {
+                var node = headersRegion.getChildren().get(dropIndex - 1);
+                var areaBounds = getTabHeaderBounds(node);
+                if (side == TOP || side == RIGHT) {
+                    dropPositionX = areaBounds.getMaxX() - dropPositionWidthHalf;
+                } else {
+                    dropPositionX = areaBounds.getMinX() - dropPositionWidthHalf;
+                }
+            }
+            dropPositionX = snapSizeX(dropPositionX);
+            return dropPositionX;
         }
 
         void dispose() {
@@ -1865,7 +2049,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private void addDummyTab() {
             var dummyTab = new Tab();
-            var dummyTabSkin = new TabHeaderSkin(dummyTab);
+            var dummyTabSkin = new TabHeaderSkin(dummyTab, true);
             headersRegion.getChildren().add(dummyTabSkin);
             headersRegion.setVisible(false);
             dummyTabAdded = true;
@@ -1897,6 +2081,208 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
         }
 
+        private void handleMouseDragEntered(MouseEvent e) {
+            var predicate = getSkinnable().getTabDropPredicate();
+            var tab = getSkinnable().getDragAndDropContext().getTab();
+            if (tab != null && getSkinnable().isTabDropEnabled() && (predicate == null || predicate.test(tab))) {
+                this.acceptsTab = true;
+                var context = getSkinnable().getDragAndDropContext();
+                context.setTargetTabPane(getSkinnable());
+                updateTabHeadersIndex();
+                e.consume();
+            }
+        }
+
+        private void updateTabHeadersIndex() {
+            int index = 0;
+            for (Node child : headersRegion.getChildren()) {
+                TabHeaderSkin tabHeaderSkin = (TabHeaderSkin)child;
+                tabHeaderSkin.setIndex(index++);
+            }
+        }
+
+        private void handleMouseDragOver(MouseEvent e) {
+            if (!acceptsTab) {
+                return;
+            }
+            int currentDropIndex = -1;
+            if (!headersRegionOverflowed.get()) {
+                var side = getSkinnable().getSide();
+                if (side == Side.TOP || side == RIGHT) {
+                    double leftX = this.headerStickyArea.getBoundsInParent().getMaxX();
+                    double rightX = this.headerLastArea.getBoundsInParent().getMinX();
+                    if (e.getX() >= leftX && e.getX() <= rightX) {
+                        currentDropIndex = getSkinnable().getTabs().size();
+                    }
+                } else {
+                    double leftX = this.headerStickyArea.getBoundsInParent().getMinX();
+                    double rightX = this.headerLastArea.getBoundsInParent().getMaxX();
+                    if (e.getX() <= leftX && e.getX() >= rightX) {
+                        currentDropIndex = getSkinnable().getTabs().size();
+                    }
+                }
+            }
+            setDropIndex(currentDropIndex);
+            e.consume();
+        }
+
+        private void handleMouseDragExited(MouseDragEvent e) {
+            if (acceptsTab) {
+                acceptsTab = false;
+                setDropIndex(-1);
+                getSkinnable().getDragAndDropContext().setTargetTabPane(null);
+                stopScrollOnDrag();
+                e.consume();
+            }
+        }
+
+        private void moveTab() {
+            if (dropPosition.getParent() == null || getDropIndex() == -1) {
+                return;
+            }
+            var context = getSkinnable().getDragAndDropContext();
+            var currentDropIndex = getDropIndex();
+            int tabIndex = context.getTabIndex();
+            if (getSkinnable() == context.getTab().getTabPane()) { // within one tab pane
+                if (tabIndex == dropIndex || tabIndex + 1 == dropIndex) {
+                    return;
+                }
+                if (tabIndex < currentDropIndex) {
+                    currentDropIndex--; // one tab will be removed
+                }
+            }
+            // don't remove tab by index - as the tab won't be removed
+            context.getTab().getTabPane().getTabs().remove(context.getTab());
+            getSkinnable().getTabs().add(currentDropIndex, context.getTab());
+            getSkinnable().getSelectionModel().select(context.getTab());
+        }
+
+        private void setDropIndex(int dropIndex) {
+            if (this.dropIndex != dropIndex) {
+                this.dropIndex = dropIndex;
+                if (dropIndex == -1) {
+                    if (this.dropPosition.getParent() != null) {
+                        getChildren().remove(this.dropPosition);
+                    }
+                } else {
+                    if (this.dropPosition.getParent() == null) {
+                        getChildren().add(this.dropPosition);
+                    } else {
+                        requestLayout();
+                    }
+                }
+            }
+        }
+
+        private int getDropIndex() {
+            return dropIndex;
+        }
+
+        private boolean isRightEdgeVisible(TabHeaderSkin tabHeader) {
+            var result = false;
+            var headerBounds = getTabHeaderBounds(tabHeader);
+            var firstBounds = this.headerFirstArea.getBoundsInParent();
+            var stickyBounds = this.headerStickyArea.getBoundsInParent();
+            switch (getSkinnable().getSide()) {
+                case TOP:
+                case RIGHT:
+                    if (firstBounds.getMaxX() <= headerBounds.getMaxX()
+                            && headerBounds.getMaxX() <=  stickyBounds.getMinX()) {
+                        result = true;
+                    }
+                    break;
+                case BOTTOM:
+                    if (firstBounds.getMinX() >= headerBounds.getMinX()
+                            && headerBounds.getMinX() >= stickyBounds.getMaxX()) {
+                        result = true;
+                    }
+                    break;
+                case LEFT:
+                    if (firstBounds.getMinX() >= headerBounds.getMaxX()
+                            && headerBounds.getMaxX() >=  stickyBounds.getMaxX()) {
+                        result = true;
+                    }
+                    break;
+                default:
+                    throw new AssertionError();
+            }
+            return result;
+        }
+
+        private boolean isLeftEdgeVisible(TabHeaderSkin tabHeader) {
+            var result = false;
+            var headerBounds = getTabHeaderBounds(tabHeader);
+            var firstBounds = this.headerFirstArea.getBoundsInParent();
+            var stickyBounds = this.headerStickyArea.getBoundsInParent();
+            switch (getSkinnable().getSide()) {
+                case TOP:
+                case RIGHT:
+                    if (firstBounds.getMaxX() <= headerBounds.getMinX()
+                            && headerBounds.getMinX() <= stickyBounds.getMinX()) {
+                        result = true;
+                    }
+                    break;
+                case BOTTOM:
+                    if (firstBounds.getMinX() >= headerBounds.getMaxX()
+                            && headerBounds.getMaxX() >= stickyBounds.getMaxX()) {
+                        result = true;
+                    }
+                    break;
+                case LEFT:
+                    if (firstBounds.getMinX() >= headerBounds.getMinX()
+                            && headerBounds.getMinX() >=  stickyBounds.getMaxX()) {
+                        result = true;
+                    }
+                    break;
+                default:
+                    throw new AssertionError();
+            }
+            return result;
+        }
+
+        private Bounds getTabHeaderBounds(Node node) {
+            return sceneToLocal(node.localToScene(node.getBoundsInLocal()));
+        }
+
+        private void startScrollOnDrag(double step) {
+            if (this.dragScroll.getStatus() == Animation.Status.STOPPED) {
+                this.currentDragScrollStep = step;
+                this.dragScroll.play();
+            }
+        }
+
+        private void stopScrollOnDrag() {
+            if (this.dragScroll.getStatus() == Animation.Status.RUNNING) {
+                this.dragScroll.stop();
+            }
+        }
+
+        private void checkScrollOnDrag(MouseEvent e) {
+            if (!headersRegionOverflowed.get()) {
+                stopScrollOnDrag();
+                return;
+            }
+            var distance = 10;
+            var firstBounds = headerFirstArea.localToScene(headerFirstArea.getBoundsInLocal());
+            var stickyBounds = headerStickyArea.localToScene(headerStickyArea.getBoundsInLocal());
+            if (getSkinnable().getSide() == TOP || getSkinnable().getSide() == BOTTOM) {
+                if (firstBounds.getMaxX() + distance >= e.getSceneX()) {
+                    startScrollOnDrag(tabDragScrollStep.get());
+                } else if (stickyBounds.getMinX() - distance <= e.getSceneX()) {
+                    startScrollOnDrag(tabDragScrollStep.get() * -1);
+                } else {
+                    stopScrollOnDrag();
+                }
+            } else {
+                if (firstBounds.getMaxY() + distance >= e.getSceneY()) {
+                    startScrollOnDrag(tabDragScrollStep.get());
+                } else if (stickyBounds.getMinY() - distance <= e.getSceneY()) {
+                    startScrollOnDrag(tabDragScrollStep.get() * -1);
+                } else {
+                    stopScrollOnDrag();
+                }
+            }
+        }
     } /* End TabHeaderArea */
 
 
@@ -1922,6 +2308,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private boolean isClosing = false;
 
+        private int index;
+
         private LambdaMultiplePropertyChangeListenerHandler listener = new LambdaMultiplePropertyChangeListenerHandler();
 
         private final ListChangeListener<String> styleClassListener = new ListChangeListener<>() {
@@ -1934,7 +2322,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private final WeakListChangeListener<String> weakStyleClassListener =
                 new WeakListChangeListener<>(styleClassListener);
 
-        public TabHeaderSkin(final Tab tab) {
+        private Popup dragPopup;
+
+        private Cursor savedSceneCursorOnDrag;
+
+        public TabHeaderSkin(final Tab tab, boolean dummy) {
             getStyleClass().setAll(tab.getStyleClass());
             setId(tab.getId());
             setStyle(tab.getStyle());
@@ -2204,6 +2596,13 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             pseudoClassStateChanged(RIGHT_PSEUDOCLASS_STATE, (side == Side.RIGHT));
             pseudoClassStateChanged(BOTTOM_PSEUDOCLASS_STATE, (side == Side.BOTTOM));
             pseudoClassStateChanged(LEFT_PSEUDOCLASS_STATE, (side == Side.LEFT));
+
+            if (!dummy) {
+                setOnDragDetected(e -> handleDragDetected(e));
+                setOnMouseDragged(e -> handleMouseDragged(e));
+                setOnMouseReleased(e -> handleMouseReleased(e));
+                setOnMouseDragOver(e -> handleMouseDragOver(e));
+            }
         }
 
         private void updateTabDisabledState() {
@@ -2320,6 +2719,128 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
         }
 
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
+        }
+
+        private void handleDragDetected(MouseEvent e) {
+            var predicate = getSkinnable().getTabDragPredicate();
+            if (getSkinnable().isTabDragEnabled() && (predicate == null || predicate.test(getTab()))) {
+                var handler = getSkinnable().getTabDragHandler();
+                if (handler != null) {
+                    handler.accept(getTab());
+                }
+                Node content = getTabDragContentFactory().apply(this, getTab());
+                this.dragPopup = new Popup();
+                this.dragPopup.setAutoHide(false);
+                this.dragPopup.getContent().add(content);
+                var scene = getSkinnable().getScene();
+                this.savedSceneCursorOnDrag = scene.getCursor();
+                if (this.savedSceneCursorOnDrag == null) {
+                    this.savedSceneCursorOnDrag = Cursor.DEFAULT;
+                }
+                var cursor = tabHeaderArea.tabDragCursor.get();
+                cursor = cursor != null ? cursor : Cursor.DEFAULT;
+                scene.setCursor(cursor);
+                startFullDrag();
+                dragPopup.show(getScene().getWindow(), e.getScreenX(), e.getScreenY());
+                var context = getSkinnable().getDragAndDropContext();
+                context.setTab(getTab());
+                // the indices are updated for the target TabPane, but the selected index from the source TabPane is used.
+                context.setTabIndex(getSkinnable().getSelectionModel().getSelectedIndex());
+                e.consume();
+            }
+        }
+
+        private void handleMouseDragged(MouseEvent e) {
+            if (this.dragPopup != null) {
+                dragPopup.setAnchorX(e.getScreenX());
+                dragPopup.setAnchorY(e.getScreenY());
+                e.consume();
+            }
+        }
+
+        private void handleMouseReleased(MouseEvent e) {
+            if (this.dragPopup != null) {
+                this.dragPopup.hide();
+                this.dragPopup = null;
+                var context = getSkinnable().getDragAndDropContext();
+                var successful = false;
+                // if no TabPane is present, it means the user has canceled the operation
+                if (context.getTargetTabPane() != null) {
+                    // mouseDragReleased is not used because we lose mouseReleaseEvent when we move tab within one TabPane
+                    var otherHeaderArea = ((TabPaneProSkin) context.getTargetTabPane().getSkin()).tabHeaderArea;
+                    otherHeaderArea.moveTab();
+                    successful = true;
+                }
+                var handler = getSkinnable().getTabDropHandler();
+                if (handler != null) {
+                    handler.accept(context.getTab(), successful);
+                }
+                getSkinnable().getScene().setCursor(savedSceneCursorOnDrag);
+                context.clear();
+                e.consume();
+            }
+        }
+
+        private void handleMouseDragOver(MouseEvent e) {
+            switch (getSkinnable().getSide()) {
+                case TOP:
+                case RIGHT:
+                    if (e.getX() <= getWidth() / 2) {
+                        if (tabHeaderArea.isLeftEdgeVisible(this)) {
+                            tabHeaderArea.setDropIndex(index);
+                        } else {
+                            tabHeaderArea.setDropIndex(-1);
+                        }
+                    } else {
+                        if (tabHeaderArea.isRightEdgeVisible(this)) {
+                            tabHeaderArea.setDropIndex(index + 1);
+                        } else {
+                            tabHeaderArea.setDropIndex(-1);
+                        }
+                    }
+                    break;
+                case BOTTOM:
+                    if (e.getX() >= getWidth() / 2) {
+                        if (tabHeaderArea.isLeftEdgeVisible(this)) {
+                            tabHeaderArea.setDropIndex(index);
+                        } else {
+                            tabHeaderArea.setDropIndex(-1);
+                        }
+                    } else {
+                        if (tabHeaderArea.isRightEdgeVisible(this)) {
+                            tabHeaderArea.setDropIndex(index + 1);
+                        } else {
+                            tabHeaderArea.setDropIndex(-1);
+                        }
+                    }
+                    break;
+                case LEFT:
+                    if (e.getX() <= getWidth() / 2) {
+                        if (tabHeaderArea.isLeftEdgeVisible(this)) {
+                            tabHeaderArea.setDropIndex(index + 1);
+                        } else {
+                            tabHeaderArea.setDropIndex(-1);
+                        }
+                    } else {
+                        if (tabHeaderArea.isRightEdgeVisible(this)) {
+                            tabHeaderArea.setDropIndex(index);
+                        } else {
+                            tabHeaderArea.setDropIndex(-1);
+                        }
+                    }
+                    break;
+                default:
+                    throw new AssertionError();
+            }
+            tabHeaderArea.checkScrollOnDrag(e);
+            e.consume();
+        }
     } /* End TabHeaderSkin */
 
     private static final PseudoClass SELECTED_PSEUDOCLASS_STATE =

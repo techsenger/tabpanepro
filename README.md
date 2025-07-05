@@ -14,6 +14,7 @@
     * [Tabs Menu](#usage-tabs-menu)
     * [Tabs ScrollBar](#usage-tabs-scroll-bar)
     * [Tab Scrolling](#usage-tab-scrolling)
+    * [Tab Drag and Drop](#usage-tab-drag-and-drop)
 * [Code building](#code-building)
 * [Running Demo](#running-demo)
 * [License](#license)
@@ -41,6 +42,7 @@ Key features include:
 * Support for both the standard and custom tab menus.
 * Supports tab scrolling via a ScrollBar, with four CSS-configurable positions per side.
 * API for programmatic tab scrolling with scroll state tracking.
+* Tab drag-and-drop with edge auto-scrolling.
 * A demo application showcasing all library features.
 * Comprehensive documentation.
 
@@ -62,12 +64,12 @@ This project will be available on Maven Central in a few weeks:
 
 The library provides three optional areas that can be used if needed. You can access these areas through the skin:
 
-```
+```java
 TabPanePro tabPane = new TabPanePro();
 var skin = (TabPaneProSkin) tabPane.getSkin();
-var firstArea = skin.getTabHeaderFirstArea(); // CSS: .first-area
-var stickyArea = skin.getTabHeaderStickyArea(); // CSS: .sticky-area
-var lastArea = skin.getTabHeaderLastArea(); // CSS: .last-area
+var firstArea = skin.getTabHeaderFirstArea(); // CSS: .tab-pane-pro > .tab-header-area > .first-area {}
+var stickyArea = skin.getTabHeaderStickyArea(); // CSS: .tab-pane-pro > .tab-header-area > .sticky-area {}
+var lastArea = skin.getTabHeaderLastArea(); // CSS: .tab-pane-pro > .tab-header-area > .last-area {}
 ```
 Note that these areas will rotate when the side of the pane is set to `RIGHT`, `BOTTOM`, or `LEFT`. However, the
 library does not apply any automatic transformation or layout logic to adapt their content. This is intentional, as
@@ -78,7 +80,7 @@ The standard `TabPane` hides its tab header area when there are no tabs. However
 need to display the areas, which may contain various controls. To address this, use
 `TabPaneProSkin#tabHeaderAreaPolicyProperty()`:
 
-```
+```java
 skin.setTabHeaderAreaPolicy(TabHeaderAreaPolicy.ALWAYS_VISIBLE);
 ```
 
@@ -105,7 +107,7 @@ the parent's padding.
 
 Example:
 
-```
+```css
 .tab-pane-pro > .tab-header-area > .tab-scroll-bar {
     -tpp-header-position: above_tabs;
     -tpp-stick-to-edge: false;
@@ -118,6 +120,55 @@ The library provides all necessary APIs for scrolling tabs and obtaining informa
 To scroll the tabs, use the method `TabPaneProSkin#scrollTabHeadersBy(double)`. To determine the scroll state, use the
 three properties: `TabPaneProSkin#headersRegionWidthProperty()`, `TabPaneProSkin#headersRegionOffsetProperty()`, and
 `TabPaneProSkin#headersClipWidthProperty()`. See the demo for an example implementation.
+
+### Tab Drag and Drop <a name="usage-tab-drag-and-drop"></a>
+
+TabPanePro supports drag and drop with automatic edge scrolling and flexible configuration options. Tabs can be dragged
+either within a single TabPane or between different TabPane instances. Below is an example configuration for two
+components: source and target. If the drag-and-drop operation occurs within the same TabPane, apply both source and
+target settings to the same instance.
+
+To enable drag and drop, follow these steps:
+
+1. Set a shared context for all TabPane instances involved in the operation:
+
+```java
+var context = new DragAndDropContext();
+sourceTabPane.setDragAndDropContext(context);
+targetTabPane.setDragAndDropContext(context);
+```
+
+2. Configure the source TabPane:
+
+```java
+sourceTabPane.setTabDragEnabled(true);
+// Optionally, restrict which tabs can be dragged using a predicate:
+sourceTabPane.setTabDragPredicate(...);
+// Optionally, provide a handler that's called when dragging starts:
+sourceTabPane.setTabDragHandler(...);
+// Provide the view of the tab being dragged — it will be shown in a popup:
+var sourceSkin = (TabPaneProSkin) sourceTabPane.getSkin();
+sourceSkin.setTabDragContentFactory(...);
+// Set the cursor for the drag operation:
+sourceSkin.setTabDragCursor(...);
+```
+
+3. Configure the target TabPane:
+
+```java
+targetTabPane.setTabDropEnabled(true);
+// Optionally, restrict which tabs can be dropped using a predicate:
+targetTabPane.setTabDropPredicate(...);
+// Optionally, provide a handler that's called when the drag operation ends:
+targetTabPane.setTabDropHandler(...);
+// Set the scroll step for edge auto-scrolling:
+var targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
+targetSkin.setTabDragScrollStep(10);
+// Configure the drop position area either via CSS or in code:
+StackPane dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .drop-position-area {}
+// It's recommended to use an even width for the drop area, as its position is calculated as (width / 2).
+// You can style the drop position in various ways, including adding nodes with arrow icons, etc.
+```
 
 ## Code Building <a name="code-building"></a>
 
