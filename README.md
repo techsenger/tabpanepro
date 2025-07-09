@@ -148,6 +148,8 @@ sourceTabPane.setTabDragEnabled(true);
 sourceTabPane.setTabDragPredicate(...);
 // Optionally, provide a handler that's called when dragging starts:
 sourceTabPane.setTabDragHandler(...);
+// Optionally, provide a handler that's called when the drag operation ends:
+sourceTabPane.setTabDropHandler(...);
 // Provide the view of the tab being dragged — it will be shown in a popup:
 var sourceSkin = (TabPaneProSkin) sourceTabPane.getSkin();
 sourceSkin.setTabDragContentFactory(...);
@@ -161,8 +163,6 @@ sourceSkin.setTabDragCursor(...);
 targetTabPane.setTabDropEnabled(true);
 // Optionally, restrict which tabs can be dropped using a predicate:
 targetTabPane.setTabDropPredicate(...);
-// Optionally, provide a handler that's called when the drag operation ends:
-targetTabPane.setTabDropHandler(...);
 // Set the scroll step for edge auto-scrolling:
 var targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
 targetSkin.setTabDragScrollStep(10);
