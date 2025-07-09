@@ -30,9 +30,12 @@ classes.
 
 ## Demo <a name="demo"></a>
 
-![t1](https://github.com/user-attachments/assets/17a6ee70-c724-4bf7-b882-2b8a0a064bd7)
+![tabpanepro0](https://github.com/user-attachments/assets/3e3c4ef7-a9e8-40be-9002-04969752e0c4)
 
-![t2](https://github.com/user-attachments/assets/b41596f7-ddd0-4a94-a932-27faa9e5d2ef)
+![tabpanepro1](https://github.com/user-attachments/assets/9079a2ed-a576-402e-a87d-c7184679ac5f)
+
+![tabpanepro2](https://github.com/user-attachments/assets/dc6cd878-a0ad-4948-a259-805c45f16438)
+
 
 ## Features <a name="features"></a>
 
