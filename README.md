@@ -24,8 +24,8 @@
 ## Overview <a name="overview"></a>
 
 Techsenger TabPanePro is a lightweight library that extends the standard `TabPane` in JavaFX with a set of
-practical enhancements addressing common needs in real-world applications. To develop the library, we used 
-the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a minimal set of required 
+practical enhancements addressing common needs in real-world applications. To develop the library, we used
+the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a minimal set of required
 classes.
 
 ## Demo <a name="demo"></a>
@@ -125,7 +125,7 @@ three properties: `TabPaneProSkin#headersRegionWidthProperty()`, `TabPaneProSkin
 
 ### Tab Drag and Drop <a name="usage-tab-drag-and-drop"></a>
 
-TabPanePro supports drag and drop with automatic edge scrolling and flexible configuration options. Tabs can be dragged
+TabPanePro supports drag-and-drop with automatic edge scrolling and flexible configuration options. Tabs can be dragged
 either within a single TabPane or between different TabPane instances. Below is an example configuration for two
 components: source and target. If the drag-and-drop operation occurs within the same TabPane, apply both source and
 target settings to the same instance.
@@ -166,11 +166,13 @@ targetTabPane.setTabDropHandler(...);
 // Set the scroll step for edge auto-scrolling:
 var targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
 targetSkin.setTabDragScrollStep(10);
-// Configure the drop position area either via CSS or in code:
-StackPane dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .drop-position-area {}
+// Configure the drop position area either via CSS or in code.
 // It's recommended to use an even width for the drop area, as its position is calculated as (width / 2).
 // You can style the drop position in various ways, including adding nodes with arrow icons, etc.
+StackPane dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .drop-position {}
 ```
+
+For a complete example and visual demonstration of these features, see the demo application included with the library.
 
 ## Code Building <a name="code-building"></a>
 
