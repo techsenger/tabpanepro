@@ -369,28 +369,28 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         this.tabHeaderArea.tabsMenuManager.showPopupMenu(anchor);
     }
 
+
     /**
-     * Returns a read-only property indicating whether all tab headers fit within the headers region.
+     * Indicates whether the tab header area currently requires a scroll bar.
      * <p>
-     * This property can be used to determine whether a tabs menu button should be shown, for example, when the
-     * available space is insufficient to display all tabs.
+     * This property becomes {@code true} when the tab headers exceed the available space
+     * and cannot be fully displayed without scrolling.
      *
-     * @return the read-only boolean property indicating tab header overflow
+     * @return a read-only property indicating whether a scroll bar is needed
      */
-    public ReadOnlyBooleanProperty headersRegionOverflowedProperty() {
-        return this.tabHeaderArea.headersRegionOverflowed.getReadOnlyProperty();
+    public ReadOnlyBooleanProperty tabScrollBarNeededProperty() {
+        return this.tabHeaderArea.scrollBarNeeded.getReadOnlyProperty();
     }
 
     /**
-     * Returns whether the headers region is currently overflowed, meaning not all tab headers fit within the
-     * visible area.
+     * Returns whether the tab header area currently requires a scroll bar.
      * <p>
-     * This is typically used to decide whether a tabs menu button should be displayed.
+     * This returns {@code true} when the tab headers do not fit in the available space.
      *
-     * @return {@code true} if not all tab headers are visible; {@code false} otherwise
+     * @return {@code true} if a scroll bar is needed; {@code false} otherwise
      */
-    public boolean isHeadersRegionOverflowed() {
-        return this.tabHeaderArea.headersRegionOverflowed.get();
+    public boolean isTabScrollBarNeeded() {
+        return this.tabHeaderArea.scrollBarNeeded.get();
     }
 
     /**
@@ -1166,8 +1166,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private final StackPane headerStickyArea = new StackPane();
 
-        private final ReadOnlyBooleanWrapper headersRegionOverflowed =
-                new ReadOnlyBooleanWrapper(this, "headersRegionOverflowed", false);
+        private final ReadOnlyBooleanWrapper scrollBarNeeded =
+                new ReadOnlyBooleanWrapper(this, "scrollBarNeeded", false);
 
         private boolean dummyTabAdded = false;
 
@@ -1514,7 +1514,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double visibleWidth = firstTabIndent() + firstAreaWidth + headerPrefWidth + stickyAreaWidth
                     + lastAreaWidth + lastTabIndent();
             var result = visibleWidth < getWidth();
-            headersRegionOverflowed.set(!result);
+            scrollBarNeeded.set(!result);
             return result;
         }
 
@@ -2106,7 +2106,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 return;
             }
             int currentDropIndex = -1;
-            if (!headersRegionOverflowed.get()) {
+            if (!scrollBarNeeded.get()) {
                 var side = getSkinnable().getSide();
                 if (side == Side.TOP || side == RIGHT) {
                     double leftX = this.headerStickyArea.getBoundsInParent().getMaxX();
@@ -2258,7 +2258,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void checkScrollOnDrag(MouseEvent e) {
-            if (!headersRegionOverflowed.get()) {
+            if (!scrollBarNeeded.get()) {
                 stopScrollOnDrag();
                 return;
             }

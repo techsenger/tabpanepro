@@ -91,7 +91,7 @@ skin.setTabHeaderAreaPolicy(TabHeaderAreaPolicy.ALWAYS_VISIBLE);
 The Tabs Menu allows quick selection of a specific tab. This menu is typically used when not all tabs are visible to
 the user. The library supports both custom menus and the standard menu. To show the standard menu, use the method
 `TabPaneProSkin#showTabsMenu(Node)`. To determine whether this menu should be shown, use
-`TabPaneProSkin#headersRegionOverflowedProperty()`.
+`TabPaneProSkin#tabScrollBarNeededProperty()`.
 
 ### Tabs ScrollBar <a name="usage-tabs-scroll-bar"></a>
 

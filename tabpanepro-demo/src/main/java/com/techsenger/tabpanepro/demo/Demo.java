@@ -403,7 +403,7 @@ public class Demo extends Application {
     private Node createLastAreaContainer(TabPaneProSkin skin) {
         var tabsMenuButton = new Button(null, new FontIcon(MaterialDesignM.MENU_DOWN));
         tabsMenuButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-        tabsMenuButton.visibleProperty().bind(skin.headersRegionOverflowedProperty());
+        tabsMenuButton.visibleProperty().bind(skin.tabScrollBarNeededProperty());
         tabsMenuButton.setOnAction(e -> skin.showTabsMenu(tabsMenuButton));
 
         var leftTimeline = new Timeline(new KeyFrame(Duration.millis(25), e -> skin.scrollTabHeadersBy(10)));
@@ -412,7 +412,7 @@ public class Demo extends Application {
         var leftEdge = Bindings.createBooleanBinding(
                 () -> skin.getHeadersRegionOffset() >= 0 - 0.000001,
                 skin.headersRegionOffsetProperty());
-        scrollLeftButton.disableProperty().bind(leftEdge.or(skin.headersRegionOverflowedProperty().not()));
+        scrollLeftButton.disableProperty().bind(leftEdge.or(skin.tabScrollBarNeededProperty().not()));
         scrollLeftButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
         scrollLeftButton.setOnMousePressed(e -> leftTimeline.play());
         scrollLeftButton.setOnMouseReleased(e -> leftTimeline.stop());
@@ -429,7 +429,7 @@ public class Demo extends Application {
                 skin.headersRegionOffsetProperty(),
                 skin.headersRegionWidthProperty(),
                 skin.headersClipWidthProperty());
-        scrollRightButton.disableProperty().bind(rightEdge.or(skin.headersRegionOverflowedProperty().not()));
+        scrollRightButton.disableProperty().bind(rightEdge.or(skin.tabScrollBarNeededProperty().not()));
 
         scrollRightButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
         scrollRightButton.setOnMousePressed(e -> rightTimeline.play());
