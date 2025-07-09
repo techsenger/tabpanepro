@@ -165,7 +165,7 @@ targetTabPane.setTabDropEnabled(true);
 targetTabPane.setTabDropPredicate(...);
 // Set the scroll step for edge auto-scrolling:
 var targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
-targetSkin.setTabDragScrollStep(10);
+targetSkin.setTabDragScrollStep(...);
 // Configure the drop position area either via CSS or in code.
 // It's recommended to use an even width for the drop area, as its position is calculated as (width / 2).
 // You can style the drop position in various ways, including adding nodes with arrow icons, etc.
