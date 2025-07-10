@@ -11,6 +11,7 @@
 * [Dependencies](#dependencies)
 * [Usage](#usage)
     * [Areas](#usage-areas)
+    * [Tab Custom Shape](#usage-tab-custom-shape)
     * [Tabs Menu](#usage-tabs-menu)
     * [Tabs ScrollBar](#usage-tabs-scroll-bar)
     * [Tab Scrolling](#usage-tab-scrolling)
@@ -23,9 +24,9 @@
 
 ## Overview <a name="overview"></a>
 
-Techsenger TabPanePro is a lightweight library that extends the standard `TabPane` in JavaFX with a set of
-practical enhancements addressing common needs in real-world applications. To develop the library, we used
-the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a minimal set of required
+Techsenger TabPanePro is a lightweight JavaFX library that extends the standard TabPane with practical features such
+as custom control areas, tab drag-and-drop with edge scrolling, a tab scrollbar, and more. The library is built on
+top of the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a minimal set of required
 classes.
 
 ## Demo <a name="demo"></a>
@@ -35,7 +36,6 @@ classes.
 ![tabpanepro1](https://github.com/user-attachments/assets/9079a2ed-a576-402e-a87d-c7184679ac5f)
 
 ![tabpanepro2](https://github.com/user-attachments/assets/dc6cd878-a0ad-4948-a259-805c45f16438)
-
 
 ## Features <a name="features"></a>
 
@@ -88,6 +88,24 @@ need to display the areas, which may contain various controls. To address this, 
 ```java
 skin.setTabHeaderAreaPolicy(TabHeaderAreaPolicy.ALWAYS_VISIBLE);
 ```
+
+### Tab Custom Shape <a name="usage-tab-custom-shape"></a>
+
+The library allows you to create virtually any custom shape for tabs. To achieve this, the following properties are provided:
+
+* `TabPaneProSkin#tabHeaderFactoryProperty()` — holds the factory used to create custom `TabHeaderSkin` instances.
+Although this class is public, its implementation is mostly hidden. Developers are given access only to the
+`TabHeaderContext`, which is sufficient for adding new nodes and overriding `layoutChildren()`.
+A key method here is `TabHeaderSkin#layoutChildren(Insets)`, which allows you to use the default layout for child
+nodes with additional padding. For example, if you want to create a custom shape with a 5-pixel gap between it and
+`.tab-container`, you can call `skin.layoutChildren(new Insets(5));`. This will add the necessary spacing without
+having to rewrite CSS styles.
+* `TabPaneProSkin#tabGapProperty()` — defines the spacing between tab headers. If the value is negative, the headers
+will overlap each other.
+* `TabPaneProSkin#tabViewOrderResolverProperty()` — holds a resolver that defines the view order for each `TabHeaderSkin`.
+* `TabPaneProSkin#tabDropOffsetResolverProperty()` — used when drag-and-drop is enabled. This property contains a
+resolver that defines an offset relative to the default position. This is necessary when using custom shapes
+and tab header spacing, as drop position may need to be adjusted accordingly.
 
 ### Tabs Menu <a name="usage-tabs-menu"></a>
 
@@ -172,7 +190,7 @@ targetSkin.setTabDragScrollStep(...);
 // Configure the drop position area either via CSS or in code.
 // It's recommended to use an even width for the drop area, as its position is calculated as (width / 2).
 // You can style the drop position in various ways, including adding nodes with arrow icons, etc.
-StackPane dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .drop-position {}
+StackPane dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .tab-drop-position {}
 ```
 
 For a complete example and visual demonstration of these features, see the demo application included with the library.

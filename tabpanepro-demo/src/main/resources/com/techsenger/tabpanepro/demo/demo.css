@@ -111,7 +111,7 @@
     Drag and Drop
 */
 
-.tab-pane-pro > .tab-header-area > .drop-position {
+.tab-pane-pro > .tab-header-area > .tab-drop-position {
     -fx-background-color: -color-accent-emphasis;
     -fx-min-width: 4px;
 }

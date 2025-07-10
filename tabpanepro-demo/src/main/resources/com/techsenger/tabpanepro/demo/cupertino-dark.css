@@ -61,3 +61,19 @@
     -fx-background-color: -color-tab-bg-selected;
 }
 
+/*
+    Custom shape.
+*/
+.tab-pane.custom-shape > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent, -color-bg-default;
+}
+
+.tab-pane.custom-shape > .tab-header-area > .headers-region > .tab:hover {
+  -fx-background-color: -color-border-default, -color-bg-subtle;
+}
+
+.tab-pane.custom-shape > .tab-header-area > .headers-region > .tab:selected {
+  -fx-background-color: -color-bg-default, -color-tab-bg-selected;
+}
+
+

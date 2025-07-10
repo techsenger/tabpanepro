@@ -27,8 +27,16 @@ import com.techsenger.tabpanepro.core.DragAndDropContext;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabHeaderAreaPolicy;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
+import com.techsenger.tabpanepro.core.skin.TabPaneProSkin.TabHeaderContext;
+import com.techsenger.tabpanepro.core.skin.TabPaneProSkin.TabHeaderSkin;
+import com.techsenger.tabpanepro.core.skin.TabViewOrderResolver;
+import com.techsenger.tabpanepro.demo.skin.DoubleSlantedTabHeaderSkin;
+import com.techsenger.tabpanepro.demo.skin.LeftSlantedTabHeaderSkin;
+import com.techsenger.tabpanepro.demo.skin.RightSlantedTabHeaderSkin;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -54,6 +62,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -98,7 +108,60 @@ public class Demo extends Application {
     }
 
     private enum CssTest {
-        NO_TEST, AREA_POSITION, HEADER_PADDING, AREA_MIN_HEIGHT, AREA_MIN_HEIGHT_AND_HEADER_PADDING
+        NONE, AREA_POSITION, HEADER_PADDING, AREA_MIN_HEIGHT, AREA_MIN_HEIGHT_AND_HEADER_PADDING
+    }
+
+    private enum CustomTabShape {
+        NONE(null, null),
+        DOUBLE_SLANTED(c -> new DoubleSlantedTabHeaderSkin(c), DoubleSlantedTabHeaderSkin.getDropOffsetResolver()),
+        LEFT_SLANTED(c -> new LeftSlantedTabHeaderSkin(c), LeftSlantedTabHeaderSkin.getDropOffsetResolver()),
+        RIGHT_SLANTED(c -> new RightSlantedTabHeaderSkin(c), RightSlantedTabHeaderSkin.getDropOffsetResolver());
+
+        private final Function<TabHeaderContext, TabHeaderSkin> skinFactory;
+
+        private final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> offsetResolver;
+
+        private CustomTabShape(Function<TabHeaderContext, TabHeaderSkin> skinFactory,
+                BiFunction<TabHeaderSkin, TabHeaderSkin, Double> offsetResolver) {
+            this.skinFactory = skinFactory;
+            this.offsetResolver = offsetResolver;
+        }
+
+        public Function<TabHeaderContext, TabHeaderSkin> getSkinFactory() {
+            return skinFactory;
+        }
+
+        public BiFunction<TabHeaderSkin, TabHeaderSkin, Double> getOffsetResolver() {
+            return offsetResolver;
+        }
+    }
+
+    public enum TabViewOrder {
+        NONE(null),
+        LEFT_ON_TOP((tabHeader, index, tabCount, selected) -> {
+            if (selected) {
+                return  tabCount * -1.0;
+            } else {
+                return (tabCount - 1 - index) * -1.0;
+            }
+        }),
+        RIGHT_ON_TOP((tabHeader, index, totalCount, selected) -> {
+            if (selected) {
+                return  totalCount * -1.0;
+            } else {
+                return index * -1.0;
+            }
+        });
+
+        private final TabViewOrderResolver resolver;
+
+        private TabViewOrder(TabViewOrderResolver resolver) {
+            this.resolver = resolver;
+        }
+
+        public TabViewOrderResolver getResolver() {
+            return resolver;
+        }
     }
 
     private final List<? extends TabPane> tabPanes = new ArrayList<>();
@@ -116,7 +179,7 @@ public class Demo extends Application {
     private final CheckBox cupertinoDarkCheckBox = new CheckBox("Cupertino Dark");
 
     private final ComboBox<Integer> tabCountComboBox =
-            new ComboBox<>(FXCollections.observableArrayList(1, 2, 3, 4, 5, 10, 15, 20, 25));
+            new ComboBox<>(FXCollections.observableArrayList(0, 1, 2, 3, 4, 5, 10, 15, 20, 25));
 
     private final ComboBox<TabStyle> tabStyleComboBox
             = new ComboBox<>(FXCollections.observableArrayList(TabStyle.values()));
@@ -136,15 +199,33 @@ public class Demo extends Application {
 
     private final Label scrollBarStyleLabel = new Label("ScrollBar Style");
 
-    private final ComboBox<TabScrollBarStyle> tabScrollBarStyleComboBox
+    private final ComboBox<TabScrollBarStyle> scrollBarStyleComboBox
             = new ComboBox<>(FXCollections.observableArrayList(TabScrollBarStyle.values()));
 
     private final CheckBox dragAndDropCheckBox = new CheckBox("Drag and Drop");
+
+    private final Label dropOffsetLabel = new Label("Drop Offset");
+
+    private final TextField dropOffsetTextField = new TextField("0.0");
 
     private final Label cssTestLabel = new Label("CSS Test");
 
     private final ComboBox<CssTest> cssTestComboBox
             = new ComboBox<>(FXCollections.observableArrayList(CssTest.values()));
+
+    private final Label tabShapeLabel = new Label("Tab Shape");
+
+    private final ComboBox<CustomTabShape> tabShapeComboBox
+            = new ComboBox<>(FXCollections.observableArrayList(CustomTabShape.values()));
+
+    private final Label tabGapLabel = new Label("Tab Gap");
+
+    private final TextField tabGapTextField = new TextField("0.0");
+
+    private final Label tabViewOrderLabel = new Label("Tab View Order");
+
+    private final ComboBox<TabViewOrder> tabViewOrderComboBox
+            = new ComboBox<>(FXCollections.observableArrayList(TabViewOrder.values()));
 
     private final GridPane gridPane = new GridPane();
 
@@ -179,12 +260,20 @@ public class Demo extends Application {
             lastAreaCheckBox.setDisable(!newV);
             tabHeaderAreaPolicyLabel.setDisable(!newV);
             tabHeaderAreaPolicyComboBox.setDisable(!newV);
-            cssTestLabel.setDisable(!newV);
-            cssTestComboBox.setDisable(!newV);
             scrollBarCheckBox.setDisable(!newV);
             scrollBarStyleLabel.setDisable(!newV);
-            tabScrollBarStyleComboBox.setDisable(!newV);
+            scrollBarStyleComboBox.setDisable(!newV);
             dragAndDropCheckBox.setDisable(!newV);
+            dropOffsetLabel.setDisable(!newV);
+            dropOffsetTextField.setDisable(!newV);
+            tabShapeLabel.setDisable(!newV);
+            tabShapeComboBox.setDisable(!newV);
+            tabGapLabel.setDisable(!newV);
+            tabGapTextField.setDisable(!newV);
+            tabViewOrderLabel.setDisable(!newV);
+            tabViewOrderComboBox.setDisable(!newV);
+            cssTestLabel.setDisable(!newV);
+            cssTestComboBox.setDisable(!newV);
         });
         cupertinoDarkCheckBox.setSelected(true);
         cupertinoDarkCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateUserAgentStylesheet());
@@ -193,11 +282,9 @@ public class Demo extends Application {
         gridPane.add(tabStylesHBox, 2, 0);
         tabStyleComboBox.getSelectionModel().select(0);
         tabStyleComboBox.valueProperty().addListener((ov, oldV, newV) -> createTabPanes());
-        tabStyleComboBox.getStyleClass().add(Styles.DENSE);
         tabStyleComboBox.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(tabStyleComboBox, Priority.ALWAYS);
         var tabCountHBox = createCellHBox(new Label("Tab Count"), tabCountComboBox);
-        tabCountComboBox.getStyleClass().add(Styles.DENSE);
         tabCountComboBox.getSelectionModel().select(4);
         tabCountComboBox.valueProperty().addListener((ov, oldV, newV) -> tabPanes.forEach(e -> createTabs(e)));
         tabCountComboBox.setMaxWidth(Double.MAX_VALUE);
@@ -226,15 +313,51 @@ public class Demo extends Application {
         gridPane.add(scrollBarCheckBox, 0, 2);
         scrollBarCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateScrollBarEnabled(newV));
         scrollBarStyleLabel.setMinWidth(Region.USE_PREF_SIZE);
-        tabScrollBarStyleComboBox.getSelectionModel().select(2);
-        tabScrollBarStyleComboBox.valueProperty()
+        scrollBarStyleComboBox.getSelectionModel().select(2);
+        scrollBarStyleComboBox.valueProperty()
                 .addListener((ov, oldV, newV) -> updateTabScrollBarStyle(oldV, newV));
-        tabScrollBarStyleComboBox.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(tabScrollBarStyleComboBox, Priority.ALWAYS);
-        var scrollBarStyleHBox = createCellHBox(scrollBarStyleLabel, tabScrollBarStyleComboBox);
+        scrollBarStyleComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(scrollBarStyleComboBox, Priority.ALWAYS);
+        var scrollBarStyleHBox = createCellHBox(scrollBarStyleLabel, scrollBarStyleComboBox);
         gridPane.add(scrollBarStyleHBox, 1, 2);
         gridPane.add(dragAndDropCheckBox, 2, 2);
         dragAndDropCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateDragAndDrop(newV));
+//        dropOffsetLabel.setMinWidth(Region.USE_PREF_SIZE);
+//        HBox.setHgrow(dropOffsetTextField, Priority.ALWAYS);
+//        dropOffsetTextField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+//            if (event.getCode() == KeyCode.ENTER) {
+//                updateDropOffset(dropOffsetTextField.getText());
+//                event.consume();
+//            }
+//        });
+//        var dropOffsetBox = createCellHBox(dropOffsetLabel, dropOffsetTextField);
+//        gridPane.add(dropOffsetBox, 3, 2);
+
+        //row 3
+        tabShapeLabel.setMinWidth(Region.USE_PREF_SIZE);
+        tabShapeComboBox.getSelectionModel().select(0);
+        tabShapeComboBox.valueProperty().addListener((ov, oldV, newV) -> updateTabShape(oldV, newV));
+        tabShapeComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(tabShapeComboBox, Priority.ALWAYS);
+        var tabShapeBox = createCellHBox(tabShapeLabel, tabShapeComboBox);
+        gridPane.add(tabShapeBox, 0, 3);
+        tabGapLabel.setMinWidth(Region.USE_PREF_SIZE);
+        HBox.setHgrow(tabGapTextField, Priority.ALWAYS);
+        tabGapTextField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                updateTabGap(tabGapTextField.getText());
+                event.consume();
+            }
+        });
+        var tabGapBox = createCellHBox(tabGapLabel, tabGapTextField);
+        gridPane.add(tabGapBox, 1, 3);
+        tabViewOrderLabel.setMinWidth(Region.USE_PREF_SIZE);
+        tabViewOrderComboBox.getSelectionModel().select(0);
+        tabViewOrderComboBox.valueProperty().addListener((ov, oldV, newV) -> updateTabViewOrder(newV));
+        tabViewOrderComboBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(tabViewOrderComboBox, Priority.ALWAYS);
+        var tabViewOrderBox = createCellHBox(tabViewOrderLabel, tabViewOrderComboBox);
+        gridPane.add(tabViewOrderBox, 2, 3);
         cssTestLabel.setMinWidth(Region.USE_PREF_SIZE);
         var testsHBox = createCellHBox(cssTestLabel, cssTestComboBox);
         cssTestComboBox.getSelectionModel().select(0);
@@ -242,7 +365,7 @@ public class Demo extends Application {
         cssTestComboBox.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(cssTestComboBox, Priority.ALWAYS);
         GridPane.setHgrow(testsHBox, Priority.ALWAYS);
-        gridPane.add(testsHBox, 3, 2);
+        gridPane.add(testsHBox, 3, 3);
 
         root.setSpacing(2 * INSET);
         root.setPadding(new Insets(INSET));
@@ -306,13 +429,46 @@ public class Demo extends Application {
         });
     }
 
+//    private void updateDropOffset(String value) {
+//        tabPanes.stream().map(t -> (TabPaneProSkin) t.getSkin()).forEach(t -> {
+//            t.setTabDropOffset(Double.valueOf(value));
+//        });
+//    }
+
+    private void updateTabShape(CustomTabShape oldShape, CustomTabShape newShape) {
+        tabPanes.stream()
+                .map(e -> {
+                    if (oldShape != CustomTabShape.NONE) {
+                        e.getStyleClass().remove("custom-shape");
+                    }
+                    if (newShape != CustomTabShape.NONE) {
+                        e.getStyleClass().add("custom-shape");
+                    }
+                    return (TabPaneProSkin) e.getSkin();
+                })
+                .forEach(s -> {
+                    s.setTabHeaderFactory(newShape.getSkinFactory());
+                    s.setTabDropOffsetResolver(newShape.getOffsetResolver());
+                });
+    }
+
+    private void updateTabGap(String value) {
+        var v = Double.valueOf(value);
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(s -> s.setTabGap(v));
+    }
+
+    private void updateTabViewOrder(TabViewOrder order) {
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin())
+                .forEach(s -> s.setTabViewOrderResolver(order.getResolver()));
+    }
+
     private void updateCssTest(CssTest oldValue, CssTest newValue) {
-        if (oldValue != CssTest.NO_TEST) {
+        if (oldValue != CssTest.NONE) {
             tabPanes.stream().forEach(e -> {
                 e.getStyleClass().removeAll("test", resolveTestStyleClass(oldValue));
             });
         }
-        if (newValue != CssTest.NO_TEST) {
+        if (newValue != CssTest.NONE) {
             tabPanes.stream().forEach(e -> {
                 e.getStyleClass().addAll("test", resolveTestStyleClass(newValue));
             });
@@ -335,8 +491,8 @@ public class Demo extends Application {
         this.rightSplitPane.getItems().addAll(leftPane, rightPane);
         this.tabPanes.clear();
         this.tabPanes.addAll((List) List.of(topPane, rightPane, bottomPane, leftPane));
-        updateCssTest(CssTest.NO_TEST, cssTestComboBox.getValue());
-        updateTabScrollBarStyle(null, tabScrollBarStyleComboBox.getValue());
+        updateCssTest(CssTest.NONE, cssTestComboBox.getValue());
+        updateTabScrollBarStyle(null, scrollBarStyleComboBox.getValue());
     }
 
     private TabPane createTabPane(Side side) {
@@ -351,6 +507,10 @@ public class Demo extends Application {
             skin.setTabDragContentFactory(this::createDragContent);
             skin.setTabDragScrollStep(10);
             skin.setTabDragCursor(Cursor.CLOSED_HAND);
+            skin.setTabHeaderFactory(tabShapeComboBox.getValue().getSkinFactory());
+            skin.setTabDropOffsetResolver(tabShapeComboBox.getValue().getOffsetResolver());
+            skin.setTabGap(Double.valueOf(tabGapTextField.getText()));
+            skin.setTabViewOrderResolver(tabViewOrderComboBox.getValue().getResolver());
             if (firstAreaCheckBox.isSelected()) {
                 skin.getTabHeaderFirstArea().getChildren().add(createFirstAreaContainer());
             }
