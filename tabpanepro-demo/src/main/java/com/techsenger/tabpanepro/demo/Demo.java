@@ -400,11 +400,13 @@ public class Demo extends Application {
     }
 
     private void updatePolicy(TabHeaderAreaPolicy policy) {
-        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(e -> e.setTabHeaderAreaPolicy(policy));
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin())
+                .forEach(e -> e.getTabHeaderArea().setPolicy(policy));
     }
 
     private void updateScrollBarEnabled(boolean value) {
-        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(e -> e.setTabScrollBarEnabled(value));
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin())
+                .forEach(e -> e.getTabHeaderArea().setScrollBarEnabled(value));
     }
 
     private void updateTabScrollBarStyle(TabScrollBarStyle oldStyle, TabScrollBarStyle newStyle) {
@@ -447,19 +449,20 @@ public class Demo extends Application {
                     return (TabPaneProSkin) e.getSkin();
                 })
                 .forEach(s -> {
-                    s.setTabHeaderFactory(newShape.getSkinFactory());
-                    s.setTabDropOffsetResolver(newShape.getOffsetResolver());
+                    var area = s.getTabHeaderArea();
+                    area.setTabHeaderFactory(newShape.getSkinFactory());
+                    area.setTabDropOffsetResolver(newShape.getOffsetResolver());
                 });
     }
 
     private void updateTabGap(String value) {
         var v = Double.valueOf(value);
-        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(s -> s.setTabGap(v));
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(s -> s.getTabHeaderArea().setTabGap(v));
     }
 
     private void updateTabViewOrder(TabViewOrder order) {
         tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin())
-                .forEach(s -> s.setTabViewOrderResolver(order.getResolver()));
+                .forEach(s -> s.getTabHeaderArea().setTabViewOrderResolver(order.getResolver()));
     }
 
     private void updateCssTest(CssTest oldValue, CssTest newValue) {
@@ -504,24 +507,25 @@ public class Demo extends Application {
             tabPanePro.setTabDropEnabled(dragAndDropCheckBox.isSelected());
             tabPane = tabPanePro;
             var skin = (TabPaneProSkin) tabPane.getSkin();
-            skin.setTabDragContentFactory(this::createDragContent);
-            skin.setTabDragScrollStep(10);
-            skin.setTabDragCursor(Cursor.CLOSED_HAND);
-            skin.setTabHeaderFactory(tabShapeComboBox.getValue().getSkinFactory());
-            skin.setTabDropOffsetResolver(tabShapeComboBox.getValue().getOffsetResolver());
-            skin.setTabGap(Double.valueOf(tabGapTextField.getText()));
-            skin.setTabViewOrderResolver(tabViewOrderComboBox.getValue().getResolver());
+            var tabHeaderArea = skin.getTabHeaderArea();
+            tabHeaderArea.setTabDragContentFactory(this::createDragContent);
+            tabHeaderArea.setTabDragScrollStep(10);
+            tabHeaderArea.setTabDragCursor(Cursor.CLOSED_HAND);
+            tabHeaderArea.setTabHeaderFactory(tabShapeComboBox.getValue().getSkinFactory());
+            tabHeaderArea.setTabDropOffsetResolver(tabShapeComboBox.getValue().getOffsetResolver());
+            tabHeaderArea.setTabGap(Double.valueOf(tabGapTextField.getText()));
+            tabHeaderArea.setTabViewOrderResolver(tabViewOrderComboBox.getValue().getResolver());
             if (firstAreaCheckBox.isSelected()) {
-                skin.getTabHeaderFirstArea().getChildren().add(createFirstAreaContainer());
+                tabHeaderArea.getFirstArea().getChildren().add(createFirstAreaContainer());
             }
             if (stickyAreaCheckBox.isSelected()) {
-                skin.getTabHeaderStickyArea().getChildren().add(createStickyAreaContainer(tabPane));
+                tabHeaderArea.getStickyArea().getChildren().add(createStickyAreaContainer(tabPane));
             }
             if (lastAreaCheckBox.isSelected()) {
-                skin.getTabHeaderLastArea().getChildren().add(createLastAreaContainer(skin));
+                tabHeaderArea.getLastArea().getChildren().add(createLastAreaContainer(skin));
             }
-            skin.setTabHeaderAreaPolicy(this.tabHeaderAreaPolicyComboBox.getValue());
-            skin.setTabScrollBarEnabled(scrollBarCheckBox.isSelected());
+            tabHeaderArea.setPolicy(this.tabHeaderAreaPolicyComboBox.getValue());
+            tabHeaderArea.setScrollBarEnabled(scrollBarCheckBox.isSelected());
         } else {
             tabPane = new TabPane();
         }
@@ -561,35 +565,36 @@ public class Demo extends Application {
     }
 
     private Node createLastAreaContainer(TabPaneProSkin skin) {
+        var tabHeaderArea = skin.getTabHeaderArea();
         var tabsMenuButton = new Button(null, new FontIcon(MaterialDesignM.MENU_DOWN));
         tabsMenuButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-        tabsMenuButton.visibleProperty().bind(skin.tabScrollBarNeededProperty());
-        tabsMenuButton.setOnAction(e -> skin.showTabsMenu(tabsMenuButton));
+        tabsMenuButton.visibleProperty().bind(skin.getTabHeaderArea().scrollBarNeededProperty());
+        tabsMenuButton.setOnAction(e -> skin.getTabHeaderArea().showTabsMenu(tabsMenuButton));
 
-        var leftTimeline = new Timeline(new KeyFrame(Duration.millis(25), e -> skin.scrollTabHeadersBy(10)));
+        var leftTimeline = new Timeline(new KeyFrame(Duration.millis(25), e -> tabHeaderArea.scrollTabHeadersBy(10)));
         leftTimeline.setCycleCount(Timeline.INDEFINITE);
         var scrollLeftButton = new Button(null, new FontIcon(MaterialDesignC.CHEVRON_LEFT));
         var leftEdge = Bindings.createBooleanBinding(
-                () -> skin.getHeadersRegionOffset() >= 0 - 0.000001,
-                skin.headersRegionOffsetProperty());
-        scrollLeftButton.disableProperty().bind(leftEdge.or(skin.tabScrollBarNeededProperty().not()));
+                () -> tabHeaderArea.getHeadersRegionOffset() >= 0 - 0.000001,
+                tabHeaderArea.headersRegionOffsetProperty());
+        scrollLeftButton.disableProperty().bind(leftEdge.or(tabHeaderArea.scrollBarNeededProperty().not()));
         scrollLeftButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
         scrollLeftButton.setOnMousePressed(e -> leftTimeline.play());
         scrollLeftButton.setOnMouseReleased(e -> leftTimeline.stop());
 
-        var rightTimeline = new Timeline(new KeyFrame(Duration.millis(25), e -> skin.scrollTabHeadersBy(-10)));
+        var rightTimeline = new Timeline(new KeyFrame(Duration.millis(25), e -> tabHeaderArea.scrollTabHeadersBy(-10)));
         rightTimeline.setCycleCount(Timeline.INDEFINITE);
         var scrollRightButton = new Button(null, new FontIcon(MaterialDesignC.CHEVRON_RIGHT));
         var rightEdge = Bindings.createBooleanBinding(
                 () -> {
                     // If snapToPixel is true, then all values (including the offset) are snapped
-                    return skin.getHeadersRegionWidth() - 0.000001 <=  skin.getHeadersClipWidth()
-                        + Math.abs(skin.getHeadersRegionOffset());
+                    return tabHeaderArea.getHeadersRegionWidth() - 0.000001 <=  tabHeaderArea.getHeadersClipWidth()
+                        + Math.abs(tabHeaderArea.getHeadersRegionOffset());
                 },
-                skin.headersRegionOffsetProperty(),
-                skin.headersRegionWidthProperty(),
-                skin.headersClipWidthProperty());
-        scrollRightButton.disableProperty().bind(rightEdge.or(skin.tabScrollBarNeededProperty().not()));
+                tabHeaderArea.headersRegionOffsetProperty(),
+                tabHeaderArea.headersRegionWidthProperty(),
+                tabHeaderArea.headersClipWidthProperty());
+        scrollRightButton.disableProperty().bind(rightEdge.or(tabHeaderArea.scrollBarNeededProperty().not()));
 
         scrollRightButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
         scrollRightButton.setOnMousePressed(e -> rightTimeline.play());
@@ -630,10 +635,11 @@ public class Demo extends Application {
         tabPane.getTabs().add(tab);
     }
 
-    private Node createDragContent(Node tabHeader, Tab tab) {
+    private Node createDragContent(TabHeaderSkin tabHeader) {
         var tabParams = new SnapshotParameters();
         WritableImage tabImage = tabHeader.snapshot(tabParams, null);
         ImageView dragView = new ImageView(tabImage);
+        var tab = tabHeader.getContext().getTab();
         if (tab.getTabPane().getSide() == Side.BOTTOM) {
             Rotate rotate = new Rotate(180, tabImage.getWidth() / 2, tabImage.getHeight() / 2);
             dragView.getTransforms().add(rotate);

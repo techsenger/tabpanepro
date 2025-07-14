@@ -41,7 +41,7 @@ public class DoubleSlantedTabHeaderSkin extends AbstractSlantedTabHeaderSkin {
     private static final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> dropOffsetResolver = (left, right) -> {
         TabPanePro tabPane = (TabPanePro) left.getContext().getTab().getTabPane();
         TabPaneProSkin skin = (TabPaneProSkin) tabPane.getSkin();
-        var offset = skin.getTabGap() / 2;
+        var offset = skin.getTabHeaderArea().getTabGap() / 2;
         if (tabPane.getSide() == Side.BOTTOM || tabPane.getSide() == Side.LEFT) {
             offset *= -1;
         }

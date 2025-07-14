@@ -40,7 +40,7 @@ public class LeftSlantedTabHeaderSkin  extends AbstractSlantedTabHeaderSkin {
         TabPanePro tabPane = (TabPanePro) left.getContext().getTab().getTabPane();
         TabPaneProSkin skin = (TabPaneProSkin) tabPane.getSkin();
         if (tabPane.getSide() == Side.BOTTOM || tabPane.getSide() == Side.LEFT) {
-            return skin.getTabGap() * -1;
+            return skin.getTabHeaderArea().getTabGap() * -1;
         }
         return 0.0;
     };

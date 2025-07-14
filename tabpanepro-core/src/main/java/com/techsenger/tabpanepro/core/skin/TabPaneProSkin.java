@@ -27,7 +27,7 @@
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
- * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025.
+ * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -246,453 +246,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         initializeSwipeHandlers();
     }
 
-    /* *************************************************************************
-     *                                                                         *
-     * TabPanePro                                                              *
-     *                                                                         *
-     **************************************************************************/
-
-    /**
-     * Returns the first area, located before all tab headers in the tab header area.
-     * <p>
-     * This area is typically used to place custom UI elements, such as a menu button.
-     *
-     * @return the {@code StackPane} positioned before the tab headers
-     */
-    public StackPane getTabHeaderFirstArea() {
-        return tabHeaderArea.headerFirstArea;
-    }
-
-    /**
-     * Returns the last area, located after the sticky area and all tab headers in the tab header area.
-     * <p>
-     * This area is typically used to place scroll buttons, a minimize button, or other auxiliary controls.
-     *
-     * @return the {@code StackPane} positioned after the tab headers and sticky area
-     */
-    public StackPane getTabHeaderLastArea() {
-        return tabHeaderArea.headerLastArea;
-    }
-
-    /**
-     * Returns the sticky area, located between the tab headers and the last header area.
-     * <p>
-     * This area is typically used to place a "New Tab" button or other controls that should remain visible
-     * regardless of tab scrolling.
-     *
-     * @return the {@code StackPane} positioned between the tab headers and the last header area
-     */
-    public StackPane getTabHeaderStickyArea() {
-        return tabHeaderArea.headerStickyArea;
-    }
-
-    /**
-     * Returns the {@link StackPane} that visually marks the exact insertion position for a tab during drag-and-drop
-     * operations. The element is managed automatically (hidden when no drag is active).
-     *
-     * <p>Customize it by either:
-     * <ul>
-     *   <li>Styling with CSS (default style class: {@code tab-drop-position})</li>
-     *   <li>Adding custom nodes (e.g., an arrow icon via {@link #getChildren()})</li>
-     * </ul>
-     *
-     * @return the non-null container marking the drop position
-     */
-    public StackPane getTabDropPosition() {
-        return tabHeaderArea.tabDropPosition;
-    }
-
-    /**
-     * Returns the property that controls the visibility policy of the tab header area.
-     * <p>
-     * By default, the tab header area becomes invisible when there are no tabs. This behavior can be changed using
-     * the {@link TabHeaderAreaPolicy} enum.
-     *
-     * @return the {@code ObjectProperty} holding the current {@code TabHeaderAreaPolicy}
-     */
-    public ObjectProperty<TabHeaderAreaPolicy> tabHeaderAreaPolicyProperty() {
-        return tabHeaderArea.policy;
-    }
-
-    /**
-     * Returns the current {@link TabHeaderAreaPolicy} that determines the visibility of the tab header area.
-     *
-     * @return the current tab header area policy
-     */
-    public TabHeaderAreaPolicy getTabHeaderAreaPolicy() {
-        return tabHeaderArea.policy.get();
-    }
-
-    /**
-     * Sets the {@link TabHeaderAreaPolicy} that controls the visibility of the tab header area.
-     *
-     * @param policy the new tab header area policy to apply
-     */
-    public void setTabHeaderAreaPolicy(TabHeaderAreaPolicy policy) {
-        this.tabHeaderArea.policy.set(policy);
-    }
-
-    /**
-     * Returns the property that controls whether a scroll bar is enabled
-     * next to the tab headers when the tabs overflow.
-     *
-     * @return the tabScrollBarEnabled property
-     */
-    public BooleanProperty tabScrollBarEnabledProperty() {
-        return this.tabHeaderArea.tabScrollBarEnabled;
-    }
-
-    /**
-     * Returns whether a scroll bar is enabled next to the tab headers
-     * when the tabs overflow.
-     *
-     * @return {@code true} if the scroll bar is enabled, {@code false} otherwise
-     */
-    public boolean isTabScrollBarEnabled() {
-        return this.tabHeaderArea.tabScrollBarEnabled.get();
-    }
-
-    /**
-     * Sets whether a scroll bar is enabled next to the tab headers
-     * when the tabs overflow.
-     *
-     * @param enabled {@code true} to enable the scroll bar, {@code false} to disable it
-     */
-    public void setTabScrollBarEnabled(boolean enabled) {
-        this.tabHeaderArea.tabScrollBarEnabled.set(enabled);
-    }
-
-    /**
-     * Shows the standard tabs menu at the specified anchor node.
-     * <p>
-     * This menu is typically used for quick navigation between tabs and is usually triggered by a button placed in
-     * the tab header area.
-     *
-     * @param anchor the node relative to which the popup menu will be shown, typically a button that opens the menu
-     */
-    public void showTabsMenu(Node anchor) {
-        this.tabHeaderArea.tabsMenuManager.showPopupMenu(anchor);
-    }
-
-
-    /**
-     * Indicates whether the tab header area currently requires a scroll bar.
-     * <p>
-     * This property becomes {@code true} when the tab headers exceed the available space
-     * and cannot be fully displayed without scrolling.
-     *
-     * @return a read-only property indicating whether a scroll bar is needed
-     */
-    public ReadOnlyBooleanProperty tabScrollBarNeededProperty() {
-        return this.tabHeaderArea.scrollBarNeeded.getReadOnlyProperty();
-    }
-
-    /**
-     * Returns whether the tab header area currently requires a scroll bar.
-     * <p>
-     * This returns {@code true} when the tab headers do not fit in the available space.
-     *
-     * @return {@code true} if a scroll bar is needed; {@code false} otherwise
-     */
-    public boolean isTabScrollBarNeeded() {
-        return this.tabHeaderArea.scrollBarNeeded.get();
-    }
-
-    /**
-     * Returns a read-only property representing the width of the headers region.
-     *
-     * @return the read-only double property of the headers region width
-     */
-    public ReadOnlyDoubleProperty headersRegionWidthProperty() {
-        return this.tabHeaderArea.headersRegion.widthProperty();
-    }
-
-    /**
-     * Returns the current width of the headers region.
-     *
-     * @return the width of the headers region in pixels
-     */
-    public double getHeadersRegionWidth() {
-        return this.tabHeaderArea.headersRegion.widthProperty().get();
-    }
-
-    /**
-     * Returns a read-only property representing the offset of the headers region.
-     * <p>
-     * This offset indicates how much the entire headers region is shifted (scrolled), which effectively controls
-     * the visible portion of the tab headers.
-     *
-     * @return the read-only double property of the headers region offset
-     */
-    public ReadOnlyDoubleProperty headersRegionOffsetProperty() {
-        return this.tabHeaderArea.scrollOffset;
-    }
-
-    /**
-     * Returns the current offset of the headers region.
-     * <p>
-     * This value reflects how much the headers region has been scrolled (shifted), which effectively controls
-     * the visible portion of the tab headers.
-     *
-     * @return the horizontal offset in pixels of the headers region
-     */
-    public double getHeadersRegionOffset() {
-        return this.tabHeaderArea.scrollOffset.get();
-    }
-
-    /**
-     * Returns a read-only property representing the width of the clip region for the tab headers.
-     * <p>
-     * This clip region acts as a viewport, defining the visible area through which the tab headers are displayed.
-     *
-     * @return the read-only double property of the headers clip width
-     */
-    public ReadOnlyDoubleProperty headersClipWidthProperty() {
-        return this.tabHeaderArea.headerClip.widthProperty();
-    }
-
-    /**
-     * Returns the current width of the clip region for the tab headers.
-     * <p>
-     * The clip defines the viewport area that determines which part of the tab headers is visible.
-     *
-     * @return the width of the headers clip region in pixels
-     */
-    public double getHeadersClipWidth() {
-        return this.tabHeaderArea.headerClip.widthProperty().get();
-    }
-
-    /**
-     * Scrolls the tab headers by the specified number of pixels.
-     *
-     * @param delta the amount in pixels to scroll the tab headers;
-     */
-    public void scrollTabHeadersBy(double delta) {
-        this.tabHeaderArea.scrollTabsBy(delta);
-    }
-
-    /**
-     * Returns the {@link ObjectProperty} that holds the factory function for creating tab drag content.
-     * The factory takes a {@link Node} (tab header) and a {@link Tab}, then produces an {@link Node}.
-     *
-     * @return The {@link ObjectProperty} containing the content factory.
-     */
-    public ObjectProperty<BiFunction<Node, Tab, Node>> tabDragContentFactoryProperty() {
-        return this.tabHeaderArea.tabDragContentFactory;
-    }
-
-    /**
-     * Gets the current factory function used to generate tab drag content.
-     * If no custom factory is set, this returns {@code null}.
-     *
-     * @return The current {@link BiFunction} producing an {@link Node}, or {@code null} if unset.
-     */
-    public BiFunction<Node, Tab, Node> getTabDragContentFactory() {
-        return tabDragContentFactoryProperty().get();
-    }
-
-    /**
-     * Sets a new factory function to generate custom tab drag content.
-     * The factory should take a {@link Node} (tab header) and a {@link Tab}, then return an {@link Node}.
-     *
-     * @param factory The {@link BiFunction} to use for content generation, or {@code null} to clear it.
-     */
-    public void setTabDragContentFactory(BiFunction<Node, Tab, Node> factory) {
-        tabDragContentFactoryProperty().set(factory);
-    }
-
-    /**
-     * Returns the DoubleProperty object for the tab drag scroll step.
-     * This value determines the scroll step (in pixels) for tab headers during drag-and-drop operations.
-     *
-     * @return the DoubleProperty representing the tab drag scroll step
-     */
-    public DoubleProperty tabDragScrollStepProperty() {
-        return tabHeaderArea.tabDragScrollStep;
-    }
-
-    /**
-     * Gets the current value of the tab drag scroll step property.
-     * This value determines the scroll step (in pixels) for tab headers during drag-and-drop operations.
-     *
-     * @return the current scroll step value
-     */
-    public double getTabDragScrollStep() {
-        return tabDragScrollStepProperty().get();
-    }
-
-    /**
-     * Sets the value of the tab drag scroll step property.
-     * This value determines the scroll step (in pixels) for tab headers during drag-and-drop operations.
-     *
-     * @param value the new scroll step value to be set
-     */
-    public void setTabDragScrollStep(double value) {
-        tabDragScrollStepProperty().set(value);
-    }
-
-    /**
-     * Gets the current cursor that will be displayed during tab drag-and-drop operations.
-     *
-     * @return The current drag cursor property. If not set, returns {@code null}
-     *         indicating system default cursor will be used.
-     */
-    public final ObjectProperty<Cursor> tabDragCursorProperty() {
-        return tabHeaderArea.tabDragCursor;
-    }
-
-    /**
-     * Sets the cursor to be displayed during tab drag-and-drop operations.
-     *
-     * @param cursor The cursor to display during dragging.
-     *               Use {@code null} to reset to system default behavior.
-     */
-    public final void setTabDragCursor(Cursor cursor) {
-        tabDragCursorProperty().set(cursor);
-    }
-
-    /**
-     * Gets the currently configured drag cursor.
-     *
-     * @return The current drag cursor, or {@code null} if no custom cursor
-     *         is set (system default will be used).
-     */
-    public final Cursor getTabDragCursor() {
-        return tabDragCursorProperty().get();
-    }
-
-
-    public ObjectProperty<Function<TabHeaderContext, TabHeaderSkin>> tabHeaderFactoryProperty() {
-        return tabHeaderArea.tabHeaderFactory;
-    }
-
-
-    public Function<TabHeaderContext, TabHeaderSkin> getTabHeaderFactory() {
-        return tabHeaderFactoryProperty().get();
-    }
-
-    public void setTabHeaderFactory(Function<TabHeaderContext, TabHeaderSkin> factory) {
-        tabHeaderFactoryProperty().set(factory);
-    }
-
-    /**
-     * Returns the {@code DoubleProperty} representing the tab gap.
-     * <p>
-     * A positive value increases the space between tabs, while a negative value causes
-     * them to overlap. A value of {@code 0} means no gap or overlap.
-     *
-     * @return the {@link DoubleProperty} controlling tab spacing
-     */
-    public DoubleProperty tabGapProperty() {
-        return tabHeaderArea.tabGap;
-    }
-
-    /**
-     * Returns the gap between tab headers.
-     * <p>
-     * A positive value increases the space between tabs, while a negative value causes
-     * them to overlap. A value of {@code 0} means no gap or overlap.
-     *
-     * @return the current gap value between tab headers
-     */
-    public double getTabGap() {
-        return tabGapProperty().get();
-    }
-
-    /**
-     * Sets the gap between tab headers.
-     * <p>
-     * A positive value increases the space between tabs, while a negative value causes
-     * them to overlap. A value of {@code 0} means no gap or overlap.
-     *
-     * @param gap the gap value between tab headers (in pixels)
-     */
-    public void setTabGap(double gap) {
-        tabGapProperty().set(gap);
-    }
-
-    /**
-     * Returns the {@link ObjectProperty} representing the tab view order resolver.
-     * <p>
-     * This property controls how tab headers are layered visually using the
-     * {@link javafx.scene.Node#setViewOrder(double)} mechanism.
-     *
-     * @return the {@link ObjectProperty} holding the tab view order resolver
-     */
-    public ObjectProperty<TabViewOrderResolver> tabViewOrderResolverProperty() {
-        return tabHeaderArea.tabViewOrderResolver;
-    }
-
-    /**
-     * Returns the current tab view order resolver.
-     * <p>
-     * This resolver defines the {@link javafx.scene.Node#setViewOrder(double) view order}
-     * for each tab header. Lower view order values are rendered in front of higher ones.
-     *
-     * @return the current {@link TabViewOrderResolver} that computes the view order for tab headers,
-     *         or {@code null} if all tabs use the same view order
-     */
-    public TabViewOrderResolver getTabViewOrderResolver() {
-        return tabViewOrderResolverProperty().get();
-    }
-
-    /**
-     * Sets the tab view order resolver used to determine the rendering order of tab headers.
-     * <p>
-     * This resolver defines the {@link javafx.scene.Node#setViewOrder(double) view order}
-     * for each tab header. Lower view order values are rendered in front of higher ones.
-     * <p>
-     * If {@code null} is set, all tab headers will share the same view order and will be
-     * rendered according to their order in the scene graph.
-     *
-     * @param resolver a {@link TabViewOrderResolver} that computes the view order for each tab header,
-     *                 or {@code null} to use the same view order for all tabs
-     */
-    public void setTabViewOrderResolver(TabViewOrderResolver resolver) {
-        tabViewOrderResolverProperty().set(resolver);
-    }
-
-    /**
-     * Defines the resolver used to calculate an offset for the visual drop position
-     * indicator ({@link #getTabDropPosition()}) when a tab is being dragged between two existing tabs.
-     * <p>
-     * This resolver receives the {@code left} and {@code right} {@link TabHeaderSkin}
-     * instances representing the tabs adjacent to the drop location. It returns a
-     * {@code double} value indicating the adjustment to apply to the automatically
-     * computed drop position.
-     * <p>
-     * This resolver is applied only when the tab is dropped between two existing tabs,
-     * and is ignored when the drop occurs before the first tab or after the last tab.
-     * The offset is added to the automatically computed drop position and affects only the
-     * visual placement of the {@code tabDropPosition}.
-     * <p>
-     * This property is typically used in conjunction with the {@link #tabGapProperty()} property
-     * to account for overlapping tab shapes or custom layouts.
-     *
-     * @return the tab drop offset resolver property
-     */
-    public final ObjectProperty<BiFunction<TabHeaderSkin, TabHeaderSkin, Double>> tabDropOffsetResolverProperty() {
-        return tabHeaderArea.tabDropOffsetResolver;
-    }
-
-    /**
-     * Gets the value of {@link #tabDropOffsetResolverProperty()}.
-     *
-     * @return the tab drop offset resolver, or {@code null} if not set
-     */
-    public final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> getTabDropOffsetResolver() {
-        return tabDropOffsetResolverProperty().get();
-    }
-
-    /**
-     * Sets the value of {@link #tabDropOffsetResolverProperty()}.
-     *
-     * @param resolver a {@link BiFunction} accepting the left and right
-     *                 {@code TabHeaderSkin} and returning the offset value;
-     *                 may be {@code null}
-     */
-    public final void setTabDropOffsetResolver(BiFunction<TabHeaderSkin, TabHeaderSkin, Double> resolver) {
-        tabDropOffsetResolverProperty().set(resolver);
+    public TabHeaderArea getTabHeaderArea() {
+        return tabHeaderArea;
     }
 
     /* *************************************************************************
@@ -1288,7 +843,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      * TabHeaderArea: Area responsible for painting all tabs
      *
      **************************************************************************/
-    class TabHeaderArea extends StackPane {
+    public class TabHeaderArea extends StackPane {
 
         private static final double DRAG_SCROLL_EDGE = 10.0;
 
@@ -1303,11 +858,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private boolean scrollOffsetDirty = true;
 
-        private final StackPane headerFirstArea = new StackPane();
+        private final StackPane firstArea = new StackPane();
 
-        private final StackPane headerLastArea = new StackPane();
+        private final StackPane lastArea = new StackPane();
 
-        private final StackPane headerStickyArea = new StackPane();
+        private final StackPane stickyArea = new StackPane();
 
         private final ReadOnlyBooleanWrapper scrollBarNeeded =
                 new ReadOnlyBooleanWrapper(this, "scrollBarNeeded", false);
@@ -1323,7 +878,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         */
         private final TabScrollBar scrollBar = new TabScrollBar();
 
-        private final BooleanProperty tabScrollBarEnabled = new SimpleBooleanProperty(this, "tabScrollBarEnabled", false);
+        private final BooleanProperty scrollBarEnabled = new SimpleBooleanProperty(this, "scrollBarEnabled", false);
 
         private Node scrollBarThumb;
 
@@ -1340,7 +895,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private final ObjectProperty<TabHeaderAreaPolicy> policy =
                 new SimpleObjectProperty<>(this, "policy", TabHeaderAreaPolicy.VISIBLE_WHEN_TABS_PRESENT);
 
-        private final ObjectProperty<BiFunction<Node, Tab, Node>> tabDragContentFactory =
+        private final ObjectProperty<Function<TabHeaderSkin, Node>> tabDragContentFactory =
                 new SimpleObjectProperty<>(this, "tabDragContentFactory");
 
         private boolean acceptsTab;
@@ -1369,7 +924,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private final ObjectProperty<TabViewOrderResolver> tabViewOrderResolver =
                 new SimpleObjectProperty(this, "tabViewOrderResolver");
 
-        public TabHeaderArea() {
+        private TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
             setManaged(false);
             final TabPanePro tabPane = getSkinnable();
@@ -1404,9 +959,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 }
 
                 @Override protected void layoutChildren() {
-                    double firstAreaWidth = computeRegionWidth(headerFirstArea, -1);
-                    double stickyAreaWidth = computeRegionWidth(headerStickyArea, -1);
-                    double lastAreaWidth = computeRegionWidth(headerLastArea, -1);
+                    double firstAreaWidth = computeRegionWidth(firstArea, -1);
+                    double stickyAreaWidth = computeRegionWidth(stickyArea, -1);
+                    double lastAreaWidth = computeRegionWidth(lastArea, -1);
 
                     if (tabsFit(firstAreaWidth, stickyAreaWidth, lastAreaWidth)) {
                         setScrollOffset(0.0, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
@@ -1480,7 +1035,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
 
             tabsMenuManager = new TabsMenuManager();
-            getChildren().addAll(headerBackground, headersRegion, headerStickyArea, headerFirstArea, headerLastArea);
+            getChildren().addAll(headerBackground, headersRegion, stickyArea, firstArea, lastArea);
 
             // support for mouse scroll of header area (for when the tabs exceed
             // the available space).
@@ -1508,17 +1063,17 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 }
             });
 
-            this.headerFirstArea.getStyleClass().add("first-area");
-            this.headerFirstArea.setViewOrder(-10);
-            this.headerLastArea.getStyleClass().add("last-area");
-            this.headerLastArea.setViewOrder(-10);
+            this.firstArea.getStyleClass().add("first-area");
+            this.firstArea.setViewOrder(-10);
+            this.lastArea.getStyleClass().add("last-area");
+            this.lastArea.setViewOrder(-10);
 
             tabDropPosition.getStyleClass().add("tab-drop-position");
             tabDropPosition.setViewOrder(-11);
             tabDropPosition.setMouseTransparent(true);
 
-            this.headerStickyArea.getStyleClass().add("sticky-area");
-            this.headerStickyArea.setViewOrder(-9);
+            this.stickyArea.getStyleClass().add("sticky-area");
+            this.stickyArea.setViewOrder(-9);
             this.scrollBar.setUnitIncrement(10);
             this.scrollBar.setBlockIncrement(25);
             this.scrollBar.setViewOrder(-8);
@@ -1546,7 +1101,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             updateNoTabsState();
             policy.addListener((ov, oldV, newV) -> updateNoTabsState());
             updateScrollBarPresence();
-            tabScrollBarEnabled.addListener((ov, oldV, newV) -> updateScrollBarPresence());
+            scrollBarEnabled.addListener((ov, oldV, newV) -> updateScrollBarPresence());
 
             setOnMouseDragOver(e -> handleMouseDragOver(e));
             setOnMouseDragEntered(e -> handleMouseDragEntered(e));
@@ -1558,22 +1113,508 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             tabHeaderFactory.addListener((ov, oldV, newV) -> updateTabHeaders());
         }
 
+        /**
+         * Returns the first area, located before all tab headers in the tab header area.
+         * <p>
+         * This area is typically used to place custom UI elements, such as a menu button.
+         *
+         * @return the {@code StackPane} positioned before the tab headers
+         */
+        public StackPane getFirstArea() {
+            return firstArea;
+        }
+
+        /**
+         * Returns the last area, located after the sticky area and all tab headers in the tab header area.
+         * <p>
+         * This area is typically used to place scroll buttons, a minimize button, or other auxiliary controls.
+         *
+         * @return the {@code StackPane} positioned after the tab headers and sticky area
+         */
+        public StackPane getLastArea() {
+            return lastArea;
+        }
+
+        /**
+         * Returns the sticky area, located between the tab headers and the last header area.
+         * <p>
+         * This area is typically used to place a "New Tab" button or other controls that should remain visible
+         * regardless of tab scrolling.
+         *
+         * @return the {@code StackPane} positioned between the tab headers and the last header area
+         */
+        public StackPane getStickyArea() {
+            return stickyArea;
+        }
+
+        /**
+         * Returns the {@link StackPane} that visually marks the exact insertion position for a tab during drag-and-drop
+         * operations. The element is managed automatically (hidden when no drag is active).
+         *
+         * <p>Customize it by either:
+         * <ul>
+         *   <li>Styling with CSS (default style class: {@code tab-drop-position})</li>
+         *   <li>Adding custom nodes (e.g., an arrow icon via {@link #getChildren()})</li>
+         * </ul>
+         *
+         * @return the non-null container marking the drop position
+         */
+        public StackPane getTabDropPosition() {
+            return tabDropPosition;
+        }
+
+        /**
+         * Defines the policy used to control the visibility of the tab header area.
+         * <p>
+         * By default, the tab header area is hidden when no tabs are present. This behavior can be modified
+         * using the {@link TabHeaderAreaPolicy} enumeration, which provides several strategies for when
+         * the tab header area should be shown or hidden.
+         * <p>
+         * This property allows customizing layout behavior depending on the presence or absence of tabs,
+         * and is useful in scenarios where the tab container must maintain a consistent size or provide
+         * visual feedback even when no tabs are present.
+        *
+         * @return the property that holds the current {@code TabHeaderAreaPolicy}
+         */
+        public final ObjectProperty<TabHeaderAreaPolicy> policyProperty() {
+            return policy;
+        }
+
+        /**
+         * Returns the value of {@link #policyProperty()}.
+         *
+         * @return the current tab header area policy
+         */
+        public final TabHeaderAreaPolicy getPolicy() {
+            return policy.get();
+        }
+
+        /**
+         * Sets the value of {@link #policyProperty()}.
+         *
+         * @param policy the tab header area policy to apply; must not be {@code null}
+         */
+        public final void setPolicy(TabHeaderAreaPolicy policy) {
+            this.policy.set(policy);
+        }
+
+        /**
+         * Defines whether a scroll bar should appear next to the tab headers when the available space is
+         * insufficient to display all tabs.
+         *
+         * @return the property indicating whether the tab scroll bar is enabled
+         */
+        public final BooleanProperty scrollBarEnabledProperty() {
+            return scrollBarEnabled;
+        }
+
+        /**
+         * Returns the value of {@link #scrollBarEnabledProperty()}.
+         *
+         * @return {@code true} if the scroll bar is enabled, {@code false} otherwise
+         */
+        public final boolean isScrollBarEnabled() {
+            return scrollBarEnabled.get();
+        }
+
+        /**
+         * Sets the value of {@link #scrollBarEnabledProperty()}.
+         *
+         * @param enabled {@code true} to enable the scroll bar, {@code false} to disable it
+         */
+        public final void setScrollBarEnabled(boolean enabled) {
+            this.scrollBarEnabled.set(enabled);
+        }
+
+        /**
+         * Indicates whether the tab header area currently requires a scroll bar due to tab overflow.
+         * <p>
+         * This is a read-only property that reflects the current layout state of the tab headers.
+         * It becomes {@code true} when the total width of all visible tabs exceeds the available
+         * space, meaning not all tabs can be shown at once without scrolling.
+         * <p>
+         * This property is typically used for monitoring layout state changes and adjusting UI behavior
+         * accordingly (e.g., showing visual indicators or disabling certain animations).
+         * <p>
+         * Note that this property is independent of {@link #scrollBarEnabledProperty()} — it reports
+         * whether a scroll bar *would be needed*, not whether it is *shown*.
+         *
+         * @return a read-only property indicating whether a scroll bar is currently needed
+         */
+        public final ReadOnlyBooleanProperty scrollBarNeededProperty() {
+            return scrollBarNeeded.getReadOnlyProperty();
+        }
+
+        /**
+         * Returns the value of {@link #scrollBarNeededProperty()}.
+         *
+         * @return {@code true} if a scroll bar is currently needed; {@code false} otherwise
+         */
+        public final boolean isScrollBarNeeded() {
+            return scrollBarNeeded.get();
+        }
+
+        /**
+         * Shows the standard tabs menu at the specified anchor node.
+         * <p>
+         * This menu is typically used for quick navigation between tabs and is usually triggered by a button placed in
+         * the tab header area.
+         *
+         * @param anchor the node relative to which the popup menu will be shown, typically a button that opens the menu
+         */
+        public void showTabsMenu(Node anchor) {
+            tabsMenuManager.showPopupMenu(anchor);
+        }
+
+        /**
+         * Represents the current width of the headers region containing the tab headers.
+         * <p>
+         * This is a read-only property that reflects the actual layout width of the internal
+         * container that holds all tab headers. It is automatically updated as the tab layout changes,
+         * for example, when tabs are added, removed, resized, or when the container itself is resized.
+         *
+         * @return the read-only property representing the current width of the headers region
+         */
+        public final ReadOnlyDoubleProperty headersRegionWidthProperty() {
+            return headersRegion.widthProperty();
+        }
+
+        /**
+         * Returns the value of {@link #headersRegionWidthProperty()}.
+         *
+         * @return the current width of the headers region in pixels
+         */
+        public final double getHeadersRegionWidth() {
+            return headersRegion.widthProperty().get();
+        }
+
+        /**
+         * Represents the current scroll offset of the headers region containing the tab headers.
+         * <p>
+         * This is a read-only property that indicates how far the entire headers region has been shifted
+         * to the left (positive values) or right (negative values), typically as a result of user interaction
+         * with a scroll bar or programmatic scrolling.
+         *
+         * @return the read-only property representing the current offset of the headers region
+         */
+        public final ReadOnlyDoubleProperty headersRegionOffsetProperty() {
+            return scrollOffset;
+        }
+
+        /**
+         * Returns the value of {@link #headersRegionOffsetProperty()}.
+         *
+         * @return the current horizontal offset of the headers region in pixels
+         */
+        public final double getHeadersRegionOffset() {
+            return scrollOffset.get();
+        }
+
+        /**
+         * Represents the current width of the clipping region (viewport) through which the tab headers are displayed.
+         * <p>
+         * This is a read-only property that reflects the layout width of the rectangular clip applied
+         * to the tab headers container. The clip region acts as a viewport, restricting the visible area
+         * of the headers when they are larger than the available space.
+         *
+         * @return the read-only property representing the width of the headers clip region
+         */
+        public final ReadOnlyDoubleProperty headersClipWidthProperty() {
+            return headerClip.widthProperty();
+        }
+
+        /**
+         * Returns the value of {@link #headersClipWidthProperty()}.
+         *
+         * @return the width of the headers clip region in pixels
+         */
+        public final double getHeadersClipWidth() {
+            return headerClip.widthProperty().get();
+        }
+
+        /**
+         * Scrolls the tab headers by the specified number of pixels.
+         *
+         * @param delta the amount in pixels to scroll the tab headers;
+         */
+        public void scrollTabHeadersBy(double delta) {
+            scrollTabsBy(delta);
+        }
+
+        /**
+         * Defines the factory used to generate the visual content displayed during a tab drag operation.
+         * <p>
+         * This factory receives a {@link TabHeaderSkin} representing the visual tab header being dragged and
+         * returns a {@link Node} that will be shown as the drag content, typically floating
+         * under the mouse cursor.
+         * <p>
+         * This property allows customization of the appearance of the dragged tab, for example,
+         * by applying transformations, visual effects, or simplified representations.
+         *
+         * @return the property that holds the factory for creating tab drag content
+         */
+        public final ObjectProperty<Function<TabHeaderSkin, Node>> tabDragContentFactoryProperty() {
+            return tabDragContentFactory;
+        }
+
+        /**
+         * Returns the value of {@link #tabDragContentFactoryProperty()}.
+         *
+         * @return the current {@link Function} producing drag content, or {@code null} if unset
+         */
+        public final Function<TabHeaderSkin, Node> getTabDragContentFactory() {
+            return tabDragContentFactoryProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #tabDragContentFactoryProperty()}.
+         *
+         * @param factory the factory used to generate drag content for a tab;
+         *                may be {@code null} to reset to default behavior
+         */
+        public final void setTabDragContentFactory(Function<TabHeaderSkin, Node> factory) {
+            tabDragContentFactoryProperty().set(factory);
+        }
+
+        /**
+         * Defines the scroll step, in pixels, used when automatically scrolling the tab headers
+         * during drag-and-drop operations.
+         * <p>
+         * When a tab is dragged near the edges of the headers region, auto-scrolling may be triggered
+         * to reveal hidden tabs. This property controls how far the headers scroll per update while
+         * the drag operation is in progress.
+         * <p>
+         * Larger values result in faster scrolling, while smaller values allow for more precise control.
+         * The value must be non-negative. A value of {@code 0} disables auto-scrolling.
+         *
+         * @return the property representing the scroll step in pixels for tab dragging
+         */
+        public final DoubleProperty tabDragScrollStepProperty() {
+            return tabDragScrollStep;
+        }
+
+        /**
+         * Returns the value of {@link #tabDragScrollStepProperty()}.
+         *
+         * @return the current scroll step in pixels for tab drag auto-scrolling
+         */
+        public final double getTabDragScrollStep() {
+            return tabDragScrollStepProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #tabDragScrollStepProperty()}.
+         *
+         * @param value the scroll step in pixels to use during tab drag auto-scrolling
+         */
+        public final void setTabDragScrollStep(double value) {
+            tabDragScrollStepProperty().set(value);
+        }
+
+        /**
+         * Defines the cursor to be displayed during tab drag-and-drop operations.
+         * <p>
+         * This property allows customizing the mouse cursor shown while dragging a tab.
+         * If no custom cursor is set (i.e., the property is {@code null}), the system default
+         * cursor is used.
+         * <p>
+         * Custom cursors can improve the user experience by providing visual feedback
+         * specific to drag operations.
+         *
+         * @return the property holding the cursor used during tab dragging
+         */
+        public final ObjectProperty<Cursor> tabDragCursorProperty() {
+            return tabDragCursor;
+        }
+
+        /**
+         * Returns the value of {@link #tabDragCursorProperty()}.
+         *
+         * @return the current drag cursor, or {@code null} if the system default cursor is used
+         */
+        public final Cursor getTabDragCursor() {
+            return tabDragCursorProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #tabDragCursorProperty()}.
+         *
+         * @param cursor the cursor to display during tab drag operations,
+         *               or {@code null} to reset to the system default cursor
+         */
+        public final void setTabDragCursor(Cursor cursor) {
+            tabDragCursorProperty().set(cursor);
+        }
+
+        /**
+         * Defines the factory used to create instances of {@link TabHeaderSkin} for tabs.
+         * <p>
+         * This factory accepts a {@link TabHeaderContext} and returns a new {@link TabHeaderSkin} instance.
+         * It is used when custom tab header implementations are needed, for example,
+         * to provide custom shapes, styles, or behaviors beyond the default tab header skin.
+         * <p>
+         * By setting a custom factory, developers can fully control how tab headers are constructed,
+         * enabling advanced customization of the tab pane appearance and interaction.
+         *
+         * @return the property holding the factory function for creating tab header skins
+         */
+        public final ObjectProperty<Function<TabHeaderContext, TabHeaderSkin>> tabHeaderFactoryProperty() {
+            return tabHeaderFactory;
+        }
+
+        /**
+         * Returns the value of {@link #tabHeaderFactoryProperty()}.
+         *
+         * @return the current factory function for creating tab header skins,
+         *         or {@code null} if the default factory is used
+         */
+        public final Function<TabHeaderContext, TabHeaderSkin> getTabHeaderFactory() {
+            return tabHeaderFactoryProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #tabHeaderFactoryProperty()}.
+         *
+         * @param factory the factory function to create custom tab header skins,
+         *                or {@code null} to use the default factory
+         */
+        public final void setTabHeaderFactory(Function<TabHeaderContext, TabHeaderSkin> factory) {
+            tabHeaderFactoryProperty().set(factory);
+        }
+
+        /**
+         * Defines the gap between adjacent tab headers.
+         * <p>
+         * This property controls the horizontal spacing between tabs in the tab header area.
+         * Positive values increase the distance between tabs, creating visible gaps.
+         * Negative values cause tabs to overlap, which can be used for custom visual effects
+         * or compact layouts.
+         * <p>
+         * A value of {@code 0} means tabs are placed edge-to-edge without gaps or overlaps.
+         * Adjusting this property can affect tab hit areas and overall appearance.
+         *
+         * @return the property controlling the horizontal gap between tab headers, in pixels
+         */
+        public final DoubleProperty tabGapProperty() {
+            return tabGap;
+        }
+
+        /**
+         * Returns the value of {@link #tabGapProperty()}.
+         *
+         * @return the current gap between tab headers, in pixels
+         */
+        public final double getTabGap() {
+            return tabGapProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #tabGapProperty()}.
+         *
+         * @param gap the new gap between tab headers, in pixels;
+         *            positive values increase spacing, negative values cause overlap
+         */
+        public final void setTabGap(double gap) {
+            tabGapProperty().set(gap);
+        }
+
+        /**
+         * Defines the resolver responsible for determining the view order of tab headers.
+         * <p>
+         * This property controls how tab headers are layered visually by setting their
+         * {@link javafx.scene.Node#setViewOrder(double)} values. Tabs with lower view order values
+         * are rendered in front of those with higher values, affecting their stacking and overlap.
+         * <p>
+         * Using a custom {@link TabViewOrderResolver} allows fine-grained control over the z-ordering
+         * of tabs, which can be useful for custom effects like overlapping tabs with visual hierarchy.
+         * <p>
+         * If this property is {@code null}, all tabs share the same view order and are rendered
+         * according to their order in the scene graph.
+         *
+         * @return the property holding the current tab view order resolver
+         */
+        public final ObjectProperty<TabViewOrderResolver> tabViewOrderResolverProperty() {
+            return tabViewOrderResolver;
+        }
+
+        /**
+         * Returns the value of {@link #tabViewOrderResolverProperty()}.
+         *
+         * @return the current {@link TabViewOrderResolver}, or {@code null} if no custom resolver is set
+         */
+        public final TabViewOrderResolver getTabViewOrderResolver() {
+            return tabViewOrderResolverProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #tabViewOrderResolverProperty()}.
+         *
+         * @param resolver the resolver to compute the view order for tab headers,
+         *                 or {@code null} to use default stacking order
+         */
+        public final void setTabViewOrderResolver(TabViewOrderResolver resolver) {
+            tabViewOrderResolverProperty().set(resolver);
+        }
+
+        /**
+         * Defines the resolver used to calculate an offset for the visual drop position
+         * indicator ({@link #getTabDropPosition()}) when a tab is being dragged between two existing tabs.
+         * <p>
+         * This resolver receives the {@code left} and {@code right} {@link TabHeaderSkin}
+         * instances representing the tabs adjacent to the drop location. It returns a
+         * {@code double} value indicating the adjustment to apply to the automatically
+         * computed drop position.
+         * <p>
+         * This resolver is applied only when the tab is dropped between two existing tabs,
+         * and is ignored when the drop occurs before the first tab or after the last tab.
+         * The offset is added to the automatically computed drop position and affects only the
+         * visual placement of the {@code tabDropPosition}.
+         * <p>
+         * This property is typically used in conjunction with the {@link #tabGapProperty()} property
+         * to account for overlapping tab shapes or custom layouts.
+         *
+         * @return the tab drop offset resolver property
+         */
+        public final ObjectProperty<BiFunction<TabHeaderSkin, TabHeaderSkin, Double>> tabDropOffsetResolverProperty() {
+            return tabDropOffsetResolver;
+        }
+
+        /**
+         * Gets the value of {@link #tabDropOffsetResolverProperty()}.
+         *
+         * @return the tab drop offset resolver, or {@code null} if not set
+         */
+        public final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> getTabDropOffsetResolver() {
+            return tabDropOffsetResolverProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #tabDropOffsetResolverProperty()}.
+         *
+         * @param resolver a {@link BiFunction} accepting the left and right
+         *                 {@code TabHeaderSkin} and returning the offset value;
+         *                 may be {@code null}
+         */
+        public final void setTabDropOffsetResolver(BiFunction<TabHeaderSkin, TabHeaderSkin, Double> resolver) {
+            tabDropOffsetResolverProperty().set(resolver);
+        }
+
         private boolean isMouseOverHeaderClip(MouseEvent e) {
             var mouseIsOver = false;
             var side = getSkinnable().getSide();
             if (side == TOP || side == RIGHT) {
-                if (e.getX() >= headerFirstArea.getLayoutX() + headerFirstArea.getWidth()
-                        && e.getX() <= headerStickyArea.getLayoutX()) {
+                if (e.getX() >= firstArea.getLayoutX() + firstArea.getWidth()
+                        && e.getX() <= stickyArea.getLayoutX()) {
                     mouseIsOver = true;
                 }
             } else if (side == BOTTOM) {
-                if (e.getX() >= headerStickyArea.getLayoutX() + headerStickyArea.getWidth()
-                        && e.getX() <= headerFirstArea.getLayoutX()) {
+                if (e.getX() >= stickyArea.getLayoutX() + stickyArea.getWidth()
+                        && e.getX() <= firstArea.getLayoutX()) {
                     mouseIsOver = true;
                 }
             } else if (side == LEFT) {
-                if (e.getX() <= headerFirstArea.getLayoutX()
-                        && e.getX() >= headerStickyArea.getLayoutX() + headerStickyArea.getWidth()) {
+                if (e.getX() <= firstArea.getLayoutX()
+                        && e.getX() >= stickyArea.getLayoutX() + stickyArea.getWidth()) {
                     mouseIsOver = true;
                 }
             }
@@ -1597,9 +1638,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void scrollTabsBy(double delta) {
-            var firstAreaWidth = snapSizeX(headerFirstArea.getWidth());
-            var stickyAreaWidth = snapSizeX(headerStickyArea.getWidth());
-            var lastAreaWidth = snapSizeX(headerLastArea.getWidth());
+            var firstAreaWidth = snapSizeX(firstArea.getWidth());
+            var stickyAreaWidth = snapSizeX(stickyArea.getWidth());
+            var lastAreaWidth = snapSizeX(lastArea.getWidth());
             // it is important to snap the delta
             delta = getSkinnable().getSide().isHorizontal() ? snapSizeX(delta) : snapSizeY(delta);
             setScrollOffset(scrollOffset.get() + delta, firstAreaWidth, stickyAreaWidth, lastAreaWidth);
@@ -1732,11 +1773,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
         }
 
-        public double getScrollOffset() {
+        private double getScrollOffset() {
             return scrollOffset.get();
         }
 
-        public void invalidateScrollOffset() {
+        private void invalidateScrollOffset() {
             scrollOffsetDirty = true;
         }
 
@@ -1817,10 +1858,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double padding = isHorizontal() ?
                 snappedLeftInset() + snappedRightInset() :
                 snappedTopInset() + snappedBottomInset();
-            return computeRegionWidth(headerFirstArea, height)
+            return computeRegionWidth(firstArea, height)
                     + snapSizeX(headersRegion.prefWidth(height))
-                    + computeRegionWidth(headerStickyArea, height)
-                    + computeRegionWidth(headerLastArea, height)
+                    + computeRegionWidth(stickyArea, height)
+                    + computeRegionWidth(lastArea, height)
                     + padding; // + firstTabIndent() ??
         }
 
@@ -1828,9 +1869,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             double padding = isHorizontal() ?
                 snappedTopInset() + snappedBottomInset() :
                 snappedLeftInset() + snappedRightInset();
-            var firstAreaHeight = computeRegionHeight(headerFirstArea, width);
-            var lastAreaHeight = computeRegionHeight(headerLastArea, width);
-            var stickyAreaHeight = computeRegionHeight(headerStickyArea, width);
+            var firstAreaHeight = computeRegionHeight(firstArea, width);
+            var lastAreaHeight = computeRegionHeight(lastArea, width);
+            var stickyAreaHeight = computeRegionHeight(stickyArea, width);
             var max = Math.max(firstAreaHeight, lastAreaHeight);
             max = Math.max(max, stickyAreaHeight);
             max = Math.max(max, snapSizeY(headersRegion.prefHeight(-1)));
@@ -1863,15 +1904,15 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
             h = Math.min(h, headersPrefHeight);
 
-            var firstAreaWidth = computeRegionWidth(headerFirstArea, -1);
-            var firstAreaHeight = computeRegionHeight(headerFirstArea, -1);
+            var firstAreaWidth = computeRegionWidth(firstArea, -1);
+            var firstAreaHeight = computeRegionHeight(firstArea, -1);
             firstAreaHeight = Math.max(firstAreaHeight, h);
-            headerFirstArea.resize(firstAreaWidth, firstAreaHeight);
+            firstArea.resize(firstAreaWidth, firstAreaHeight);
 
-            var stickyAreaWidth = computeRegionWidth(headerStickyArea, -1);
-            var stickyAreaHeight = computeRegionHeight(headerStickyArea, -1);
+            var stickyAreaWidth = computeRegionWidth(stickyArea, -1);
+            var stickyAreaHeight = computeRegionHeight(stickyArea, -1);
             stickyAreaHeight = Math.max(stickyAreaHeight, h);
-            headerStickyArea.resize(stickyAreaWidth, stickyAreaHeight);
+            stickyArea.resize(stickyAreaWidth, stickyAreaHeight);
 
             double dropPositionWidth = 0;
             double dropPositionWidthHalf = 0;
@@ -1885,10 +1926,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 tabDropPosition.resize(dropPositionWidth, dropPositionHeight);
             }
 
-            var lastAreaWidth = computeRegionWidth(headerLastArea, -1);
-            var lastAreaHeight = computeRegionHeight(headerLastArea, -1);
+            var lastAreaWidth = computeRegionWidth(lastArea, -1);
+            var lastAreaHeight = computeRegionHeight(lastArea, -1);
             lastAreaHeight = Math.max(lastAreaHeight, h);
-            headerLastArea.resize(lastAreaWidth, lastAreaHeight);
+            lastArea.resize(lastAreaWidth, lastAreaHeight);
 
             double scrollBarWidth = 0.0;
             double scrollBarHeight = 0.0;
@@ -2052,16 +2093,16 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         headerWidth, headerHeight, /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             }
 
-            positionInArea(headerFirstArea, firstAreaX, allAreaY, firstAreaWidth, firstAreaHeight,
+            positionInArea(firstArea, firstAreaX, allAreaY, firstAreaWidth, firstAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             if (tabDropPosition.getParent() != null) {
                 positionInArea(tabDropPosition, dropPositionX, dropPositionY, dropPositionWidth, dropPositionHeight,
                     /*baseline ignored*/0, HPos.LEFT, VPos.CENTER);
             }
             positionInArea(headersRegion, regionX, regionY, w, h, /*baseline ignored*/0, HPos.LEFT, VPos.CENTER);
-            positionInArea(headerStickyArea, stickyX, allAreaY, stickyAreaWidth, stickyAreaHeight,
+            positionInArea(stickyArea, stickyX, allAreaY, stickyAreaWidth, stickyAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
-            positionInArea(headerLastArea, lastAreaX, allAreaY, lastAreaWidth, lastAreaHeight,
+            positionInArea(lastArea, lastAreaX, allAreaY, lastAreaWidth, lastAreaHeight,
                     /*baseline ignored*/0, HPos.CENTER, VPos.CENTER);
             if (scrollBar.getParent() != null) {
                 // position in any case - visible or not
@@ -2112,7 +2153,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             return dropPositionX;
         }
 
-        void dispose() {
+        private void dispose() {
             for (Node child : headersRegion.getChildren()) {
                 TabHeaderSkin header = (TabHeaderSkin) child;
                 header.dispose();
@@ -2121,7 +2162,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void updateScrollBarPresence() {
-            if (tabScrollBarEnabled.get()) {
+            if (scrollBarEnabled.get()) {
                 if (this.scrollBar.getParent() == null) {
                     getChildren().add(this.scrollBar);
                 }
@@ -2294,14 +2335,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             if (!scrollBarNeeded.get()) {
                 var side = getSkinnable().getSide();
                 if (side == Side.TOP || side == RIGHT) {
-                    double leftX = this.headerStickyArea.getBoundsInParent().getMaxX();
-                    double rightX = this.headerLastArea.getBoundsInParent().getMinX();
+                    double leftX = this.stickyArea.getBoundsInParent().getMaxX();
+                    double rightX = this.lastArea.getBoundsInParent().getMinX();
                     if (e.getX() >= leftX && e.getX() <= rightX) {
                         currentDropIndex = getSkinnable().getTabs().size();
                     }
                 } else {
-                    double leftX = this.headerStickyArea.getBoundsInParent().getMinX();
-                    double rightX = this.headerLastArea.getBoundsInParent().getMaxX();
+                    double leftX = this.stickyArea.getBoundsInParent().getMinX();
+                    double rightX = this.lastArea.getBoundsInParent().getMaxX();
                     if (e.getX() <= leftX && e.getX() >= rightX) {
                         currentDropIndex = getSkinnable().getTabs().size();
                     }
@@ -2366,8 +2407,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private boolean isRightEdgeVisible(TabHeaderSkin tabHeader) {
             var result = false;
             var headerBounds = getTabHeaderBounds(tabHeader);
-            var firstBounds = this.headerFirstArea.getBoundsInParent();
-            var stickyBounds = this.headerStickyArea.getBoundsInParent();
+            var firstBounds = this.firstArea.getBoundsInParent();
+            var stickyBounds = this.stickyArea.getBoundsInParent();
             switch (getSkinnable().getSide()) {
                 case TOP:
                 case RIGHT:
@@ -2397,8 +2438,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private boolean isLeftEdgeVisible(TabHeaderSkin tabHeader) {
             var result = false;
             var headerBounds = getTabHeaderBounds(tabHeader);
-            var firstBounds = this.headerFirstArea.getBoundsInParent();
-            var stickyBounds = this.headerStickyArea.getBoundsInParent();
+            var firstBounds = this.firstArea.getBoundsInParent();
+            var stickyBounds = this.stickyArea.getBoundsInParent();
             switch (getSkinnable().getSide()) {
                 case TOP:
                 case RIGHT:
@@ -2447,8 +2488,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 stopScrollOnDrag();
                 return;
             }
-            var firstBounds = headerFirstArea.localToScene(headerFirstArea.getBoundsInLocal());
-            var stickyBounds = headerStickyArea.localToScene(headerStickyArea.getBoundsInLocal());
+            var firstBounds = firstArea.localToScene(firstArea.getBoundsInLocal());
+            var stickyBounds = stickyArea.localToScene(stickyArea.getBoundsInLocal());
             if (getSkinnable().getSide() == TOP || getSkinnable().getSide() == BOTTOM) {
                 if (firstBounds.getMaxX() + DRAG_SCROLL_EDGE >= e.getSceneX()) {
                     startScrollOnDrag(tabDragScrollStep.get());
@@ -3058,7 +3099,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     handler.accept(getTab());
                 }
                 var skin = (TabPaneProSkin) getSkinnable().getSkin();
-                Node content = skin.getTabDragContentFactory().apply(this, getTab());
+                Node content = skin.getTabHeaderArea().getTabDragContentFactory().apply(this);
                 this.dragPopup = new Popup();
                 this.dragPopup.setAutoHide(false);
                 this.dragPopup.getContent().add(content);

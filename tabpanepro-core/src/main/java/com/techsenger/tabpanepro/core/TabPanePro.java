@@ -62,12 +62,17 @@ public class TabPanePro extends TabPane {
         getStyleClass().add("tab-pane-pro");
     }
 
-
     /**
-     * The property representing the tab drag-enabled state.
-     * @return the BooleanProperty instance
+     * Defines whether tab dragging is enabled.
+     * <p>
+     * When this property is {@code true}, users can drag tabs to reorder or move them within the tab pane.
+     * When {@code false}, tab dragging is disabled and tabs remain fixed in their positions.
+     * <p>
+     * By default, this property is {@code false}.
+     *
+     * @return the property representing the tab drag-enabled state
      */
-    public BooleanProperty tabDragEnabledProperty() {
+    public final BooleanProperty tabDragEnabledProperty() {
         if (this.tabDragEnabled == null) {
             this.tabDragEnabled = new SimpleBooleanProperty(this, "tabDragEnabled", false);
         }
@@ -75,30 +80,38 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Gets the current value of the tab drag-enabled property.
-     * @return true if tab dragging is enabled, false otherwise
+     * Returns the value of {@link #tabDragEnabledProperty()}.
+     *
+     * @return {@code true} if tab dragging is enabled; {@code false} otherwise
      */
-    public boolean isTabDragEnabled() {
+    public final boolean isTabDragEnabled() {
         return this.tabDragEnabled == null ? false : tabDragEnabledProperty().get();
     }
 
     /**
-     * Sets whether tab dragging is enabled.
-     * @param enabled true to enable tab dragging, false to disable
+     * Sets the value of {@link #tabDragEnabledProperty()}.
+     *
+     * @param enabled {@code true} to enable tab dragging; {@code false} to disable it
      */
-    public void setTabDragEnabled(boolean enabled) {
+    public final void setTabDragEnabled(boolean enabled) {
         tabDragEnabledProperty().set(enabled);
     }
 
     /**
-     * The drag predicate property that determines whether a tab can be dragged from this pane.
+     * Defines the predicate that determines whether a specific tab can be dragged from this pane.
      * <p>
-     * The predicate evaluates to {@code true} if the tab can be dragged. When is {@code null} all tabs are draggable.
-     * Can be combined with {@link Tab#getProperties()} for tab-specific control.
+     * This property holds a {@link Predicate} that is evaluated for each {@link Tab} to decide if dragging
+     * is permitted. If the predicate returns {@code true}, the tab can be dragged; if {@code false}, dragging
+     * is disallowed for that tab.
+     * <p>
+     * If the predicate is {@code null}, all tabs are considered draggable by default.
+     * <p>
+     * This predicate can leverage tab-specific metadata via {@link Tab#getProperties()} to customize
+     * drag behavior on a per-tab basis.
      *
-     * @return the drag predicate property
+     * @return the property holding the drag predicate for tabs
      */
-    public ObjectProperty<Predicate<Tab>> tabDragPredicateProperty() {
+    public final ObjectProperty<Predicate<Tab>> tabDragPredicateProperty() {
         if (this.tabDragPredicate == null) {
             this.tabDragPredicate = new SimpleObjectProperty<>(this, "tabDragPredicate");
         }
@@ -106,28 +119,37 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Gets the value of the drag predicate property.
+     * Returns the value of {@link #tabDragPredicateProperty()}.
      *
-     * @return the current drag predicate, or {@code null} if all tabs are draggable
+     * @return the current predicate used to determine draggable tabs,
+     *         or {@code null} if all tabs are draggable
      */
-    public Predicate<Tab> getTabDragPredicate() {
+    public final Predicate<Tab> getTabDragPredicate() {
         return this.tabDragPredicate == null ? null : this.tabDragPredicate.get();
     }
 
     /**
-     * Sets the drag predicate property.
+     * Sets the value of {@link #tabDragPredicateProperty()}.
      *
-     * @param predicate the new predicate to use, or {@code null} to allow dragging all tabs
+     * @param predicate the predicate to determine draggable tabs,
+     *                  or {@code null} to allow dragging all tabs
      */
-    public void setTabDragPredicate(Predicate<Tab> predicate) {
+    public final void setTabDragPredicate(Predicate<Tab> predicate) {
         tabDragPredicateProperty().set(predicate);
     }
 
     /**
-     * The property representing the tab drop-enabled state.
-     * @return the BooleanProperty instance
+     * Defines whether tab dropping is enabled.
+     * <p>
+     * When this property is {@code true}, tabs can be dropped into this tab pane,
+     * allowing users to rearrange or add tabs by dropping them.
+     * When {@code false}, tab dropping is disabled and tabs cannot be dropped here.
+     * <p>
+     * By default, this property is {@code false}.
+     *
+     * @return the property representing the tab drop-enabled state
      */
-    public BooleanProperty tabDropEnabledProperty() {
+    public final BooleanProperty tabDropEnabledProperty() {
         if (this.tabDropEnabled == null) {
             this.tabDropEnabled = new SimpleBooleanProperty(this, "tabDropEnabled", false);
         }
@@ -135,30 +157,35 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Gets the current value of the tab drop-enabled property.
-     * @return true if tab dropping is enabled, false otherwise
+     * Returns the value of {@link #tabDropEnabledProperty()}.
+     *
+     * @return {@code true} if tab dropping is enabled; {@code false} otherwise
      */
-    public boolean isTabDropEnabled() {
+    public final boolean isTabDropEnabled() {
         return this.tabDropEnabled == null ? false : tabDropEnabledProperty().get();
     }
 
     /**
-     * Sets whether tab dropping is enabled.
-     * @param enabled true to enable tab dropping, false to disable
+     * Sets the value of {@link #tabDropEnabledProperty()}.
+     *
+     * @param enabled {@code true} to enable tab dropping; {@code false} to disable it
      */
-    public void setTabDropEnabled(boolean enabled) {
+    public final void setTabDropEnabled(boolean enabled) {
         tabDropEnabledProperty().set(enabled);
     }
 
     /**
-     * The drop predicate property that determines whether a tab can be dropped into this pane.
+     * Defines the predicate that determines whether a specific tab can be dropped into this pane.
      * <p>
-     * The predicate evaluates to {@code true} if the tab can be dropped. When is {@code null}, all tabs
-     * can be dropped into this pane.
+     * This property holds a {@link Predicate} evaluated for each {@link Tab} to decide if dropping
+     * is permitted. If the predicate returns {@code true}, the tab can be dropped; if {@code false},
+     * dropping is disallowed for that tab.
+     * <p>
+     * If the predicate is {@code null}, all tabs are allowed to be dropped by default.
      *
-     * @return the drop predicate property
+     * @return the property holding the drop predicate for tabs
      */
-    public ObjectProperty<Predicate<Tab>> tabDropPredicateProperty() {
+    public final ObjectProperty<Predicate<Tab>> tabDropPredicateProperty() {
         if (this.tabDropPredicate == null) {
             this.tabDropPredicate = new SimpleObjectProperty<>(this, "tabDropPredicate");
         }
@@ -166,34 +193,41 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Gets the value of the drop predicate property.
+     * Returns the value of {@link #tabDropPredicateProperty()}.
      *
-     * @return the current drop predicate, or {@code null} if all tabs can be dropped
+     * @return the current predicate used to determine droppable tabs,
+     *         or {@code null} if all tabs can be dropped
      */
-    public Predicate<Tab> getTabDropPredicate() {
+    public final Predicate<Tab> getTabDropPredicate() {
         return this.tabDropPredicate == null ? null : this.tabDropPredicate.get();
     }
 
     /**
-     * Sets the drop predicate property.
+     * Sets the value of {@link #tabDropPredicateProperty()}.
      *
-     * @param predicate the new predicate to use, or {@code null} to accept all tabs
+     * @param predicate the predicate to determine droppable tabs,
+     *                  or {@code null} to accept all tabs
      */
-    public void setTabDropPredicate(Predicate<Tab> predicate) {
+    public final void setTabDropPredicate(Predicate<Tab> predicate) {
         tabDropPredicateProperty().set(predicate);
     }
 
     /**
-     * Returns the {@link ObjectProperty} holding the shared {@link DragAndDropContext}
-     * used for drag-and-drop operations between {@link TabPanePro} instances.
+     * Defines the shared {@link DragAndDropContext} used to coordinate drag-and-drop operations
+     * between multiple {@link TabPanePro} instances.
      * <p>
-     * All {@link TabPanePro}s that participate in cross-pane drag-and-drop must share
-     * the same context. If uninitialized, this property is lazily created.
-     * </p>
+     * This property holds the context object that manages state and communication for
+     * cross-pane dragging and dropping of tabs. All {@link TabPanePro} instances participating
+     * in drag-and-drop must share the same context instance to enable coordinated behavior.
+     * <p>
+     * The property is lazily initialized when first accessed if not already set.
+     * <p>
+     * For drag-and-drop between multiple {@link TabPanePro} instances to work,
+     * they must all share the same {@link DragAndDropContext} instance.
      *
-     * @return The {@link ObjectProperty} containing the drag-and-drop context.
+     * @return the property holding the shared drag-and-drop context
      */
-    public ObjectProperty<DragAndDropContext> dragAndDropContextProperty() {
+    public final ObjectProperty<DragAndDropContext> dragAndDropContextProperty() {
         if (this.dragAndDropContext == null) {
             this.dragAndDropContext = new SimpleObjectProperty<>(this, "dragAndDropContext");
         }
@@ -201,36 +235,32 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Gets the current shared {@link DragAndDropContext} used for cross-{@link TabPanePro}
-     * drag-and-drop operations.
+     * Returns the value of {@link #dragAndDropContextProperty()}.
      *
-     * @return The current context, or {@code null} if none is set.
-     * @see #dragAndDropContextProperty()
+     * @return the current shared {@link DragAndDropContext}, or {@code null} if none is set
      */
-    public DragAndDropContext getDragAndDropContext() {
+    public final DragAndDropContext getDragAndDropContext() {
         return this.dragAndDropContext == null ? null : this.dragAndDropContext.get();
     }
 
     /**
-     * Sets the shared {@link DragAndDropContext} to enable drag-and-drop
-     * between multiple {@link TabPanePro} instances.
-     * <p>
-     * <b>Note:</b> All participating {@link TabPanePro}s must use the same context.
-     * </p>
+     * Sets the value of {@link #dragAndDropContextProperty()}.
      *
-     * @param context The {@link DragAndDropContext} to share, or {@code null} to disable.
-     * @see #dragAndDropContextProperty()
+     * @param context the shared drag-and-drop context to use,
+     *                or {@code null} to disable cross-pane drag-and-drop
      */
-    public void setDragAndDropContext(DragAndDropContext context) {
+    public final void setDragAndDropContext(DragAndDropContext context) {
         dragAndDropContextProperty().set(context);
     }
 
     /**
-     * The handler that is called when a tab drag operation starts.
+     * Defines the handler that is invoked when a tab drag operation begins.
      * <p>
-     * The provided {@code Consumer<Tab>} will receive the tab being dragged.
+     * This property holds a {@link Consumer} that receives the {@link Tab} being dragged
+     * at the start of the drag gesture. It can be used to perform custom logic such as
+     * updating UI state, logging, or preparing drag visuals.
      *
-     * @return the tab drag handler property
+     * @return the property holding the tab drag start handler
      */
     public final ObjectProperty<Consumer<Tab>> tabDragHandlerProperty() {
         if (tabDragHandler == null) {
@@ -240,33 +270,35 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Sets the handler to be called when a tab drag operation starts.
+     * Sets the value of {@link #tabDragHandlerProperty()}.
      *
-     * @param handler the tab drag handler
+     * @param handler the handler to invoke when a tab drag starts,
+     *                or {@code null} to clear any existing handler
      */
     public final void setTabDragHandler(Consumer<Tab> handler) {
         tabDragHandlerProperty().set(handler);
     }
 
     /**
-     * Returns the handler that is called when a tab drag operation starts.
+     * Returns the value of {@link #tabDragHandlerProperty()}.
      *
-     * @return the tab drag handler
+     * @return the current tab drag start handler, or {@code null} if none is set
      */
     public final Consumer<Tab> getTabDragHandler() {
         return tabDragHandler == null ? null : tabDragHandler.get();
     }
 
     /**
-     * The handler that is called when a tab drag operation ends.
+     * Defines the handler invoked when a tab drag operation ends.
      * <p>
-     * The provided {@code BiConsumer<Tab, Boolean>} will receive:
+     * This property holds a {@link BiConsumer} that receives:
      * <ul>
-     *     <li>the tab being dropped</li>
-     *     <li>{@code true} if the drop was successful, or {@code false} if it was cancelled</li>
+     *     <li>the {@link Tab} being dropped</li>
+     *     <li>a {@code boolean} indicating whether the drop was successful ({@code true}) or cancelled ({@code false})</li>
      * </ul>
+     * This handler can be used to perform cleanup, update UI state, or trigger side effects after a drag-and-drop completes.
      *
-     * @return the tab drop handler property
+     * @return the property holding the tab drop handler
      */
     public final ObjectProperty<BiConsumer<Tab, Boolean>> tabDropHandlerProperty() {
         if (tabDropHandler == null) {
@@ -276,18 +308,19 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Sets the handler to be called when a tab drag operation ends.
+     * Sets the value of {@link #tabDropHandlerProperty()}.
      *
-     * @param handler the tab drop handler
+     * @param handler the handler to invoke when a tab drag operation ends,
+     *                or {@code null} to clear any existing handler
      */
     public final void setTabDropHandler(BiConsumer<Tab, Boolean> handler) {
         tabDropHandlerProperty().set(handler);
     }
 
     /**
-     * Returns the handler that is called when a tab drag operation ends.
+     * Returns the value of {@link #tabDropHandlerProperty()}.
      *
-     * @return the tab drop handler
+     * @return the current tab drop handler, or {@code null} if none is set
      */
     public final BiConsumer<Tab, Boolean> getTabDropHandler() {
         return tabDropHandler == null ? null : tabDropHandler.get();
