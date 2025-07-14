@@ -2593,10 +2593,30 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             this.tab = tab;
         }
 
+        /**
+         * Returns whether this tab is a phantom.
+         * <p>
+         * A phantom tab is an invisible tab used solely for layout purposes.
+         * It is not part of {@code TabPane.getTabs()} and is never shown to the user.
+         * Phantom tabs (along with their corresponding {@code TabHeaderSkin}) are created
+         * when there are no actual tabs in the {@code TabPane}, but the {@code TabHeaderArea}
+         * still needs to be displayed. They are used to calculate the preferred height
+         * of the header area.
+         *
+         * @return {@code true} if this tab is phantom; {@code false} otherwise
+         */
         public boolean isPhantom() {
             return phantom;
         }
 
+        /**
+         * Sets whether this tab is a phantom.
+         * <p>
+         * This flag should only be set internally when a phantom tab is created
+         * for layout purposes.
+         *
+         * @param phantom {@code true} to mark this tab as phantom; {@code false} otherwise
+         */
         private void setPhantom(boolean phantom) {
             this.phantom = phantom;
         }
