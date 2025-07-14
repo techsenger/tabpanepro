@@ -2535,6 +2535,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
             headersRegion.getChildren().clear();
             headersRegion.getChildren().addAll(newTabHeaders);
+            updateTabHeaderViewOrder(false);
             requestLayout();
         }
 

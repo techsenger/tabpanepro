@@ -438,21 +438,20 @@ public class Demo extends Application {
 //    }
 
     private void updateTabShape(CustomTabShape oldShape, CustomTabShape newShape) {
-        tabPanes.stream()
-                .map(e -> {
-                    if (oldShape != CustomTabShape.NONE) {
-                        e.getStyleClass().remove("custom-shape");
-                    }
-                    if (newShape != CustomTabShape.NONE) {
-                        e.getStyleClass().add("custom-shape");
-                    }
-                    return (TabPaneProSkin) e.getSkin();
-                })
-                .forEach(s -> {
-                    var area = s.getTabHeaderArea();
-                    area.setTabHeaderFactory(newShape.getSkinFactory());
-                    area.setTabDropOffsetResolver(newShape.getOffsetResolver());
-                });
+        tabPanes.stream().forEach(t -> updateTabShape((TabPanePro) t, oldShape, newShape));
+    }
+
+    private void updateTabShape(TabPanePro tabPane, CustomTabShape oldShape, CustomTabShape newShape) {
+        if (oldShape != CustomTabShape.NONE) {
+            tabPane.getStyleClass().remove("custom-shape");
+        }
+        if (newShape != CustomTabShape.NONE) {
+            tabPane.getStyleClass().add("custom-shape");
+        }
+        TabPaneProSkin skin = (TabPaneProSkin) tabPane.getSkin();
+        var area = skin.getTabHeaderArea();
+        area.setTabHeaderFactory(newShape.getSkinFactory());
+        area.setTabDropOffsetResolver(newShape.getOffsetResolver());
     }
 
     private void updateTabGap(String value) {
@@ -511,8 +510,7 @@ public class Demo extends Application {
             tabHeaderArea.setTabDragContentFactory(this::createDragContent);
             tabHeaderArea.setTabDragScrollStep(10);
             tabHeaderArea.setTabDragCursor(Cursor.CLOSED_HAND);
-            tabHeaderArea.setTabHeaderFactory(tabShapeComboBox.getValue().getSkinFactory());
-            tabHeaderArea.setTabDropOffsetResolver(tabShapeComboBox.getValue().getOffsetResolver());
+            updateTabShape(tabPanePro, CustomTabShape.NONE, tabShapeComboBox.getValue());
             tabHeaderArea.setTabGap(Double.valueOf(tabGapTextField.getText()));
             tabHeaderArea.setTabViewOrderResolver(tabViewOrderComboBox.getValue().getResolver());
             if (firstAreaCheckBox.isSelected()) {
