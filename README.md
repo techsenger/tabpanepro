@@ -31,11 +31,9 @@ minimal set of required classes.
 
 ## Demo <a name="demo"></a>
 
-![tabpanepro0](https://github.com/user-attachments/assets/3e3c4ef7-a9e8-40be-9002-04969752e0c4)
+![tabpanepro-demo0](https://github.com/user-attachments/assets/809d0779-6c9d-4d28-9a9a-e126739d5955)
 
-![tabpanepro1](https://github.com/user-attachments/assets/9079a2ed-a576-402e-a87d-c7184679ac5f)
-
-![tabpanepro2](https://github.com/user-attachments/assets/dc6cd878-a0ad-4948-a259-805c45f16438)
+![tabpanepro-demo1](https://github.com/user-attachments/assets/890f7504-2ad1-4b1b-92e4-60ef26a5ac68)
 
 ## Features <a name="features"></a>
 
