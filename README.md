@@ -10,7 +10,7 @@
 * [Features](#features)
 * [Dependencies](#dependencies)
 * [Usage](#usage)
-    * [Areas](#usage-areas)
+    * [Control Areas](#usage-control-areas)
     * [Tab Custom Shape](#usage-tab-custom-shape)
     * [Tabs Menu](#usage-tabs-menu)
     * [Tabs ScrollBar](#usage-tabs-scroll-bar)
@@ -25,9 +25,9 @@
 ## Overview <a name="overview"></a>
 
 Techsenger TabPanePro is a lightweight JavaFX library that extends the standard TabPane with practical features such
-as custom control areas, tab drag-and-drop with edge scrolling, a tab scrollbar, and more. The library is built on
-top of the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a minimal set of required
-classes.
+as custom control areas, custom tab shapes, tab drag-and-drop with edge scrolling, a tab scrollbar, and more. The
+library is built on top of the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a
+minimal set of required classes.
 
 ## Demo <a name="demo"></a>
 
@@ -43,6 +43,7 @@ Key features include:
 
 * Two additional areas placed before and after all tabs, available for any custom purpose.
 * A sticky area, located between the tabs and the trailing area, typically used for a New Tab button.
+* Support for custom tab shapes with control over view order and gaps between tabs.
 * Ability to show the tab header area even when there are no tabs.
 * Support for both the standard and custom tab menus.
 * Supports tab scrolling via a ScrollBar, with four CSS-configurable positions per side.
@@ -65,16 +66,17 @@ This project will be available on Maven Central in a few weeks:
 
 ## Usage <a name="usage"></a>
 
-### Areas <a name="usage-areas"></a>
+### Control Areas <a name="usage-control-areas"></a>
 
 The library provides three optional areas that can be used if needed. You can access these areas through the skin:
 
 ```java
 TabPanePro tabPane = new TabPanePro();
-var skin = (TabPaneProSkin) tabPane.getSkin();
-var firstArea = skin.getTabHeaderFirstArea(); // CSS: .tab-pane-pro > .tab-header-area > .first-area {}
-var stickyArea = skin.getTabHeaderStickyArea(); // CSS: .tab-pane-pro > .tab-header-area > .sticky-area {}
-var lastArea = skin.getTabHeaderLastArea(); // CSS: .tab-pane-pro > .tab-header-area > .last-area {}
+TabPaneProSkin skin = (TabPaneProSkin) tabPane.getSkin();
+TabHeaderArea tabHeaderArea = skin.getTabHeaderArea();
+StackPane firstArea = tabHeaderArea.getFirstArea(); // CSS: .tab-pane-pro > .tab-header-area > .first-area {}
+StackPane stickyArea = tabHeaderArea.getStickyArea(); // CSS: .tab-pane-pro > .tab-header-area > .sticky-area {}
+StackPane lastArea = tabHeaderArea.getLastArea(); // CSS: .tab-pane-pro > .tab-header-area > .last-area {}
 ```
 Note that these areas will rotate when the side of the pane is set to `RIGHT`, `BOTTOM`, or `LEFT`. However, the
 library does not apply any automatic transformation or layout logic to adapt their content. This is intentional, as
@@ -83,27 +85,27 @@ See `demo.css` for styling examples across different sides.
 
 The standard `TabPane` hides its tab header area when there are no tabs. However, this behavior is not suitable if you
 need to display the areas, which may contain various controls. To address this, use
-`TabPaneProSkin#tabHeaderAreaPolicyProperty()`:
+`TabHeaderArea#policyProperty()`:
 
 ```java
-skin.setTabHeaderAreaPolicy(TabHeaderAreaPolicy.ALWAYS_VISIBLE);
+tabHeaderArea.setPolicy(TabHeaderAreaPolicy.ALWAYS_VISIBLE);
 ```
 
 ### Tab Custom Shape <a name="usage-tab-custom-shape"></a>
 
 The library allows you to create virtually any custom shape for tabs. To achieve this, the following properties are provided:
 
-* `TabPaneProSkin#tabHeaderFactoryProperty()` — holds the factory used to create custom `TabHeaderSkin` instances.
+* `TabHeaderArea#tabHeaderFactoryProperty()` — holds the factory used to create custom `TabHeaderSkin` instances.
 Although this class is public, its implementation is mostly hidden. Developers are given access only to the
 `TabHeaderContext`, which is sufficient for adding new nodes and overriding `layoutChildren()`.
 A key method here is `TabHeaderSkin#layoutChildren(Insets)`, which allows you to use the default layout for child
 nodes with additional padding. For example, if you want to create a custom shape with a 5-pixel gap between it and
 `.tab-container`, you can call `skin.layoutChildren(new Insets(5));`. This will add the necessary spacing without
 having to rewrite CSS styles.
-* `TabPaneProSkin#tabGapProperty()` — defines the spacing between tab headers. If the value is negative, the headers
+* `TabHeaderArea#tabGapProperty()` — defines the spacing between tab headers. If the value is negative, the headers
 will overlap each other.
-* `TabPaneProSkin#tabViewOrderResolverProperty()` — holds a resolver that defines the view order for each `TabHeaderSkin`.
-* `TabPaneProSkin#tabDropOffsetResolverProperty()` — used when drag-and-drop is enabled. This property contains a
+* `TabHeaderArea#tabViewOrderResolverProperty()` — holds a resolver that defines the view order for each `TabHeaderSkin`.
+* `TabHeaderArea#tabDropOffsetResolverProperty()` — used when drag-and-drop is enabled. This property contains a
 resolver that defines an offset relative to the default position. This is necessary when using custom shapes
 and tab header spacing, as drop position may need to be adjusted accordingly.
 
@@ -111,13 +113,13 @@ and tab header spacing, as drop position may need to be adjusted accordingly.
 
 The Tabs Menu allows quick selection of a specific tab. This menu is typically used when not all tabs are visible to
 the user. The library supports both custom menus and the standard menu. To show the standard menu, use the method
-`TabPaneProSkin#showTabsMenu(Node)`. To determine whether this menu should be shown, use
-`TabPaneProSkin#tabScrollBarNeededProperty()`.
+`TabHeaderArea#showTabsMenu(Node)`. To determine whether this menu should be shown, use
+`TabHeaderArea#scrollBarNeededProperty()`.
 
 ### Tabs ScrollBar <a name="usage-tabs-scroll-bar"></a>
 
-To enable scrolling of tabs using a `ScrollBar`, first set the `tabScrollBarEnabled` property of the skin
-class to `true`. As a result, the `ScrollBar` will be added to the tab header area, but it will remain invisible by
+To enable scrolling of tabs using a `ScrollBar`, first set the `TabHeaderArea#scrollBarEnabledProperty()` property
+to `true`. As a result, the `ScrollBar` will be added to the tab header area, but it will remain invisible by
 default. It only becomes visible when the tabs do not fit and the user hovers the cursor over the header area.
 
 The "vertical" position of the `ScrollBar` can be configured using two CSS properties:
@@ -140,9 +142,9 @@ Example:
 ### Tab Scrolling <a name="usage-tab-scrolling"></a>
 
 The library provides all necessary APIs for scrolling tabs and obtaining information about the current scroll state.
-To scroll the tabs, use the method `TabPaneProSkin#scrollTabHeadersBy(double)`. To determine the scroll state, use the
-three properties: `TabPaneProSkin#headersRegionWidthProperty()`, `TabPaneProSkin#headersRegionOffsetProperty()`, and
-`TabPaneProSkin#headersClipWidthProperty()`. See the demo for an example implementation.
+To scroll the tabs, use the method `TabHeaderArea#scrollTabHeadersBy(double)`. To determine the scroll state, use the
+three read-only properties: `TabHeaderArea#headersRegionWidthProperty()`, `TabHeaderArea#headersRegionOffsetProperty()`,
+and `TabHeaderArea#headersClipWidthProperty()`. See the demo for an example implementation.
 
 ### Tab Drag and Drop <a name="usage-tab-drag-and-drop"></a>
 
@@ -156,7 +158,7 @@ To enable drag and drop, follow these steps:
 1. Set a shared context for all TabPane instances involved in the operation:
 
 ```java
-var context = new DragAndDropContext();
+DragAndDropContext context = new DragAndDropContext();
 sourceTabPane.setDragAndDropContext(context);
 targetTabPane.setDragAndDropContext(context);
 ```
@@ -171,11 +173,13 @@ sourceTabPane.setTabDragPredicate(...);
 sourceTabPane.setTabDragHandler(...);
 // Optionally, provide a handler that's called when the drag operation ends:
 sourceTabPane.setTabDropHandler(...);
+// Retrieve the TabHeaderArea from the source skin
+TabPaneProSkin sourceSkin = (TabPaneProSkin) sourceTabPane.getSkin();
+TabHeaderArea sourceTabHeaderArea = sourceSkin.getTabHeaderArea();
 // Provide the view of the tab being dragged — it will be shown in a popup:
-var sourceSkin = (TabPaneProSkin) sourceTabPane.getSkin();
-sourceSkin.setTabDragContentFactory(...);
+sourceTabHeaderArea.setTabDragContentFactory(...);
 // Set the cursor for the drag operation:
-sourceSkin.setTabDragCursor(...);
+sourceTabHeaderArea.setTabDragCursor(...);
 ```
 
 3. Configure the target TabPane:
@@ -184,13 +188,17 @@ sourceSkin.setTabDragCursor(...);
 targetTabPane.setTabDropEnabled(true);
 // Optionally, restrict which tabs can be dropped using a predicate:
 targetTabPane.setTabDropPredicate(...);
+// Retrieve the TabHeaderArea from the target skin
+TabPaneProSkin targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
+TabHeaderArea targetTabHeaderArea = targetSkin.getTabHeaderArea();
 // Set the scroll step for edge auto-scrolling:
-var targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
-targetSkin.setTabDragScrollStep(...);
+targetTabHeaderArea.setTabDragScrollStep(...);
 // Configure the drop position area either via CSS or in code.
 // It's recommended to use an even width for the drop area, as its position is calculated as (width / 2).
 // You can style the drop position in various ways, including adding nodes with arrow icons, etc.
 StackPane dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .tab-drop-position {}
+// If you use custom tab shapes, you may need to adjust the drop position
+targetTabHeaderArea.setTabDropOffsetResolver(...);
 ```
 
 For a complete example and visual demonstration of these features, see the demo application included with the library.
