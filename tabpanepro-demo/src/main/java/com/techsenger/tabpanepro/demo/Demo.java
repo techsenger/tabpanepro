@@ -204,9 +204,9 @@ public class Demo extends Application {
 
     private final CheckBox dragAndDropCheckBox = new CheckBox("Drag and Drop");
 
-    private final Label dropOffsetLabel = new Label("Drop Offset");
+    private final Label dragScrollStepLabel = new Label("Drag Scroll Step");
 
-    private final TextField dropOffsetTextField = new TextField("0.0");
+    private final TextField dragScrollStepTextField = new TextField("10.0");
 
     private final Label cssTestLabel = new Label("CSS Test");
 
@@ -264,8 +264,8 @@ public class Demo extends Application {
             scrollBarStyleLabel.setDisable(!newV);
             scrollBarStyleComboBox.setDisable(!newV);
             dragAndDropCheckBox.setDisable(!newV);
-            dropOffsetLabel.setDisable(!newV);
-            dropOffsetTextField.setDisable(!newV);
+            dragScrollStepLabel.setDisable(!newV);
+            dragScrollStepTextField.setDisable(!newV);
             tabShapeLabel.setDisable(!newV);
             tabShapeComboBox.setDisable(!newV);
             tabGapLabel.setDisable(!newV);
@@ -322,16 +322,16 @@ public class Demo extends Application {
         gridPane.add(scrollBarStyleHBox, 1, 2);
         gridPane.add(dragAndDropCheckBox, 2, 2);
         dragAndDropCheckBox.selectedProperty().addListener((ov, oldV, newV) -> updateDragAndDrop(newV));
-//        dropOffsetLabel.setMinWidth(Region.USE_PREF_SIZE);
-//        HBox.setHgrow(dropOffsetTextField, Priority.ALWAYS);
-//        dropOffsetTextField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-//            if (event.getCode() == KeyCode.ENTER) {
-//                updateDropOffset(dropOffsetTextField.getText());
-//                event.consume();
-//            }
-//        });
-//        var dropOffsetBox = createCellHBox(dropOffsetLabel, dropOffsetTextField);
-//        gridPane.add(dropOffsetBox, 3, 2);
+        dragScrollStepLabel.setMinWidth(Region.USE_PREF_SIZE);
+        HBox.setHgrow(dragScrollStepTextField, Priority.ALWAYS);
+        dragScrollStepTextField.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                updateDragScrollStep(dragScrollStepTextField.getText());
+                event.consume();
+            }
+        });
+        var dragScrollStepBox = createCellHBox(dragScrollStepLabel, dragScrollStepTextField);
+        gridPane.add(dragScrollStepBox, 3, 2);
 
         //row 3
         tabShapeLabel.setMinWidth(Region.USE_PREF_SIZE);
@@ -431,11 +431,11 @@ public class Demo extends Application {
         });
     }
 
-//    private void updateDropOffset(String value) {
-//        tabPanes.stream().map(t -> (TabPaneProSkin) t.getSkin()).forEach(t -> {
-//            t.setTabDropOffset(Double.valueOf(value));
-//        });
-//    }
+    private void updateDragScrollStep(String value) {
+        tabPanes.stream().map(t -> (TabPaneProSkin) t.getSkin()).forEach(t -> {
+            t.getTabHeaderArea().setTabDragScrollStep(Double.valueOf(value));
+        });
+    }
 
     private void updateTabShape(CustomTabShape oldShape, CustomTabShape newShape) {
         tabPanes.stream().forEach(t -> updateTabShape((TabPanePro) t, oldShape, newShape));
@@ -508,7 +508,7 @@ public class Demo extends Application {
             var skin = (TabPaneProSkin) tabPane.getSkin();
             var tabHeaderArea = skin.getTabHeaderArea();
             tabHeaderArea.setTabDragContentFactory(this::createDragContent);
-            tabHeaderArea.setTabDragScrollStep(10);
+            tabHeaderArea.setTabDragScrollStep(Double.valueOf(dragScrollStepTextField.getText()));
             tabHeaderArea.setTabDragCursor(Cursor.CLOSED_HAND);
             updateTabShape(tabPanePro, CustomTabShape.NONE, tabShapeComboBox.getValue());
             tabHeaderArea.setTabGap(Double.valueOf(tabGapTextField.getText()));
