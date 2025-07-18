@@ -112,17 +112,17 @@ public class Demo extends Application {
     }
 
     private enum CustomTabShape {
-        NONE(null, null),
+        NONE(null, (skin, gap) -> 0.0),
         DOUBLE_SLANTED(c -> new DoubleSlantedTabHeaderSkin(c), DoubleSlantedTabHeaderSkin.getDropOffsetResolver()),
         LEFT_SLANTED(c -> new LeftSlantedTabHeaderSkin(c), LeftSlantedTabHeaderSkin.getDropOffsetResolver()),
         RIGHT_SLANTED(c -> new RightSlantedTabHeaderSkin(c), RightSlantedTabHeaderSkin.getDropOffsetResolver());
 
         private final Function<TabHeaderContext, TabHeaderSkin> skinFactory;
 
-        private final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> offsetResolver;
+        private final BiFunction<Side, Double, Double> offsetResolver;
 
         private CustomTabShape(Function<TabHeaderContext, TabHeaderSkin> skinFactory,
-                BiFunction<TabHeaderSkin, TabHeaderSkin, Double> offsetResolver) {
+                BiFunction<Side, Double, Double> offsetResolver) {
             this.skinFactory = skinFactory;
             this.offsetResolver = offsetResolver;
         }
@@ -131,7 +131,7 @@ public class Demo extends Application {
             return skinFactory;
         }
 
-        public BiFunction<TabHeaderSkin, TabHeaderSkin, Double> getOffsetResolver() {
+        public BiFunction<Side, Double, Double> getOffsetResolver() {
             return offsetResolver;
         }
     }
@@ -451,12 +451,22 @@ public class Demo extends Application {
         TabPaneProSkin skin = (TabPaneProSkin) tabPane.getSkin();
         var area = skin.getTabHeaderArea();
         area.setTabHeaderFactory(newShape.getSkinFactory());
-        area.setTabDropOffsetResolver(newShape.getOffsetResolver());
+        updateDropPosition(skin);
     }
 
     private void updateTabGap(String value) {
         var v = Double.valueOf(value);
-        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(s -> s.getTabHeaderArea().setTabGap(v));
+        tabPanes.stream().map(e -> (TabPaneProSkin) e.getSkin()).forEach(s -> {
+            s.getTabHeaderArea().setTabGap(v);
+            updateDropPosition(s);
+        });
+    }
+
+    private void updateDropPosition(TabPaneProSkin skin) {
+        var side = skin.getSkinnable().getSide();
+        var gap = skin.getTabHeaderArea().getTabGap();
+        var offset = tabShapeComboBox.getValue().offsetResolver.apply(side, gap);
+        skin.getTabHeaderArea().getTabDropPosition().setOffset(offset);
     }
 
     private void updateTabViewOrder(TabViewOrder order) {

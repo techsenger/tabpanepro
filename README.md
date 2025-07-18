@@ -103,9 +103,6 @@ having to rewrite CSS styles.
 * `TabHeaderArea#tabGapProperty()` — defines the spacing between tab headers. If the value is negative, the headers
 will overlap each other.
 * `TabHeaderArea#tabViewOrderResolverProperty()` — holds a resolver that defines the view order for each `TabHeaderSkin`.
-* `TabHeaderArea#tabDropOffsetResolverProperty()` — used when drag-and-drop is enabled. This property contains a
-resolver that defines an offset relative to the default position. This is necessary when using custom shapes
-and tab header spacing, as drop position may need to be adjusted accordingly.
 
 ### Tabs Menu <a name="usage-tabs-menu"></a>
 
@@ -194,9 +191,9 @@ targetTabHeaderArea.setTabDragScrollStep(...);
 // Configure the drop position area either via CSS or in code.
 // It's recommended to use an even width for the drop area, as its position is calculated as (width / 2).
 // You can style the drop position in various ways, including adding nodes with arrow icons, etc.
-StackPane dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .tab-drop-position {}
+TabDropPosition dropPosition = targetSkin.getTabDropPosition(); // CSS: .tab-pane-pro > .tab-header-area > .tab-drop-position {}
 // If you use custom tab shapes, you may need to adjust the drop position
-targetTabHeaderArea.setTabDropOffsetResolver(...);
+dropPosition.setOffset(...);
 ```
 
 For a complete example and visual demonstration of these features, see the demo application included with the library.

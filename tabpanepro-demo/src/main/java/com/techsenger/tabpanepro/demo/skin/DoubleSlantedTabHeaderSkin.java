@@ -21,9 +21,7 @@
 
 package com.techsenger.tabpanepro.demo.skin;
 
-import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
-import com.techsenger.tabpanepro.core.skin.TabPaneProSkin.TabHeaderSkin;
 import java.util.function.BiFunction;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
@@ -38,17 +36,15 @@ public class DoubleSlantedTabHeaderSkin extends AbstractSlantedTabHeaderSkin {
 
     private final Insets extraPadding = new Insets(2, 13, 0, 13);
 
-    private static final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> dropOffsetResolver = (left, right) -> {
-        TabPanePro tabPane = (TabPanePro) left.getContext().getTab().getTabPane();
-        TabPaneProSkin skin = (TabPaneProSkin) tabPane.getSkin();
-        var offset = skin.getTabHeaderArea().getTabGap() / 2;
-        if (tabPane.getSide() == Side.BOTTOM || tabPane.getSide() == Side.LEFT) {
+    private static final BiFunction<Side, Double, Double> dropOffsetResolver = (side, gap) -> {
+        var offset = gap / 2;
+        if (side== Side.BOTTOM || side == Side.LEFT) {
             offset *= -1;
         }
         return offset;
     };
 
-    public static BiFunction<TabHeaderSkin, TabHeaderSkin, Double> getDropOffsetResolver() {
+    public static BiFunction<Side, Double, Double> getDropOffsetResolver() {
         return dropOffsetResolver;
     }
 

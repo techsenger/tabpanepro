@@ -21,9 +21,7 @@
 
 package com.techsenger.tabpanepro.demo.skin;
 
-import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
-import com.techsenger.tabpanepro.core.skin.TabPaneProSkin.TabHeaderSkin;
 import java.util.function.BiFunction;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
@@ -36,16 +34,14 @@ import javafx.scene.shape.MoveTo;
  */
 public class RightSlantedTabHeaderSkin extends AbstractSlantedTabHeaderSkin {
 
-    private static final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> dropOffsetResolver = (left, right) -> {
-        TabPanePro tabPane = (TabPanePro) left.getContext().getTab().getTabPane();
-        TabPaneProSkin skin = (TabPaneProSkin) tabPane.getSkin();
-        if (tabPane.getSide() == Side.TOP|| tabPane.getSide() == Side.RIGHT) {
-            return skin.getTabHeaderArea().getTabGap();
+    private static final BiFunction<Side, Double, Double> dropOffsetResolver = (side, gap) -> {
+        if (side == Side.TOP|| side == Side.RIGHT) {
+            return gap;
         }
         return 0.0;
     };
 
-    public static BiFunction<TabHeaderSkin, TabHeaderSkin, Double> getDropOffsetResolver() {
+    public static BiFunction<Side, Double, Double> getDropOffsetResolver() {
         return dropOffsetResolver;
     }
 

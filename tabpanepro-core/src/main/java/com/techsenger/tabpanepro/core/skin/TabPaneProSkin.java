@@ -27,7 +27,8 @@
  * This source file was taken from the OpenJFX project (https://github.com/openjdk/jfx),
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
- * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025.
+ * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
+ * July 18, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -41,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
@@ -843,7 +843,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      * TabHeaderArea: Area responsible for painting all tabs
      *
      **************************************************************************/
-    public class TabHeaderArea extends StackPane {
+    public final class TabHeaderArea extends StackPane {
 
         private static final double DRAG_SCROLL_EDGE = 10.0;
 
@@ -900,10 +900,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private boolean acceptsTab;
 
-        private final StackPane tabDropPosition = new StackPane();
-
-        private final ObjectProperty<BiFunction<TabHeaderSkin, TabHeaderSkin, Double>>
-                tabDropOffsetResolver = new SimpleObjectProperty(this, "tabDropOffsetResolver");
+        private final TabDropPosition tabDropPosition = new TabDropPosition();
 
         private int dropIndex = -1;
 
@@ -1068,10 +1065,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             this.lastArea.getStyleClass().add("last-area");
             this.lastArea.setViewOrder(-10);
 
-            tabDropPosition.getStyleClass().add("tab-drop-position");
-            tabDropPosition.setViewOrder(-11);
-            tabDropPosition.setMouseTransparent(true);
-
             this.stickyArea.getStyleClass().add("sticky-area");
             this.stickyArea.setViewOrder(-9);
             this.scrollBar.setUnitIncrement(10);
@@ -1148,10 +1141,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         /**
-         * Returns the {@link StackPane} that visually marks the exact insertion position for a tab during drag-and-drop
-         * operations. The element is managed automatically (hidden when no drag is active).
-         *
-         * <p>Customize it by either:
+         * Returns the {@link TabDropPosition} that visually marks the exact insertion position for a tab during drag-and-drop
+         * operations.The element is managed automatically (hidden when no drag is active).<p>Customize it by either:
          * <ul>
          *   <li>Styling with CSS (default style class: {@code tab-drop-position})</li>
          *   <li>Adding custom nodes (e.g., an arrow icon via {@link #getChildren()})</li>
@@ -1159,7 +1150,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
          *
          * @return the non-null container marking the drop position
          */
-        public StackPane getTabDropPosition() {
+        public TabDropPosition getTabDropPosition() {
             return tabDropPosition;
         }
 
@@ -1556,49 +1547,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             tabViewOrderResolverProperty().set(resolver);
         }
 
-        /**
-         * Defines the resolver used to calculate an offset for the visual drop position
-         * indicator ({@link #getTabDropPosition()}) when a tab is being dragged between two existing tabs.
-         * <p>
-         * This resolver receives the {@code left} and {@code right} {@link TabHeaderSkin}
-         * instances representing the tabs adjacent to the drop location. It returns a
-         * {@code double} value indicating the adjustment to apply to the automatically
-         * computed drop position.
-         * <p>
-         * This resolver is applied only when the tab is dropped between two existing tabs,
-         * and is ignored when the drop occurs before the first tab or after the last tab.
-         * The offset is added to the automatically computed drop position and affects only the
-         * visual placement of the {@code tabDropPosition}.
-         * <p>
-         * This property is typically used in conjunction with the {@link #tabGapProperty()} property
-         * to account for overlapping tab shapes or custom layouts.
-         *
-         * @return the tab drop offset resolver property
-         */
-        public final ObjectProperty<BiFunction<TabHeaderSkin, TabHeaderSkin, Double>> tabDropOffsetResolverProperty() {
-            return tabDropOffsetResolver;
-        }
-
-        /**
-         * Gets the value of {@link #tabDropOffsetResolverProperty()}.
-         *
-         * @return the tab drop offset resolver, or {@code null} if not set
-         */
-        public final BiFunction<TabHeaderSkin, TabHeaderSkin, Double> getTabDropOffsetResolver() {
-            return tabDropOffsetResolverProperty().get();
-        }
-
-        /**
-         * Sets the value of {@link #tabDropOffsetResolverProperty()}.
-         *
-         * @param resolver a {@link BiFunction} accepting the left and right
-         *                 {@code TabHeaderSkin} and returning the offset value;
-         *                 may be {@code null}
-         */
-        public final void setTabDropOffsetResolver(BiFunction<TabHeaderSkin, TabHeaderSkin, Double> resolver) {
-            tabDropOffsetResolverProperty().set(resolver);
-        }
-
         private boolean isMouseOverHeaderClip(MouseEvent e) {
             var mouseIsOver = false;
             var side = getSkinnable().getSide();
@@ -1992,7 +1940,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = topInset + firstAreaHeight - scrollBarHeight;
                     }
                 }
-                dropPositionX = calculateDropPositionX(regionX, dropPositionWidthHalf);
+                dropPositionX = computeDropPositionX(regionX, dropPositionWidthHalf);
                 dropPositionY = regionY;
             } else if (tabPosition.equals(Side.RIGHT)) {
                 firstAreaX = topInset;
@@ -2023,7 +1971,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = headerHeight - leftInset - scrollBarHeight;
                     }
                 }
-                dropPositionX = calculateDropPositionX(regionX, dropPositionWidthHalf);
+                dropPositionX = computeDropPositionX(regionX, dropPositionWidthHalf);
                 dropPositionY = regionY;
             } else if (tabPosition.equals(Side.BOTTOM)) {
                 firstAreaX = headerWidth - firstAreaWidth - leftInset;
@@ -2054,7 +2002,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = topInset;
                     }
                 }
-                dropPositionX = calculateDropPositionX(firstAreaX, dropPositionWidthHalf);
+                dropPositionX = computeDropPositionX(firstAreaX, dropPositionWidthHalf);
                 dropPositionY = regionY;
             } else if (tabPosition.equals(Side.LEFT)) {
                 firstAreaX = headerWidth - firstAreaWidth - topInset;
@@ -2085,7 +2033,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         scrollBarY = headerHeight - scrollBarHeight - rightInset;
                     }
                 }
-                dropPositionX = calculateDropPositionX(firstAreaX, dropPositionWidthHalf);
+                dropPositionX = computeDropPositionX(firstAreaX, dropPositionWidthHalf);
                 dropPositionY = regionY;
             }
             if (headerBackground.isVisible()) {
@@ -2127,7 +2075,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
         }
 
-        private double calculateDropPositionX(double zeroPosition, double dropPositionWidthHalf) {
+        private double computeDropPositionX(double zeroPosition, double dropPositionWidthHalf) {
             if (tabDropPosition.getParent() == null) {
                 return 0;
             }
@@ -2139,9 +2087,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 TabHeaderSkin leftHeader = (TabHeaderSkin) headersRegion.getChildren().get(dropIndex - 1);
                 var areaBounds = getTabHeaderBounds(leftHeader);
                 var offset = 0.0;
-                if (dropIndex != getSkinnable().getTabs().size() && getTabDropOffsetResolver() != null) {
-                    TabHeaderSkin rightHeader = (TabHeaderSkin) headersRegion.getChildren().get(dropIndex);
-                    offset = getTabDropOffsetResolver().apply(leftHeader, rightHeader);
+                if (dropIndex != getSkinnable().getTabs().size()) {
+                    offset = getTabDropPosition().getOffset();
                 }
                 if (side == TOP || side == RIGHT) {
                     dropPositionX = areaBounds.getMaxX() - dropPositionWidthHalf + offset;
@@ -2567,7 +2514,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
      *
      **************************************************************************/
 
-    public static class TabHeaderContext {
+    public static final class TabHeaderContext {
 
         private Tab tab;
 
@@ -2651,6 +2598,55 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private void setResourceBundle(ResourceBundle resourceBundle) {
             this.resourceBundle = resourceBundle;
+        }
+    }
+
+    public static final class TabDropPosition extends StackPane {
+
+        private final DoubleProperty offset = new SimpleDoubleProperty(this, "offset");
+
+        private TabDropPosition() {
+            getStyleClass().add("tab-drop-position");
+            setViewOrder(-11);
+            setMouseTransparent(true);
+        }
+
+        /**
+         * Defines the offset (in pixels) to adjust the visual drop position
+         * indicator when a tab is being dragged between two existing tabs.
+         * <p>
+         * This value is added to the automatically computed drop position to fine-tune
+         * its placement. It only affects the visual feedback shown during the drag-and-drop
+         * operation and has no impact on the actual insertion logic.
+         * <p>
+         * The offset is applied only when the tab is dropped between two existing tabs,
+         * and is ignored when the drop occurs before the first tab or after the last tab.
+         * <p>
+         * This property is typically used in conjunction with the {@link TabHeaderArea#tabGapProperty()}
+         * to account for overlapping tab shapes, visual gaps, or custom layout adjustments.
+         *
+         * @return the tab drop offset property
+         */
+        public final DoubleProperty offsetProperty() {
+            return offset;
+        }
+
+        /**
+         * Gets the value of {@link #offsetProperty()}.
+         *
+         * @return the visual offset added to the drop indicator position
+         */
+        public final double getOffset() {
+            return offsetProperty().get();
+        }
+
+        /**
+         * Sets the value of {@link #offsetProperty()}.
+         *
+         * @param offset the visual offset (in pixels) to apply to the drop indicator
+         */
+        public final void setOffset(double offset) {
+            offsetProperty().set(offset);
         }
     }
 
