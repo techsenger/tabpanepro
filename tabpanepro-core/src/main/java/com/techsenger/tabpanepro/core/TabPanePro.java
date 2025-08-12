@@ -29,6 +29,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
@@ -48,9 +50,9 @@ public class TabPanePro extends TabPane {
 
     private ObjectProperty<DragAndDropContext> dragAndDropContext;
 
-    private ObjectProperty<Consumer<Tab>> tabDragHandler;
+    private final ObservableList<Consumer<Tab>> tabDragHandlers = FXCollections.emptyObservableList();
 
-    private ObjectProperty<BiConsumer<Tab, Boolean>> tabDropHandler;
+    private final ObservableList<BiConsumer<Tab, Boolean>> tabDropHandlers = FXCollections.emptyObservableList();
 
     public TabPanePro() {
         this(null);
@@ -254,75 +256,74 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Defines the handler that is invoked when a tab drag operation begins.
+     * Adds the handler that is invoked when a tab drag operation begins.
      * <p>
-     * This property holds a {@link Consumer} that receives the {@link Tab} being dragged
+     * The handler is a {@link Consumer} that receives the {@link Tab} being dragged
      * at the start of the drag gesture. It can be used to perform custom logic such as
      * updating UI state, logging, or preparing drag visuals.
-     *
-     * @return the property holding the tab drag start handler
      */
-    public final ObjectProperty<Consumer<Tab>> tabDragHandlerProperty() {
-        if (tabDragHandler == null) {
-            tabDragHandler = new SimpleObjectProperty<>(this, "tabDragHandler");
-        }
-        return tabDragHandler;
+    public final void addTabDragHandler(Consumer<Tab> handler) {
+        this.tabDragHandlers.add(handler);
     }
 
     /**
-     * Sets the value of {@link #tabDragHandlerProperty()}.
-     *
-     * @param handler the handler to invoke when a tab drag starts,
-     *                or {@code null} to clear any existing handler
-     */
-    public final void setTabDragHandler(Consumer<Tab> handler) {
-        tabDragHandlerProperty().set(handler);
-    }
-
-    /**
-     * Returns the value of {@link #tabDragHandlerProperty()}.
-     *
-     * @return the current tab drag start handler, or {@code null} if none is set
-     */
-    public final Consumer<Tab> getTabDragHandler() {
-        return tabDragHandler == null ? null : tabDragHandler.get();
-    }
-
-    /**
-     * Defines the handler invoked when a tab drag operation ends.
+     * Removes the handler that is invoked when a tab drag operation begins.
      * <p>
-     * This property holds a {@link BiConsumer} that receives:
+     * The handler is a {@link Consumer} that receives the {@link Tab} being dragged
+     * at the start of the drag gesture. It can be used to perform custom logic such as
+     * updating UI state, logging, or preparing drag visuals.
+     */
+    public final void removeTabDragHandler(Consumer<Tab> handler) {
+        this.tabDragHandlers.remove(handler);
+    }
+
+    /**
+     * Returns the handlers that are invoked when a tab drag operation begins.
+     *
+     * @apiNote <b>This method is for internal use only!</b>  Library clients should not call it directly, as it may
+     *      change or be removed without notice in future versions.
+     * @return the internal list of tab drag handlers (do not modify)
+     */
+    public ObservableList<Consumer<Tab>> getTabDragHandlers() {
+        return tabDragHandlers;
+    }
+
+    /**
+     * Adds the handler invoked when a tab drag operation ends.
+     * <p>
+     * The handler is a {@link BiConsumer} that receives:
      * <ul>
      *     <li>the {@link Tab} being dropped</li>
      *     <li>a {@code boolean} indicating whether the drop was successful ({@code true}) or cancelled ({@code false})</li>
      * </ul>
      * This handler can be used to perform cleanup, update UI state, or trigger side effects after a drag-and-drop completes.
-     *
-     * @return the property holding the tab drop handler
      */
-    public final ObjectProperty<BiConsumer<Tab, Boolean>> tabDropHandlerProperty() {
-        if (tabDropHandler == null) {
-            tabDropHandler = new SimpleObjectProperty<>(this, "tabDropHandler");
-        }
-        return tabDropHandler;
+    public final void addTabDropHandler(BiConsumer<Tab, Boolean> handler) {
+        this.tabDropHandlers.add(handler);
     }
 
     /**
-     * Sets the value of {@link #tabDropHandlerProperty()}.
-     *
-     * @param handler the handler to invoke when a tab drag operation ends,
-     *                or {@code null} to clear any existing handler
+     * Removes the handler invoked when a tab drag operation ends.
+     * <p>
+     * The handler is a {@link BiConsumer} that receives:
+     * <ul>
+     *     <li>the {@link Tab} being dropped</li>
+     *     <li>a {@code boolean} indicating whether the drop was successful ({@code true}) or cancelled ({@code false})</li>
+     * </ul>
+     * This handler can be used to perform cleanup, update UI state, or trigger side effects after a drag-and-drop completes.
      */
-    public final void setTabDropHandler(BiConsumer<Tab, Boolean> handler) {
-        tabDropHandlerProperty().set(handler);
+    public final void removeTabDropHandler(BiConsumer<Tab, Boolean> handler) {
+        this.tabDropHandlers.remove(handler);
     }
 
     /**
-     * Returns the value of {@link #tabDropHandlerProperty()}.
+     * Returns the handlers invoked when a tab drag operation ends.
      *
-     * @return the current tab drop handler, or {@code null} if none is set
+     * @apiNote <b>This method is for internal use only!</b>  Library clients should not call it directly, as it may
+     *      change or be removed without notice in future versions.
+     * @return the internal list of tab drop handlers (do not modify)
      */
-    public final BiConsumer<Tab, Boolean> getTabDropHandler() {
-        return tabDropHandler == null ? null : tabDropHandler.get();
+    public ObservableList<BiConsumer<Tab, Boolean>> getTabDropHandlers() {
+        return tabDropHandlers;
     }
 }

@@ -3117,8 +3117,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private void handleDragDetected(MouseEvent e) {
             var predicate = getSkinnable().getTabDragPredicate();
             if (getSkinnable().isTabDragEnabled() && (predicate == null || predicate.test(getTab()))) {
-                var handler = getSkinnable().getTabDragHandler();
-                if (handler != null) {
+                for (var handler: getSkinnable().getTabDragHandlers()) {
                     handler.accept(getTab());
                 }
                 var skin = (TabPaneProSkin) getSkinnable().getSkin();
@@ -3165,8 +3164,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     otherHeaderArea.moveTab();
                     successful = true;
                 }
-                var handler = getSkinnable().getTabDropHandler();
-                if (handler != null) {
+                for (var handler : getSkinnable().getTabDropHandlers()) {
                     handler.accept(context.getTab(), successful);
                 }
                 getSkinnable().getScene().setCursor(savedSceneCursorOnDrag);
@@ -3756,7 +3754,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             // Update selected tab & index.
             getSkinnable().getSelectionModel().select(fromTab);
             this.reoderingInProgress = false;
-            
+
             tabHeaderArea.updateTabHeaderViewOrder(false);
             // Fix for JDK-8122662
             getSkinnable().requestLayout();

@@ -165,9 +165,9 @@ sourceTabPane.setTabDragEnabled(true);
 // Optionally, restrict which tabs can be dragged using a predicate:
 sourceTabPane.setTabDragPredicate(...);
 // Optionally, provide a handler that's called when dragging starts:
-sourceTabPane.setTabDragHandler(...);
+sourceTabPane.addTabDragHandler(...);
 // Optionally, provide a handler that's called when the drag operation ends:
-sourceTabPane.setTabDropHandler(...);
+sourceTabPane.addTabDropHandler(...);
 // Retrieve the TabHeaderArea from the source skin
 TabPaneProSkin sourceSkin = (TabPaneProSkin) sourceTabPane.getSkin();
 TabHeaderArea sourceTabHeaderArea = sourceSkin.getTabHeaderArea();
