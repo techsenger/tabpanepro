@@ -50,9 +50,9 @@ public class TabPanePro extends TabPane {
 
     private ObjectProperty<DragAndDropContext> dragAndDropContext;
 
-    private final ObservableList<Consumer<Tab>> tabDragHandlers = FXCollections.emptyObservableList();
+    private final ObservableList<Consumer<Tab>> tabDragHandlers = FXCollections.observableArrayList();
 
-    private final ObservableList<BiConsumer<Tab, Boolean>> tabDropHandlers = FXCollections.emptyObservableList();
+    private final ObservableList<BiConsumer<Tab, Boolean>> tabDropHandlers = FXCollections.observableArrayList();
 
     public TabPanePro() {
         this(null);
