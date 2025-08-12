@@ -28,7 +28,7 @@
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
  * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
- * July 18, 2025.
+ * July 18, 2025; August 12, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -36,11 +36,11 @@ package com.techsenger.tabpanepro.core.skin;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.behavior.TabPaneBehavior;
 import com.techsenger.tabpanepro.core.control.LambdaMultiplePropertyChangeListenerHandler;
-import com.techsenger.tabpanepro.core.control.TabObservableList;
 import com.techsenger.tabpanepro.core.utils.Utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.ResourceBundle;
 import java.util.function.Function;
 import javafx.animation.Animation;
@@ -610,8 +610,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
     ListChangeListener<Tab> tabsListener;
     WeakListChangeListener<Tab> weakTabsListener;
+    private boolean reoderingInProgress = false;
+
     private void initializeTabListener() {
         tabsListener = c -> {
+            if (reoderingInProgress) {
+                return;
+            }
+
             tabHeaderArea.updateNoTabsState(); // before processing tab adding/removing!
 
             List<Tab> tabsToRemove = new ArrayList<>();
@@ -3717,9 +3723,43 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
     private void reorderTabs() {
         if (dragTabHeaderIndex != dragTabHeaderStartIndex) {
-            ((TabObservableList<Tab>) getSkinnable().getTabs()).reorder(
-                    getSkinnable().getTabs().get(dragTabHeaderStartIndex),
-                    getSkinnable().getTabs().get(dragTabHeaderIndex));
+            var tabList = getSkinnable().getTabs();
+            Tab fromTab = tabList.get(dragTabHeaderStartIndex);
+            Tab toTab = tabList.get(dragTabHeaderIndex);
+            if (!tabList.contains(fromTab) || !tabList.contains(toTab) || fromTab == toTab) {
+                return;
+            }
+
+            // copied from TabObservableList.java.
+            this.reoderingInProgress = true;
+            // Perform reorder with the array of tabs.
+            Object[] a = tabList.toArray();
+            int fromIndex = tabList.indexOf(fromTab);
+            int toIndex = tabList.indexOf(toTab);
+            if (fromIndex == -1 || toIndex == -1) {
+                return;
+            }
+            int direction = (toIndex - fromIndex) / Math.abs(toIndex - fromIndex);
+
+            for (int j = fromIndex; j != toIndex; j += direction) {
+                a[j] = a[j + direction];
+            }
+            a[toIndex] = fromTab;
+
+            // Update the list with reordered array.
+            ListIterator iter = tabList.listIterator();
+            for (int j = 0; j < tabList.size(); j++) {
+                iter.next();
+                iter.set(a[j]);
+            }
+
+            // Update selected tab & index.
+            getSkinnable().getSelectionModel().select(fromTab);
+            this.reoderingInProgress = false;
+            
+            tabHeaderArea.updateTabHeaderViewOrder(false);
+            // Fix for JDK-8122662
+            getSkinnable().requestLayout();
         }
     }
 
