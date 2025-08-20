@@ -28,7 +28,7 @@
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
  * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
- * July 18, 2025; August 12, 2025.
+ * July 18, 2025; August 12, 2025; August 20, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -94,6 +94,7 @@ import javafx.scene.AccessibleAttribute;
 import javafx.scene.AccessibleRole;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
@@ -927,6 +928,12 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private final ObjectProperty<TabViewOrderResolver> tabViewOrderResolver =
                 new SimpleObjectProperty(this, "tabViewOrderResolver");
 
+        private Cursor sceneCursorOnDrag;
+
+        private Scene sceneOnDrag;
+
+        private Popup dragPopup;
+
         private TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
             setManaged(false);
@@ -1551,6 +1558,26 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
          */
         public final void setTabViewOrderResolver(TabViewOrderResolver resolver) {
             tabViewOrderResolverProperty().set(resolver);
+        }
+
+        /**
+         * Performs cleanup operations after a drag operation completion. This method is manually invoked only when the
+         * program intercepts MOUSE_DRAG_RELEASED event and the TabPane does not receive this event naturally.
+         *
+         * <p>This method hides the drag indicator popup, clears the drag context and temporary state and restores the
+         * previously saved cursor.
+         */
+        public void cleanupAfterDrop() {
+            if (this.dragPopup != null) {
+                this.dragPopup.hide();
+            }
+            if (this.sceneOnDrag != null && this.sceneCursorOnDrag != null) {
+                this.sceneOnDrag.setCursor(this.sceneCursorOnDrag);
+            }
+            this.dragPopup = null;
+            this.sceneOnDrag = null;
+            this.sceneCursorOnDrag = null;
+            getSkinnable().getDragAndDropContext().clear();
         }
 
         private boolean isMouseOverHeaderClip(MouseEvent e) {
@@ -2509,6 +2536,31 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
             return result;
         }
+
+        private Cursor getSceneCursorOnDrag() {
+            return sceneCursorOnDrag;
+        }
+
+        private void setSceneCursorOnDrag(Cursor sceneCursorOnDrag) {
+            this.sceneCursorOnDrag = sceneCursorOnDrag;
+        }
+
+        private Scene getSceneOnDrag() {
+            return sceneOnDrag;
+        }
+
+        private void setSceneOnDrag(Scene sceneOnDrag) {
+            this.sceneOnDrag = sceneOnDrag;
+        }
+
+        private Popup getDragPopup() {
+            return dragPopup;
+        }
+
+        private void setDragPopup(Popup dragPopup) {
+            this.dragPopup = dragPopup;
+        }
+
     } /* End TabHeaderArea */
 
 
@@ -2683,10 +2735,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private final WeakListChangeListener<String> weakStyleClassListener =
                 new WeakListChangeListener<>(styleClassListener);
-
-        private Popup dragPopup;
-
-        private Cursor savedSceneCursorOnDrag;
 
         private final TabHeaderContext context;
 
@@ -3121,14 +3169,18 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     handler.accept(getTab());
                 }
                 var skin = (TabPaneProSkin) getSkinnable().getSkin();
-                Node content = skin.getTabHeaderArea().getTabDragContentFactory().apply(this);
-                this.dragPopup = new Popup();
-                this.dragPopup.setAutoHide(false);
-                this.dragPopup.getContent().add(content);
+                var tabHeaderaArea = skin.getTabHeaderArea();
+                Node content = tabHeaderaArea.getTabDragContentFactory().apply(this);
+                var dragPopup = new Popup();
+                tabHeaderaArea.setDragPopup(dragPopup);
+                dragPopup.setAutoHide(false);
+                dragPopup.getContent().add(content);
                 var scene = getSkinnable().getScene();
-                this.savedSceneCursorOnDrag = scene.getCursor();
-                if (this.savedSceneCursorOnDrag == null) {
-                    this.savedSceneCursorOnDrag = Cursor.DEFAULT;
+                tabHeaderaArea.setSceneOnDrag(scene);
+                if (scene.getCursor() == null) {
+                    tabHeaderaArea.setSceneCursorOnDrag(Cursor.DEFAULT);
+                } else {
+                    tabHeaderaArea.setSceneCursorOnDrag(scene.getCursor());
                 }
                 var cursor = context.getTabHeaderArea().tabDragCursor.get();
                 cursor = cursor != null ? cursor : Cursor.DEFAULT;
@@ -3144,7 +3196,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseDragged(MouseEvent e) {
-            if (this.dragPopup != null) {
+            var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            var tabHeaderaArea = skin.getTabHeaderArea();
+            var dragPopup = tabHeaderaArea.getDragPopup();
+            if (dragPopup != null) {
                 dragPopup.setAnchorX(e.getScreenX());
                 dragPopup.setAnchorY(e.getScreenY());
                 e.consume();
@@ -3152,10 +3207,12 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseReleased(MouseEvent e) {
-            if (this.dragPopup != null) {
-                this.dragPopup.hide();
-                this.dragPopup = null;
-                var context = getSkinnable().getDragAndDropContext();
+            var context = getSkinnable().getDragAndDropContext();
+            var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            var tabHeaderaArea = skin.getTabHeaderArea();
+            var dragPopup = tabHeaderaArea.getDragPopup();
+            if (dragPopup != null) {
+                dragPopup.hide();
                 var successful = false;
                 // if no TabPane is present, it means the user has canceled the operation
                 if (context.getTargetTabPane() != null) {
@@ -3167,10 +3224,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 for (var handler : getSkinnable().getTabDropHandlers()) {
                     handler.accept(context.getTab(), successful);
                 }
-                getSkinnable().getScene().setCursor(savedSceneCursorOnDrag);
-                context.clear();
-                e.consume();
             }
+            tabHeaderaArea.cleanupAfterDrop();
+            e.consume();
         }
 
         private void handleMouseDragOver(MouseEvent e) {
