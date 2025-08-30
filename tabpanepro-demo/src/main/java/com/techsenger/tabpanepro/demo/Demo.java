@@ -23,7 +23,7 @@ package com.techsenger.tabpanepro.demo;
 
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.Styles;
-import com.techsenger.tabpanepro.core.DragAndDropContext;
+import com.techsenger.tabpanepro.core.skin.DragAndDropContext;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.TabHeaderAreaPolicy;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;

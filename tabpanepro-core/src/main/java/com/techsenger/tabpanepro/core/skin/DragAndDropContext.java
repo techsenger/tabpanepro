@@ -19,8 +19,11 @@
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package com.techsenger.tabpanepro.core;
+package com.techsenger.tabpanepro.core.skin;
 
+import com.techsenger.tabpanepro.core.TabPanePro;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.Tab;
 
 /**
@@ -32,46 +35,39 @@ public class DragAndDropContext {
     /**
      * The tab that is being dragged and dropped.
      */
-    private Tab tab;
-
-    /**
-     * The index of the tab.
-     */
-    private int tabIndex = -1;
+    private final ReadOnlyObjectWrapper<Tab> tab = new ReadOnlyObjectWrapper<>();
 
     /**
      * The TabPane that is ready to accept this tab if the drop occurs at the current mouse position.
      */
-    private TabPanePro targetTabPane;
+    private final ReadOnlyObjectWrapper<TabPanePro> targetTabPane = new ReadOnlyObjectWrapper<>();
 
     public Tab getTab() {
-        return this.tab;
+        return this.tab.get();
     }
 
-    public void setTab(Tab tab) {
-        this.tab = tab;
-    }
-
-    public int getTabIndex() {
-        return tabIndex;
-    }
-
-    public void setTabIndex(int tabIndex) {
-        this.tabIndex = tabIndex;
+    public ReadOnlyObjectProperty<Tab> tabProperty() {
+        return this.tab.getReadOnlyProperty();
     }
 
     public TabPanePro getTargetTabPane() {
-        return targetTabPane;
+        return targetTabPane.get();
     }
 
-    public void setTargetTabPane(TabPanePro targetTabPane) {
-        this.targetTabPane = targetTabPane;
+    public ReadOnlyObjectProperty<TabPanePro> targetTabPaneProperty() {
+        return this.targetTabPane.getReadOnlyProperty();
     }
 
-    public void clear() {
-        this.tab = null;
-        this.tabIndex = -1;
-        this.targetTabPane = null;
+    void setTab(Tab tab) {
+        this.tab.set(tab);
     }
 
+    void setTargetTabPane(TabPanePro targetTabPane) {
+        this.targetTabPane.set(targetTabPane);
+    }
+
+    void clear() {
+        this.tab.set(null);
+        this.targetTabPane.set(null);
+    }
 }

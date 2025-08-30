@@ -21,6 +21,7 @@
 
 package com.techsenger.tabpanepro.core;
 
+import com.techsenger.tabpanepro.core.skin.DragAndDropContext;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

@@ -28,7 +28,7 @@
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
  * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
- * July 18, 2025; August 12, 2025; August 20, 2025.
+ * July 18, 2025; August 12, 2025; August 20, 2025; August 31, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -2348,7 +2348,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
             var context = getSkinnable().getDragAndDropContext();
             var currentDropIndex = getDropIndex();
-            int tabIndex = context.getTabIndex();
+            var sourceTabPane = context.getTab().getTabPane();
+            int tabIndex = sourceTabPane.getTabs().indexOf(context.getTab());
             if (getSkinnable() == context.getTab().getTabPane()) { // within one tab pane
                 if (tabIndex == dropIndex || tabIndex + 1 == dropIndex) {
                     return;
@@ -3189,8 +3190,6 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 dragPopup.show(getScene().getWindow(), e.getScreenX(), e.getScreenY());
                 var context = getSkinnable().getDragAndDropContext();
                 context.setTab(getTab());
-                // the indices are updated for the target TabPane, but the selected index from the source TabPane is used.
-                context.setTabIndex(getSkinnable().getSelectionModel().getSelectedIndex());
                 e.consume();
             }
         }
