@@ -42,6 +42,8 @@ public class DragAndDropContext {
      */
     private final ReadOnlyObjectWrapper<TabPanePro> targetTabPane = new ReadOnlyObjectWrapper<>();
 
+    private boolean dragInProgress = false;
+
     public Tab getTab() {
         return this.tab.get();
     }
@@ -66,8 +68,17 @@ public class DragAndDropContext {
         this.targetTabPane.set(targetTabPane);
     }
 
+    boolean isDragInProgress() {
+        return dragInProgress;
+    }
+
+    void setDragInProgress(boolean dragInProgress) {
+        this.dragInProgress = dragInProgress;
+    }
+
     void clear() {
         this.tab.set(null);
         this.targetTabPane.set(null);
+        this.dragInProgress = true;
     }
 }

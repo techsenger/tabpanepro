@@ -2288,6 +2288,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseDragEntered(MouseEvent e) {
+            if (!isDragInProgress()) {
+                return;
+            }
             var predicate = getSkinnable().getTabDropPredicate();
             var tab = getSkinnable().getDragAndDropContext().getTab();
             if (tab != null && getSkinnable().isTabDropEnabled() && (predicate == null || predicate.test(tab))) {
@@ -2308,7 +2311,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseDragOver(MouseEvent e) {
-            if (!acceptsTab) {
+            if (!isDragInProgress() || !acceptsTab) {
                 return;
             }
             int currentDropIndex = -1;
@@ -2333,7 +2336,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseDragExited(MouseDragEvent e) {
-            if (acceptsTab) {
+            if (isDragInProgress() && acceptsTab) {
                 acceptsTab = false;
                 setDropIndex(-1);
                 getSkinnable().getDragAndDropContext().setTargetTabPane(null);
@@ -3164,6 +3167,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleDragDetected(MouseEvent e) {
+            if (getSkinnable().getDragAndDropContext() == null) {
+                return;
+            }
             var predicate = getSkinnable().getTabDragPredicate();
             if (getSkinnable().isTabDragEnabled() && (predicate == null || predicate.test(getTab()))) {
                 for (var handler: getSkinnable().getTabDragHandlers()) {
@@ -3190,12 +3196,16 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 dragPopup.show(getScene().getWindow(), e.getScreenX(), e.getScreenY());
                 var context = getSkinnable().getDragAndDropContext();
                 context.setTab(getTab());
+                context.setDragInProgress(true);
                 e.consume();
             }
         }
 
         private void handleMouseDragged(MouseEvent e) {
             var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            if (!skin.isDragInProgress()) {
+                return;
+            }
             var tabHeaderaArea = skin.getTabHeaderArea();
             var dragPopup = tabHeaderaArea.getDragPopup();
             if (dragPopup != null) {
@@ -3206,8 +3216,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseReleased(MouseEvent e) {
-            var context = getSkinnable().getDragAndDropContext();
             var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            if (!skin.isDragInProgress()) {
+                return;
+            }
+            var context = getSkinnable().getDragAndDropContext();
             var tabHeaderaArea = skin.getTabHeaderArea();
             var dragPopup = tabHeaderaArea.getDragPopup();
             if (dragPopup != null) {
@@ -3229,6 +3242,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseDragOver(MouseEvent e) {
+            var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            if (!skin.isDragInProgress()) {
+                return;
+            }
             var tabHeaderArea = context.getTabHeaderArea();
             switch (getSkinnable().getSide()) {
                 case TOP:
@@ -3848,6 +3865,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             anim.getOnFinished().handle(null);
             anim.stop();
         }
+    }
+
+    private boolean isDragInProgress() {
+        var context = getSkinnable().getDragAndDropContext();
+        return context != null && context.isDragInProgress();
     }
 
 }
