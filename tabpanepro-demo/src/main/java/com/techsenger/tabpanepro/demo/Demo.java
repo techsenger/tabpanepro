@@ -23,8 +23,8 @@ package com.techsenger.tabpanepro.demo;
 
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.Styles;
-import com.techsenger.tabpanepro.core.skin.DragAndDropContext;
 import com.techsenger.tabpanepro.core.TabPanePro;
+import com.techsenger.tabpanepro.core.skin.DragAndDropContext;
 import com.techsenger.tabpanepro.core.skin.TabHeaderAreaPolicy;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin.TabHeaderContext;
@@ -138,14 +138,22 @@ public class Demo extends Application {
 
     public enum TabViewOrder {
         NONE(null),
-        LEFT_ON_TOP((tabHeader, index, tabCount, selected) -> {
+
+        /**
+         * The left tab will be in front.
+         */
+        LEFT_IN_FRONT((tabHeader, index, tabCount, selected) -> {
             if (selected) {
                 return  tabCount * -1.0;
             } else {
                 return (tabCount - 1 - index) * -1.0;
             }
         }),
-        RIGHT_ON_TOP((tabHeader, index, totalCount, selected) -> {
+
+        /**
+         * The right tab will be in front.
+         */
+        RIGHT_IN_FRONT((tabHeader, index, totalCount, selected) -> {
             if (selected) {
                 return  totalCount * -1.0;
             } else {
