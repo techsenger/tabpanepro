@@ -44,8 +44,15 @@
     <properties>
         <publishing.plugin.exclusions>tabpanepro-demo</publishing.plugin.exclusions>
         <checkstyle.plugin.skip>true</checkstyle.plugin.skip>    <!-- todo: -->
-         <maven.deploy.uniqueVersion>false</maven.deploy.uniqueVersion>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>repsy</id>
+            <name>Techsenger Repsy Repo</name>
+            <url>https://repo.repsy.io/mvn/techsenger/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
@@ -64,14 +71,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <distributionManagement>
-        <repository>
-            <id>repsy</id>
-            <name>Techsenger Repsy Repo</name>
-            <url>https://repo.repsy.io/mvn/techsenger/snapshots</url>
-        </repository>
-    </distributionManagement>
 
     <modules>
         <module>tabpanepro-core</module>
