@@ -64,6 +64,14 @@
         </dependencies>
     </dependencyManagement>
 
+    <distributionManagement>
+        <repository>
+            <id>repsy</id>
+            <name>Techsenger Repsy Repo</name>
+            <url>https://repo.repsy.io/mvn/techsenger/snapshots</url>
+        </repository>
+    </distributionManagement>
+
     <modules>
         <module>tabpanepro-core</module>
         <module>tabpanepro-demo</module>
