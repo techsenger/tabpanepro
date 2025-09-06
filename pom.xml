@@ -44,6 +44,7 @@
     <properties>
         <publishing.plugin.exclusions>tabpanepro-demo</publishing.plugin.exclusions>
         <checkstyle.plugin.skip>true</checkstyle.plugin.skip>    <!-- todo: -->
+         <maven.deploy.uniqueVersion>false</maven.deploy.uniqueVersion>
     </properties>
 
     <dependencyManagement>
