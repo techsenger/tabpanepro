@@ -14,7 +14,8 @@
     <description>The demonstration module that showcases the capabilities of TabPanePro</description>
 
     <properties>
-        <javafx.version>25-ea+12</javafx.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
@@ -37,17 +38,14 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
     </dependencies>
 
