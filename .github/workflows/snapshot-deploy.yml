@@ -12,7 +12,7 @@ jobs:
       packages: write
     steps:
     - uses: actions/checkout@v4
-    - name: Setup Java 17  # demo requires java 17
+    - name: Setup Java 17 # demo requires java 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
@@ -24,7 +24,7 @@ jobs:
           <settings>
             <servers>
               <server>
-                <id>repsy</id>
+                <id>repsy-snapshots</id>
                 <username>${{ secrets.REPSY_USERNAME }}</username>
                 <password>${{ secrets.REPSY_PASSWORD }}</password>
               </server>
@@ -37,7 +37,7 @@ jobs:
         echo "Detected version: $VERSION"
         if [[ $VERSION == *"SNAPSHOT"* ]]; then
           echo "Deploying snapshot version: $VERSION"
-          mvn -B deploy
+          mvn deploy -U -B
         else
           echo "Skipping deploy for release version: $VERSION"
         fi
