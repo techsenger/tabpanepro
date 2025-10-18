@@ -1,11 +1,11 @@
 # Techsenger TabPanePro
 
-| Support the Project! |
-|:-------------|
-| This project is open-source and free to use, both commercially and non-commercially, which is why we need your help in its development. If you like it, please give it a star ⭐ on GitHub — it helps others discover the project and increases its visibility. You can also contribute, for example, by fixing bugs 🐛 or suggesting improvements 💡, see [Contributing](#contributing). If you can, financial support 💰 is always appreciated, see [Support Us](#support-us). Thank you! |
+Techsenger TabPanePro is a lightweight JavaFX library that extends the standard TabPane with practical features such
+as custom control areas, custom tab shapes, tab drag-and-drop with edge scrolling, a tab scrollbar, and more. The
+library is built on top of the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a
+minimal set of required classes.
 
 ## Table of Contents
-* [Overview](#overview)
 * [Demo](#demo)
 * [Features](#features)
 * [Dependencies](#dependencies)
@@ -20,14 +20,7 @@
 * [Running Demo](#running-demo)
 * [License](#license)
 * [Contributing](#contributing)
-* [👉 Support Us](#support-us)
-
-## Overview <a name="overview"></a>
-
-Techsenger TabPanePro is a lightweight JavaFX library that extends the standard TabPane with practical features such
-as custom control areas, custom tab shapes, tab drag-and-drop with edge scrolling, a tab scrollbar, and more. The
-library is built on top of the standard TabPaneSkin, carefully extracted from the OpenJFX project along with a
-minimal set of required classes.
+* [Support Us](#support-us)
 
 ## Demo <a name="demo"></a>
 
@@ -224,9 +217,9 @@ Techsenger TabPanePro is licensed under the GNU General Public License version 2
 We welcome all contributions. You can help by reporting bugs, suggesting improvements, or submitting pull requests
 with fixes and new features. If you have any questions, feel free to reach out — we’ll be happy to assist you.
 
-## 👉 Support Us <a name="support-us"></a>
+## Support Us <a name="support-us"></a>
 
-You can support us financially through [GitHub Sponsors](https://github.com/sponsors/techsenger). Your
-contribution directly helps us keep our open-source projects active, improve their features, and offer ongoing support.
-Besides, we offer multiple sponsorship tiers, with different rewards.
+You can support our open-source work through [GitHub Sponsors](https://github.com/sponsors/techsenger).
+Your contribution helps us maintain projects, develop new features, and provide ongoing improvements.
+Multiple sponsorship tiers are available, each offering different levels of recognition and benefits.
 
