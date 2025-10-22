@@ -28,7 +28,7 @@
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
  * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
- * July 18, 2025; August 12, 2025; August 20, 2025; August 31, 2025.
+ * July 18, 2025; August 12, 2025; August 20, 2025; August 31, 2025; October 22, 2025.
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -62,6 +62,8 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -143,7 +145,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         // In future we could add FADE, ...
     }
 
-    private enum TabAnimationState {
+    public enum TabAnimationState {
         SHOWING, HIDING, NONE;
     }
 
@@ -539,14 +541,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 removeTabContent(tab);
 
                 EventHandler<ActionEvent> cleanup = ae -> {
-                    tabRegion.animationState = TabAnimationState.NONE;
+                    tabRegion.setAnimationState(TabAnimationState.NONE);
 
                     tabHeaderArea.removeTab(tab);
                     tabHeaderArea.requestLayout();
                 };
 
                 if (Platform.isFxApplicationThread() && (closeTabAnimation.get() == TabAnimation.GROW)) {
-                    tabRegion.animationState = TabAnimationState.HIDING;
+                    tabRegion.setAnimationState(TabAnimationState.HIDING);
                     Timeline closedTabTimeline = tabRegion.currentAnimation =
                             createTimeline(tabRegion, Duration.millis(ANIMATION_SPEED), 0.0F, cleanup);
                     closedTabTimeline.play();
@@ -577,7 +579,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         List<Node> headers = new ArrayList<>(tabHeaderArea.headersRegion.getChildren());
         for (Node n : headers) {
             TabHeaderSkin header = (TabHeaderSkin) n;
-            if (header.animationState == TabAnimationState.HIDING) {
+            if (header.getAnimationState() == TabAnimationState.HIDING) {
                 stopCurrentAnimation(header.tab);
             }
         }
@@ -592,11 +594,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             final TabHeaderSkin tabRegion = tabHeaderArea.getTabHeaderSkin(tab);
             if (tabRegion != null) {
                 if (Platform.isFxApplicationThread() && (openTabAnimation.get() == TabAnimation.GROW)) {
-                    tabRegion.animationState = TabAnimationState.SHOWING;
+                    tabRegion.setAnimationState(TabAnimationState.SHOWING);
                     tabRegion.animationTransition.setValue(0.0);
                     tabRegion.setVisible(true);
                     tabRegion.currentAnimation = createTimeline(tabRegion, Duration.millis(ANIMATION_SPEED), 1.0, event -> {
-                        tabRegion.animationState = TabAnimationState.NONE;
+                        tabRegion.setAnimationState(TabAnimationState.NONE);
                         tabRegion.setVisible(true);
                         tabRegion.inner.requestLayout();
                     });
@@ -2852,7 +2854,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         labelHeight = maxHeight;
                     }
 
-                    if (animationState != TabAnimationState.NONE) {
+                    if (getAnimationState() != TabAnimationState.NONE) {
 //                        if (prefWidth.getValue() < labelAreaWidth) {
 //                            labelAreaWidth = prefWidth.getValue();
 //                        }
@@ -3069,7 +3071,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             setOnMousePressed(null);
         }
 
-        private TabAnimationState animationState = TabAnimationState.NONE;
+        private ReadOnlyObjectWrapper<TabAnimationState> animationState =
+                new ReadOnlyObjectWrapper(TabAnimationState.NONE);
         private Timeline currentAnimation;
 
         @Override protected double computePrefWidth(double height) {
@@ -3308,6 +3311,19 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         private TabPanePro getSkinnable() {
             return context.getSkinnable();
         }
+
+        public TabAnimationState getAnimationState() {
+            return animationState.get();
+        }
+
+        public ReadOnlyObjectProperty<TabAnimationState> animationStateProperty() {
+            return animationState.getReadOnlyProperty();
+        }
+
+        private void setAnimationState(TabAnimationState state) {
+            animationState.set(state);
+        }
+
     } /* End TabHeaderSkin */
 
     private static final PseudoClass SELECTED_PSEUDOCLASS_STATE =
