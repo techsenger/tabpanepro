@@ -45,7 +45,7 @@ Key features include:
 
 ## Dependencies <a name="dependencies"></a>
 
-This project will be available on Maven Central in a few weeks:
+This project is available on Maven Central:
 
 ```
 <dependency>

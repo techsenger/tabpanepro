@@ -281,8 +281,9 @@ public class TabPanePro extends TabPane {
     /**
      * Returns the handlers that are invoked when a tab drag operation begins.
      *
-     * @apiNote <b>This method is for internal use only!</b>  Library clients should not call it directly, as it may
-     *      change or be removed without notice in future versions.
+     * <p>This method is for internal use only!  Library clients should not call it directly, as it may
+     * change or be removed without notice in future versions.
+     *
      * @return the internal list of tab drag handlers (do not modify)
      */
     public ObservableList<Consumer<Tab>> getTabDragHandlers() {
@@ -320,8 +321,9 @@ public class TabPanePro extends TabPane {
     /**
      * Returns the handlers invoked when a tab drag operation ends.
      *
-     * @apiNote <b>This method is for internal use only!</b>  Library clients should not call it directly, as it may
-     *      change or be removed without notice in future versions.
+     * <p>This method is for internal use only! Library clients should not call it directly, as it may change or be
+     * removed without notice in future versions.
+     * 
      * @return the internal list of tab drop handlers (do not modify)
      */
     public ObservableList<BiConsumer<Tab, Boolean>> getTabDropHandlers() {
