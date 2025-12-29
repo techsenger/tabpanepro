@@ -28,7 +28,8 @@
  * commit 72c1c21a76ba752439c877aba599b0b5f8bf9332 (tag: 25+20), and modified on:
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
  * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
- * July 18, 2025; August 12, 2025; August 20, 2025; August 31, 2025; October 22, 2025.
+ * July 18, 2025; August 12, 2025; August 20, 2025; August 31, 2025; October 22, 2025;
+ * December 29, 2025;
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -1070,7 +1071,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                         break;
                     case LEFT:
                     case RIGHT:
-                        scrollTabsBy(dy * -1);
+                        scrollTabsBy(dy * 1);
                         break;
                 }
             });
