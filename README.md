@@ -140,7 +140,7 @@ TabPanePro supports drag-and-drop with automatic edge scrolling and flexible con
 either within a single TabPane or between different TabPane instances. To handle tab drag-and-drop events, see the
 `TabEvent` class.
 
-Below is an example configuration for two `TabPane`s: source and target. If the drag-and-drop operation occurs within
+Below is an example configuration for two `TabPane`s – source and target. If the drag-and-drop operation occurs within
 the same TabPane, apply both source and target settings to the same instance:
 
 1. Set a shared context for all TabPane instances involved in the operation:
