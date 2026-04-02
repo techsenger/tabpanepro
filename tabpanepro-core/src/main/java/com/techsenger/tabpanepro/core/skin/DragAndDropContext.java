@@ -79,6 +79,6 @@ public class DragAndDropContext {
     void clear() {
         this.tab.set(null);
         this.targetTabPane.set(null);
-        this.dragInProgress = true;
+        this.dragInProgress = false;
     }
 }

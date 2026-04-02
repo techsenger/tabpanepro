@@ -137,11 +137,11 @@ and `TabHeaderArea#headersClipWidthProperty()`. See the demo for an example impl
 ### Tab Drag and Drop <a name="usage-tab-drag-and-drop"></a>
 
 TabPanePro supports drag-and-drop with automatic edge scrolling and flexible configuration options. Tabs can be dragged
-either within a single TabPane or between different TabPane instances. Below is an example configuration for two
-components: source and target. If the drag-and-drop operation occurs within the same TabPane, apply both source and
-target settings to the same instance.
+either within a single TabPane or between different TabPane instances. To handle tab drag-and-drop events, see the
+`TabEvent` class.
 
-To enable drag and drop, follow these steps:
+Below is an example configuration for two `TabPane`s: source and target. If the drag-and-drop operation occurs within
+the same TabPane, apply both source and target settings to the same instance:
 
 1. Set a shared context for all TabPane instances involved in the operation:
 
@@ -158,9 +158,9 @@ sourceTabPane.setTabDragEnabled(true);
 // Optionally, restrict which tabs can be dragged using a filter:
 sourceTabPane.setTabDragFilter(...);
 // Optionally, provide a handler that's called when dragging starts:
-sourceTabPane.addTabDragHandler(...);
-// Optionally, provide a handler that's called when the drag operation ends:
-sourceTabPane.addTabDropHandler(...);
+sourceTabPane.setOnTabDragStarted(e -> { ... });
+// Optionally, provide a handler that's called when dragging finishes:
+sourceTabPane.setOnTabDragFinished(e -> { ... });
 // Retrieve the TabHeaderArea from the source skin
 TabPaneProSkin sourceSkin = (TabPaneProSkin) sourceTabPane.getSkin();
 TabHeaderArea sourceTabHeaderArea = sourceSkin.getTabHeaderArea();
@@ -176,6 +176,8 @@ sourceTabHeaderArea.setTabDragCursor(...);
 targetTabPane.setTabDropEnabled(true);
 // Optionally, restrict which tabs can be dropped using a filter:
 targetTabPane.setTabDropFilter(...);
+// Optionally, provide a handler that's called when a tab is dropped into this pane:
+targetTabPane.setOnTabDropped(e -> { ... });
 // Retrieve the TabHeaderArea from the target skin
 TabPaneProSkin targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
 TabHeaderArea targetTabHeaderArea = targetSkin.getTabHeaderArea();

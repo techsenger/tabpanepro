@@ -23,15 +23,13 @@ package com.techsenger.tabpanepro.core;
 
 import com.techsenger.tabpanepro.core.skin.DragAndDropContext;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
@@ -51,9 +49,11 @@ public class TabPanePro extends TabPane {
 
     private ObjectProperty<DragAndDropContext> dragAndDropContext;
 
-    private final ObservableList<Consumer<Tab>> tabDragHandlers = FXCollections.observableArrayList();
+    private ObjectProperty<EventHandler<TabEvent>> onTabDragStarted;
 
-    private final ObservableList<BiConsumer<Tab, Boolean>> tabDropHandlers = FXCollections.observableArrayList();
+    private ObjectProperty<EventHandler<TabEvent>> onTabDragFinished;
+
+    private ObjectProperty<EventHandler<TabEvent>> onTabDropped;
 
     public TabPanePro() {
         this(null);
@@ -135,7 +135,7 @@ public class TabPanePro extends TabPane {
      * Sets the value of {@link #tabDragFilterProperty()}.
      *
      * @param filter the filter to determine draggable tabs,
-     *                  or {@code null} to allow dragging all tabs
+     *               or {@code null} to allow dragging all tabs
      */
     public final void setTabDragFilter(Predicate<Tab> filter) {
         tabDragFilterProperty().set(filter);
@@ -209,7 +209,7 @@ public class TabPanePro extends TabPane {
      * Sets the value of {@link #tabDropFilterProperty()}.
      *
      * @param filter the filter to determine droppable tabs,
-     *                  or {@code null} to accept all tabs
+     *               or {@code null} to accept all tabs
      */
     public final void setTabDropFilter(Predicate<Tab> filter) {
         tabDropFilterProperty().set(filter);
@@ -257,76 +257,149 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Adds the handler that is invoked when a tab drag operation begins.
+     * Defines the handler for {@link TabEvent#TAB_DRAG_STARTED} events.
      * <p>
-     * The handler is a {@link Consumer} that receives the {@link Tab} being dragged
-     * at the start of the drag gesture. It can be used to perform custom logic such as
-     * updating UI state, logging, or preparing drag visuals.
+     * This handler is invoked when a tab drag operation starts on this pane.
+     *
+     * @return the property holding the TAB_DRAG_STARTED event handler
      */
-    public final void addTabDragHandler(Consumer<Tab> handler) {
-        this.tabDragHandlers.add(handler);
+    public final ObjectProperty<EventHandler<TabEvent>> onTabDragStartedProperty() {
+        if (this.onTabDragStarted == null) {
+            this.onTabDragStarted = new ObjectPropertyBase<>() {
+                @Override
+                protected void invalidated() {
+                    setEventHandler(TabEvent.TAB_DRAG_STARTED, get());
+                }
+
+                @Override
+                public Object getBean() {
+                    return TabPanePro.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "onTabDragStarted";
+                }
+            };
+        }
+        return onTabDragStarted;
     }
 
     /**
-     * Removes the handler that is invoked when a tab drag operation begins.
+     * Returns the value of {@link #onTabDragStartedProperty()}.
+     *
+     * @return the current TAB_DRAG_STARTED event handler, or {@code null} if none is set
+     */
+    public final EventHandler<TabEvent> getOnTabDragStarted() {
+        return onTabDragStartedProperty().get();
+    }
+
+    /**
+     * Sets the value of {@link #onTabDragStartedProperty()}.
+     *
+     * @param handler the handler to invoke when a tab drag starts,
+     *                or {@code null} to remove the current handler
+     */
+    public final void setOnTabDragStarted(EventHandler<TabEvent> handler) {
+        onTabDragStartedProperty().set(handler);
+    }
+
+    /**
+     * Defines the handler for {@link TabEvent#TAB_DRAG_FINISHED} events.
      * <p>
-     * The handler is a {@link Consumer} that receives the {@link Tab} being dragged
-     * at the start of the drag gesture. It can be used to perform custom logic such as
-     * updating UI state, logging, or preparing drag visuals.
+     * This handler is invoked when a tab drag operation finishes on this pane, whether
+     * the drop was successful or cancelled. Use {@link TabEvent#isSuccess()} to determine
+     * the outcome. The target {@link TabPanePro} is available via
+     * {@link DragAndDropContext#getTargetTabPane()}.
+     *
+     * @return the property holding the TAB_DRAG_FINISHED event handler
      */
-    public final void removeTabDragHandler(Consumer<Tab> handler) {
-        this.tabDragHandlers.remove(handler);
+    public final ObjectProperty<EventHandler<TabEvent>> onTabDragFinishedProperty() {
+        if (this.onTabDragFinished == null) {
+            this.onTabDragFinished = new ObjectPropertyBase<>() {
+                @Override
+                protected void invalidated() {
+                    setEventHandler(TabEvent.TAB_DRAG_FINISHED, get());
+                }
+
+                @Override
+                public Object getBean() {
+                    return TabPanePro.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "onTabDragFinished";
+                }
+            };
+        }
+        return onTabDragFinished;
     }
 
     /**
-     * Returns the handlers that are invoked when a tab drag operation begins.
+     * Returns the value of {@link #onTabDragFinishedProperty()}.
      *
-     * <p>This method is for internal use only!  Library clients should not call it directly, as it may
-     * change or be removed without notice in future versions.
-     *
-     * @return the internal list of tab drag handlers (do not modify)
+     * @return the current TAB_DRAG_FINISHED event handler, or {@code null} if none is set
      */
-    public ObservableList<Consumer<Tab>> getTabDragHandlers() {
-        return tabDragHandlers;
+    public final EventHandler<TabEvent> getOnTabDragFinished() {
+        return onTabDragFinishedProperty().get();
     }
 
     /**
-     * Adds the handler invoked when a tab drag operation ends.
+     * Sets the value of {@link #onTabDragFinishedProperty()}.
+     *
+     * @param handler the handler to invoke when a tab drag finishes,
+     *                or {@code null} to remove the current handler
+     */
+    public final void setOnTabDragFinished(EventHandler<TabEvent> handler) {
+        onTabDragFinishedProperty().set(handler);
+    }
+
+    /**
+     * Defines the handler for {@link TabEvent#TAB_DROPPED} events.
      * <p>
-     * The handler is a {@link BiConsumer} that receives:
-     * <ul>
-     *     <li>the {@link Tab} being dropped</li>
-     *     <li>a {@code boolean} indicating whether the drop was successful ({@code true}) or cancelled ({@code false})</li>
-     * </ul>
-     * This handler can be used to perform cleanup, update UI state, or trigger side effects after a drag-and-drop completes.
+     * This handler is invoked when a tab is successfully dropped into this pane.
+     *
+     * @return the property holding the TAB_DROPPED event handler
      */
-    public final void addTabDropHandler(BiConsumer<Tab, Boolean> handler) {
-        this.tabDropHandlers.add(handler);
+    public final ObjectProperty<EventHandler<TabEvent>> onTabDroppedProperty() {
+        if (this.onTabDropped == null) {
+            this.onTabDropped = new ObjectPropertyBase<>() {
+                @Override
+                protected void invalidated() {
+                    setEventHandler(TabEvent.TAB_DROPPED, get());
+                }
+
+                @Override
+                public Object getBean() {
+                    return TabPanePro.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "onTabDropped";
+                }
+            };
+        }
+        return onTabDropped;
     }
 
     /**
-     * Removes the handler invoked when a tab drag operation ends.
-     * <p>
-     * The handler is a {@link BiConsumer} that receives:
-     * <ul>
-     *     <li>the {@link Tab} being dropped</li>
-     *     <li>a {@code boolean} indicating whether the drop was successful ({@code true}) or cancelled ({@code false})</li>
-     * </ul>
-     * This handler can be used to perform cleanup, update UI state, or trigger side effects after a drag-and-drop completes.
+     * Returns the value of {@link #onTabDroppedProperty()}.
+     *
+     * @return the current TAB_DROPPED event handler, or {@code null} if none is set
      */
-    public final void removeTabDropHandler(BiConsumer<Tab, Boolean> handler) {
-        this.tabDropHandlers.remove(handler);
+    public final EventHandler<TabEvent> getOnTabDropped() {
+        return onTabDroppedProperty().get();
     }
 
     /**
-     * Returns the handlers invoked when a tab drag operation ends.
+     * Sets the value of {@link #onTabDroppedProperty()}.
      *
-     * <p>This method is for internal use only! Library clients should not call it directly, as it may change or be
-     * removed without notice in future versions.
-     *
-     * @return the internal list of tab drop handlers (do not modify)
+     * @param handler the handler to invoke when a tab is dropped into this pane,
+     *                or {@code null} to remove the current handler
      */
-    public ObservableList<BiConsumer<Tab, Boolean>> getTabDropHandlers() {
-        return tabDropHandlers;
+    public final void setOnTabDropped(EventHandler<TabEvent> handler) {
+        onTabDroppedProperty().set(handler);
     }
 }

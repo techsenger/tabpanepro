@@ -29,11 +29,12 @@
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
  * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
  * July 18, 2025; August 12, 2025; August 20, 2025; August 31, 2025; October 22, 2025;
- * December 29, 2025;
+ * December 29, 2025; April 02, 2026;
  */
 
 package com.techsenger.tabpanepro.core.skin;
 
+import com.techsenger.tabpanepro.core.TabEvent;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.behavior.TabPaneBehavior;
 import com.techsenger.tabpanepro.core.control.LambdaMultiplePropertyChangeListenerHandler;
@@ -3174,11 +3175,9 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             if (getSkinnable().getDragAndDropContext() == null) {
                 return;
             }
-            var predicate = getSkinnable().getTabDragFilter();
-            if (getSkinnable().isTabDragEnabled() && (predicate == null || predicate.test(getTab()))) {
-                for (var handler: getSkinnable().getTabDragHandlers()) {
-                    handler.accept(getTab());
-                }
+            var filter = getSkinnable().getTabDragFilter();
+            if (getSkinnable().isTabDragEnabled() && (filter == null || filter.test(getTab()))) {
+                getSkinnable().fireEvent(new TabEvent(TabEvent.TAB_DRAG_STARTED, getTab()));
                 var skin = (TabPaneProSkin) getSkinnable().getSkin();
                 var tabHeaderaArea = skin.getTabHeaderArea();
                 Node content = tabHeaderaArea.getTabDragContentFactory().apply(this);
@@ -3206,7 +3205,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
         }
 
         private void handleMouseDragged(MouseEvent e) {
-            var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            var skin = getSkin();
             if (!skin.isDragInProgress()) {
                 return;
             }
@@ -3219,8 +3218,11 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             }
         }
 
+        /**
+         * Handler the event that is fired on the {@link TabHeaderSkin} that is being dragged.
+         */
         private void handleMouseReleased(MouseEvent e) {
-            var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            var skin = getSkin();
             if (!skin.isDragInProgress()) {
                 return;
             }
@@ -3229,24 +3231,24 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             var dragPopup = tabHeaderaArea.getDragPopup();
             if (dragPopup != null) {
                 dragPopup.hide();
-                var successful = false;
                 // if no TabPane is present, it means the user has canceled the operation
                 if (context.getTargetTabPane() != null) {
+                    var otherTabPane = context.getTargetTabPane();
+                    var otherSkin = (TabPaneProSkin) otherTabPane.getSkin();
                     // mouseDragReleased is not used because we lose mouseReleaseEvent when we move tab within one TabPane
-                    var otherHeaderArea = ((TabPaneProSkin) context.getTargetTabPane().getSkin()).tabHeaderArea;
+                    var otherHeaderArea = otherSkin.tabHeaderArea;
                     otherHeaderArea.moveTab();
-                    successful = true;
+                    otherHeaderArea.setDropIndex(-1);
+                    otherTabPane.fireEvent(new TabEvent(TabEvent.TAB_DROPPED, context.getTab()));
                 }
-                for (var handler : getSkinnable().getTabDropHandlers()) {
-                    handler.accept(context.getTab(), successful);
-                }
+                getSkinnable().fireEvent(new TabEvent(TabEvent.TAB_DRAG_FINISHED, context.getTab()));
             }
             tabHeaderaArea.cleanupAfterDrop();
             e.consume();
         }
 
         private void handleMouseDragOver(MouseEvent e) {
-            var skin = (TabPaneProSkin) getSkinnable().getSkin();
+            var skin = getSkin();
             if (!skin.isDragInProgress()) {
                 return;
             }
@@ -3311,6 +3313,10 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private TabPanePro getSkinnable() {
             return context.getSkinnable();
+        }
+
+        private TabPaneProSkin getSkin() {
+            return (TabPaneProSkin) getSkinnable().getSkin();
         }
 
         public TabAnimationState getAnimationState() {
