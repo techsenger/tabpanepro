@@ -155,8 +155,8 @@ targetTabPane.setDragAndDropContext(context);
 
 ```java
 sourceTabPane.setTabDragEnabled(true);
-// Optionally, restrict which tabs can be dragged using a predicate:
-sourceTabPane.setTabDragPredicate(...);
+// Optionally, restrict which tabs can be dragged using a filter:
+sourceTabPane.setTabDragFilter(...);
 // Optionally, provide a handler that's called when dragging starts:
 sourceTabPane.addTabDragHandler(...);
 // Optionally, provide a handler that's called when the drag operation ends:
@@ -174,8 +174,8 @@ sourceTabHeaderArea.setTabDragCursor(...);
 
 ```java
 targetTabPane.setTabDropEnabled(true);
-// Optionally, restrict which tabs can be dropped using a predicate:
-targetTabPane.setTabDropPredicate(...);
+// Optionally, restrict which tabs can be dropped using a filter:
+targetTabPane.setTabDropFilter(...);
 // Retrieve the TabHeaderArea from the target skin
 TabPaneProSkin targetSkin = (TabPaneProSkin) targetTabPane.getSkin();
 TabHeaderArea targetTabHeaderArea = targetSkin.getTabHeaderArea();

@@ -2294,7 +2294,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             if (!isDragInProgress()) {
                 return;
             }
-            var predicate = getSkinnable().getTabDropPredicate();
+            var predicate = getSkinnable().getTabDropFilter();
             var tab = getSkinnable().getDragAndDropContext().getTab();
             if (tab != null && getSkinnable().isTabDropEnabled() && (predicate == null || predicate.test(tab))) {
                 this.acceptsTab = true;
@@ -3174,7 +3174,7 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             if (getSkinnable().getDragAndDropContext() == null) {
                 return;
             }
-            var predicate = getSkinnable().getTabDragPredicate();
+            var predicate = getSkinnable().getTabDragFilter();
             if (getSkinnable().isTabDragEnabled() && (predicate == null || predicate.test(getTab()))) {
                 for (var handler: getSkinnable().getTabDragHandlers()) {
                     handler.accept(getTab());

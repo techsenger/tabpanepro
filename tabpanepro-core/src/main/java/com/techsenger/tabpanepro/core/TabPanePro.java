@@ -43,11 +43,11 @@ public class TabPanePro extends TabPane {
 
     private BooleanProperty tabDragEnabled;
 
-    private ObjectProperty<Predicate<Tab>> tabDragPredicate;
+    private ObjectProperty<Predicate<Tab>> tabDragFilter;
 
     private BooleanProperty tabDropEnabled;
 
-    private ObjectProperty<Predicate<Tab>> tabDropPredicate;
+    private ObjectProperty<Predicate<Tab>> tabDropFilter;
 
     private ObjectProperty<DragAndDropContext> dragAndDropContext;
 
@@ -101,44 +101,44 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Defines the predicate that determines whether a specific tab can be dragged from this pane.
+     * Defines the filter that determines whether a specific tab can be dragged from this pane.
      * <p>
      * This property holds a {@link Predicate} that is evaluated for each {@link Tab} to decide if dragging
-     * is permitted. If the predicate returns {@code true}, the tab can be dragged; if {@code false}, dragging
+     * is permitted. If the filter returns {@code true}, the tab can be dragged; if {@code false}, dragging
      * is disallowed for that tab.
      * <p>
-     * If the predicate is {@code null}, all tabs are considered draggable by default.
+     * If the filter is {@code null}, all tabs are considered draggable by default.
      * <p>
-     * This predicate can leverage tab-specific metadata via {@link Tab#getProperties()} to customize
+     * This filter can leverage tab-specific metadata via {@link Tab#getProperties()} to customize
      * drag behavior on a per-tab basis.
      *
-     * @return the property holding the drag predicate for tabs
+     * @return the property holding the drag filter for tabs
      */
-    public final ObjectProperty<Predicate<Tab>> tabDragPredicateProperty() {
-        if (this.tabDragPredicate == null) {
-            this.tabDragPredicate = new SimpleObjectProperty<>(this, "tabDragPredicate");
+    public final ObjectProperty<Predicate<Tab>> tabDragFilterProperty() {
+        if (this.tabDragFilter == null) {
+            this.tabDragFilter = new SimpleObjectProperty<>(this, "tabDragFilter");
         }
-        return this.tabDragPredicate;
+        return this.tabDragFilter;
     }
 
     /**
-     * Returns the value of {@link #tabDragPredicateProperty()}.
+     * Returns the value of {@link #tabDragFilterProperty()}.
      *
-     * @return the current predicate used to determine draggable tabs,
+     * @return the current filter used to determine draggable tabs,
      *         or {@code null} if all tabs are draggable
      */
-    public final Predicate<Tab> getTabDragPredicate() {
-        return this.tabDragPredicate == null ? null : this.tabDragPredicate.get();
+    public final Predicate<Tab> getTabDragFilter() {
+        return this.tabDragFilter == null ? null : this.tabDragFilter.get();
     }
 
     /**
-     * Sets the value of {@link #tabDragPredicateProperty()}.
+     * Sets the value of {@link #tabDragFilterProperty()}.
      *
-     * @param predicate the predicate to determine draggable tabs,
+     * @param filter the filter to determine draggable tabs,
      *                  or {@code null} to allow dragging all tabs
      */
-    public final void setTabDragPredicate(Predicate<Tab> predicate) {
-        tabDragPredicateProperty().set(predicate);
+    public final void setTabDragFilter(Predicate<Tab> filter) {
+        tabDragFilterProperty().set(filter);
     }
 
     /**
@@ -178,41 +178,41 @@ public class TabPanePro extends TabPane {
     }
 
     /**
-     * Defines the predicate that determines whether a specific tab can be dropped into this pane.
+     * Defines the filter that determines whether a specific tab can be dropped into this pane.
      * <p>
      * This property holds a {@link Predicate} evaluated for each {@link Tab} to decide if dropping
-     * is permitted. If the predicate returns {@code true}, the tab can be dropped; if {@code false},
+     * is permitted. If the filter returns {@code true}, the tab can be dropped; if {@code false},
      * dropping is disallowed for that tab.
      * <p>
-     * If the predicate is {@code null}, all tabs are allowed to be dropped by default.
+     * If the filter is {@code null}, all tabs are allowed to be dropped by default.
      *
-     * @return the property holding the drop predicate for tabs
+     * @return the property holding the drop filter for tabs
      */
-    public final ObjectProperty<Predicate<Tab>> tabDropPredicateProperty() {
-        if (this.tabDropPredicate == null) {
-            this.tabDropPredicate = new SimpleObjectProperty<>(this, "tabDropPredicate");
+    public final ObjectProperty<Predicate<Tab>> tabDropFilterProperty() {
+        if (this.tabDropFilter == null) {
+            this.tabDropFilter = new SimpleObjectProperty<>(this, "tabDropFilter");
         }
-        return this.tabDropPredicate;
+        return this.tabDropFilter;
     }
 
     /**
-     * Returns the value of {@link #tabDropPredicateProperty()}.
+     * Returns the value of {@link #tabDropFilterProperty()}.
      *
-     * @return the current predicate used to determine droppable tabs,
+     * @return the current filter used to determine droppable tabs,
      *         or {@code null} if all tabs can be dropped
      */
-    public final Predicate<Tab> getTabDropPredicate() {
-        return this.tabDropPredicate == null ? null : this.tabDropPredicate.get();
+    public final Predicate<Tab> getTabDropFilter() {
+        return this.tabDropFilter == null ? null : this.tabDropFilter.get();
     }
 
     /**
-     * Sets the value of {@link #tabDropPredicateProperty()}.
+     * Sets the value of {@link #tabDropFilterProperty()}.
      *
-     * @param predicate the predicate to determine droppable tabs,
+     * @param filter the filter to determine droppable tabs,
      *                  or {@code null} to accept all tabs
      */
-    public final void setTabDropPredicate(Predicate<Tab> predicate) {
-        tabDropPredicateProperty().set(predicate);
+    public final void setTabDropFilter(Predicate<Tab> filter) {
+        tabDropFilterProperty().set(filter);
     }
 
     /**
@@ -323,7 +323,7 @@ public class TabPanePro extends TabPane {
      *
      * <p>This method is for internal use only! Library clients should not call it directly, as it may change or be
      * removed without notice in future versions.
-     * 
+     *
      * @return the internal list of tab drop handlers (do not modify)
      */
     public ObservableList<BiConsumer<Tab, Boolean>> getTabDropHandlers() {
