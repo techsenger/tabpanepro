@@ -25,6 +25,7 @@ import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.Styles;
 import com.techsenger.tabpanepro.core.TabPanePro;
 import com.techsenger.tabpanepro.core.skin.DragAndDropContext;
+import com.techsenger.tabpanepro.core.skin.DragAndDropUtils;
 import com.techsenger.tabpanepro.core.skin.TabHeaderAreaPolicy;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin;
 import com.techsenger.tabpanepro.core.skin.TabPaneProSkin.TabHeaderContext;
@@ -50,7 +51,6 @@ import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -60,8 +60,6 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.ColumnConstraints;
@@ -71,7 +69,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -525,7 +522,7 @@ public class Demo extends Application {
             tabPane = tabPanePro;
             var skin = (TabPaneProSkin) tabPane.getSkin();
             var tabHeaderArea = skin.getTabHeaderArea();
-            tabHeaderArea.setTabDragContentFactory(this::createDragContent);
+            tabHeaderArea.setTabDragContentFactory(DragAndDropUtils::createTabDragContent);
             tabHeaderArea.setTabDragScrollStep(Double.valueOf(dragScrollStepTextField.getText()));
             tabHeaderArea.setTabDragCursor(Cursor.CLOSED_HAND);
             updateTabShape(tabPanePro, CustomTabShape.NONE, tabShapeComboBox.getValue());
@@ -649,19 +646,5 @@ public class Demo extends Application {
         content.getChildren().add(textArea);
         tab.setContent(content);
         tabPane.getTabs().add(tab);
-    }
-
-    private Node createDragContent(TabHeaderSkin tabHeader) {
-        var tabParams = new SnapshotParameters();
-        WritableImage tabImage = tabHeader.snapshot(tabParams, null);
-        ImageView dragView = new ImageView(tabImage);
-        var tab = tabHeader.getContext().getTab();
-        if (tab.getTabPane().getSide() == Side.BOTTOM) {
-            Rotate rotate = new Rotate(180, tabImage.getWidth() / 2, tabImage.getHeight() / 2);
-            dragView.getTransforms().add(rotate);
-        }
-        var container = new VBox(dragView);
-        container.getStyleClass().add("tab-drag-content");
-        return container;
     }
 }
