@@ -29,7 +29,7 @@
  * June 18, 2025; June 20, 2025; June 21, 2025; June 22, 2025; June 23, 2025; June 24, 2025;
  * June 25, 2025; June 26, 2025; July 05, 2025; July 09, 2025; July 11, 2025; July 14, 2025;
  * July 18, 2025; August 12, 2025; August 20, 2025; August 31, 2025; October 22, 2025;
- * December 29, 2025; April 02, 2026;
+ * December 29, 2025; April 02, 2026; October 31, 2026;
  */
 
 package com.techsenger.tabpanepro.core.skin;
@@ -2255,6 +2255,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                     removePhantomTab();
                 }
             }
+            // the header area is unmanaged, so its height change does not reach the tab pane layout on its own
+            getSkinnable().requestLayout();
         }
 
         private void addPhantomTab() {
