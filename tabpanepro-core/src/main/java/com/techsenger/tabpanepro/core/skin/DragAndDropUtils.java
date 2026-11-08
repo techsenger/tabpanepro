@@ -27,6 +27,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 
 /**
@@ -45,6 +46,7 @@ public final class DragAndDropUtils {
      */
     public static Node createTabDragContent(TabPaneProSkin.TabHeaderSkin tabHeader) {
         var tabParams = new SnapshotParameters();
+        tabParams.setFill(Color.TRANSPARENT);
         WritableImage tabImage = tabHeader.snapshot(tabParams, null);
         ImageView dragView = new ImageView(tabImage);
         var tab = tabHeader.getContext().getTab();
