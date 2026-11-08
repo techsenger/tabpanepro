@@ -938,6 +938,14 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
 
         private Popup dragPopup;
 
+        /**
+         * The position of the mouse inside the drag popup, so the popup keeps the grabbed point of the tab under the
+         * cursor.
+         */
+        private double dragOffsetX;
+
+        private double dragOffsetY;
+
         private TabHeaderArea() {
             getStyleClass().setAll("tab-header-area");
             setManaged(false);
@@ -2571,6 +2579,22 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             this.dragPopup = dragPopup;
         }
 
+        private double getDragOffsetX() {
+            return dragOffsetX;
+        }
+
+        private void setDragOffsetX(double dragOffsetX) {
+            this.dragOffsetX = dragOffsetX;
+        }
+
+        private double getDragOffsetY() {
+            return dragOffsetY;
+        }
+
+        private void setDragOffsetY(double dragOffsetY) {
+            this.dragOffsetY = dragOffsetY;
+        }
+
     } /* End TabHeaderArea */
 
 
@@ -3198,7 +3222,16 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
                 cursor = cursor != null ? cursor : Cursor.DEFAULT;
                 scene.setCursor(cursor);
                 startFullDrag();
-                dragPopup.show(getScene().getWindow(), e.getScreenX(), e.getScreenY());
+                // the preview of a bottom tab is rotated by 180 degrees, so the grabbed point is mirrored
+                if (getSkinnable().getSide() == Side.BOTTOM) {
+                    tabHeaderaArea.setDragOffsetX(getWidth() - e.getX());
+                    tabHeaderaArea.setDragOffsetY(getHeight() - e.getY());
+                } else {
+                    tabHeaderaArea.setDragOffsetX(e.getX());
+                    tabHeaderaArea.setDragOffsetY(e.getY());
+                }
+                dragPopup.show(getScene().getWindow(), e.getScreenX() - tabHeaderaArea.getDragOffsetX(),
+                        e.getScreenY() - tabHeaderaArea.getDragOffsetY());
                 var context = getSkinnable().getDragAndDropContext();
                 context.setTab(getTab());
                 context.setDragInProgress(true);
@@ -3214,8 +3247,8 @@ public class TabPaneProSkin extends SkinBase<TabPanePro> {
             var tabHeaderaArea = skin.getTabHeaderArea();
             var dragPopup = tabHeaderaArea.getDragPopup();
             if (dragPopup != null) {
-                dragPopup.setAnchorX(e.getScreenX());
-                dragPopup.setAnchorY(e.getScreenY());
+                dragPopup.setAnchorX(e.getScreenX() - tabHeaderaArea.getDragOffsetX());
+                dragPopup.setAnchorY(e.getScreenY() - tabHeaderaArea.getDragOffsetY());
                 e.consume();
             }
         }

@@ -119,6 +119,7 @@
 .tab-drag-content {
     -fx-border-width: 1px;
     -fx-border-color: -color-accent-emphasis;
+    -fx-opacity: 0.7;
 }
 
 /*
